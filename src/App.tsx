@@ -43,8 +43,12 @@ import Module148 from './modules/Poutres/Module148';
 import Module149 from './modules/Poutres/Module149';
 import Module150 from './modules/Poutres/Module150';
 import Module151 from './modules/Poutres/Module151';
+import Module152 from './modules/Poutres/Module152';
+import Module153 from './modules/Poutres/Module153';
+import Module154 from './modules/Poteaux/Module154';
+import Module155 from './modules/Poutres/Module155';
 
-type ModuleKey = '101' | '103' | '104' | '105' | '107' | '111' | '121' | '124' | '108' | '112' | '113' | '119' | '114' | '115' | '116' | '117' | '118' | '120' | '122' | '123' | '109' | '125' | '126' | '127' | '128' | '129' | '130' | '132' | '133' | '135' | '137' | '139' | '140' | '141' | '136' | '142' | '143' | '145' | '146' | '147' | '148' | '149' | '150' | '151';
+type ModuleKey = '101' | '103' | '104' | '105' | '107' | '111' | '121' | '124' | '108' | '112' | '113' | '119' | '114' | '115' | '116' | '117' | '118' | '120' | '122' | '123' | '109' | '125' | '126' | '127' | '128' | '129' | '130' | '132' | '133' | '135' | '137' | '139' | '140' | '141' | '136' | '142' | '143' | '145' | '146' | '147' | '148' | '149' | '150' | '151' | '152' | '153' | '154' | '155';
 
 interface NavGroup {
   group: string;
@@ -196,6 +200,10 @@ export default function App() {
           {module === '149' && <Module149 />}
           {module === '150' && <Module150 />}
           {module === '151' && <Module151 />}
+          {module === '152' && <Module152 />}
+          {module === '153' && <Module153 />}
+          {module === '154' && <Module154 />}
+          {module === '155' && <Module155 />}
         </main>
       </div>
     </div>

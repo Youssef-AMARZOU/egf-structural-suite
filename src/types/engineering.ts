@@ -1619,3 +1619,142 @@ export interface CentreTorsionGeneralOutput {
   verdict: string;
   diag: string[];
 }
+
+export interface FlecheRecomProfInputs {
+  fck: number;
+  b: number;
+  h: number;
+  bw: number;
+  hf: number;
+  t1: number;
+  too: number;
+  cement_class: string;
+  rh: number;
+  ecm: number;
+  pl: number;
+  m: number;
+  n0: number;
+  aci: number;
+  acs: number;
+  d: number;
+  dp: number;
+}
+
+export interface FlecheRecomProfOutput {
+  ec_eff: number;
+  neq: number;
+  phi: number;
+  bh: number;
+  ho: number;
+  x_na: number;
+  i_cr: number;
+  sigma_c: number;
+  sigma_s: number;
+  sigma_sp: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface FlexionAsFlechInputs {
+  fck: number;
+  fyk: number;
+  b: number;
+  h: number;
+  bw: number;
+  hf: number;
+  d: number;
+  dp: number;
+  med: number;
+  ned: number;
+  hx: number;
+  ln: number;
+  p_uni: number;
+  mg: number;
+  md: number;
+  neq: number;
+  fctm: number;
+  n_ite: number;
+}
+
+export interface FlexionAsFlechOutput {
+  x_na: number;
+  aci: number;
+  acs: number;
+  sigma_c: number;
+  sigma_s: number;
+  sigma_sp: number;
+  m_resist: number;
+  ac_min: number;
+  mx_max: number;
+  mx_pos: number;
+  xr_max: number;
+  is_balanced: boolean;
+  mode: string;
+  verdict: string;
+  diag: string[];
+}
+
+export interface NonFragiliteInputs {
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  b: number;
+  h: number;
+  d: number;
+  dp: number;
+  aci: number;
+  acs: number;
+  ned: number;
+  med: number;
+  ec2: number;
+  nex: number;
+  n_layers: number;
+}
+
+export interface NonFragiliteOutput {
+  n_rd: number;
+  m_rd: number;
+  n_ed: number;
+  m_ed: number;
+  x_na: number;
+  xd_ratio: number;
+  xd_limit: number;
+  eps_s: number;
+  eps_y: number;
+  is_ductile: boolean;
+  utilisation: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface EffTrComparInputs {
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  b: number;
+  bw: number;
+  h: number;
+  d: number;
+  asw: number;
+  s: number;
+  rho_l: number;
+  cot_theta: number;
+  ned: number;
+  ved: number;
+}
+
+export interface EffTrComparOutput {
+  vrdc: number;
+  vrds: number;
+  vrd_max: number;
+  vrd_bael: number;
+  acw: number;
+  tau_ed: number;
+  ratio_ec2: number;
+  ratio_bael: number;
+  governing: string;
+  verdict: string;
+  diag: string[];
+}

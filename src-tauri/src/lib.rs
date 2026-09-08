@@ -42,6 +42,10 @@ mod module_148;
 mod module_149;
 mod module_150;
 mod module_151;
+mod module_152;
+mod module_153;
+mod module_154;
+mod module_155;
 
 pub use interaction101::calculate_interaction_curve;
 pub use module_103::calculate_punching_103;
@@ -87,6 +91,10 @@ pub use module_148::calculate_file_ouvertures_148;
 pub use module_149::calculate_n_files_ouvertures_3_149;
 pub use module_150::calculate_cdt_1vvoile_150;
 pub use module_151::calculate_centre_torsion_general_151;
+pub use module_152::calculate_fleche_recom_prof_152;
+pub use module_153::calculate_flexion_as_flech_153;
+pub use module_154::calculate_non_fragilite_section_qq_154;
+pub use module_155::calculate_eff_tr_compar_ec2_bael_155;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -112,7 +120,11 @@ pub fn run() {
             calculate_tirant_118,
             calculate_escalier_120,
             calculate_sem2_pieux_122,
-            calculate_ouver_pout_123,            calculate_bael_faessel_109,            calculate_boussinesq_lagrange_125,            calculate_contraintes_section_qq_126,            calculate_rotplast_abaque_127,            calculate_eff_tr_repr_beton_128,            calculate_n_m_v_t_129,            calculate_plancher_dalle_poinconnement_130,            calculate_eff_tr_charg_pres_appui_132,            calculate_verification_dalles_poinconnement_133,            calculate_ecretement_135,            calculate_interac_circ_137,            calculate_cisai_rect_139,            calculate_cisai_circ_140,            calculate_ec1_vent_141,            calculate_ancrage_ts_136,            calculate_semelle_portante_142,            calculate_torsion_multitub_143,            calculate_reservoir_circulaire_145,            calculate_poinconnement_tremie_146,            calculate_poutre_cloison_147,            calculate_file_ouvertures_148,            calculate_n_files_ouvertures_3_149,            calculate_cdt_1vvoile_150,            calculate_centre_torsion_general_151,
+            calculate_ouver_pout_123,            calculate_bael_faessel_109,            calculate_boussinesq_lagrange_125,            calculate_contraintes_section_qq_126,            calculate_rotplast_abaque_127,            calculate_eff_tr_repr_beton_128,            calculate_n_m_v_t_129,            calculate_plancher_dalle_poinconnement_130,            calculate_eff_tr_charg_pres_appui_132,            calculate_verification_dalles_poinconnement_133,            calculate_ecretement_135,            calculate_interac_circ_137,            calculate_cisai_rect_139,            calculate_cisai_circ_140,            calculate_ec1_vent_141,            calculate_ancrage_ts_136,            calculate_semelle_portante_142,            calculate_torsion_multitub_143,            calculate_reservoir_circulaire_145,            calculate_poinconnement_tremie_146,            calculate_poutre_cloison_147,            calculate_file_ouvertures_148,            calculate_n_files_ouvertures_3_149,            calculate_cdt_1vvoile_150,            calculate_centre_torsion_general_151,            calculate_fleche_recom_prof_152,            calculate_flexion_as_flech_153,            calculate_non_fragilite_section_qq_154,            calculate_eff_tr_compar_ec2_bael_155,
+
+
+
+
 
 
 
