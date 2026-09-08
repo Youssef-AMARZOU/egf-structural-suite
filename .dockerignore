@@ -1,0 +1,9 @@
+node_modules/
+target/
+dist/
+src-tauri/target/
+*.exe
+*.msi
+.git/
+.github/
+Phase3-Extractor/

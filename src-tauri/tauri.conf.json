@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/schema.json",
+  "productName": "EGF Structural Suite",
+  "version": "0.1.0",
+  "identifier": "com.egf.structural-suite",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "EGF Structural Suite",
+        "width": 1400,
+        "height": 900,
+        "resizable": true,
+        "decorations": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/icon.ico"
+    ],
+    "targets": "all",
+    "windows": {
+      "nsis": {
+        "displayLanguageSelector": false,
+        "languages": ["French", "English"]
+      }
+    },
+    "category": "Developer Tool",
+    "shortDescription": "Calculs de génie civil — EC2 / BAEL",
+    "longDescription": "Suite de calculs structuraux pour le génie civil : béton armé, interaction M-N, poinçonnement, fondations, tassements, conformes aux normes Eurocode 2 et BAEL.",
+    "copyright": "Copyright EGF BTP — Henry Thonier",
+    "externalBin": []
+  },
+  "plugins": {
+    "shell": {
+      "open": true
+    }
+  }
+}
