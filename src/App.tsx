@@ -47,8 +47,10 @@ import Module152 from './modules/Poutres/Module152';
 import Module153 from './modules/Poutres/Module153';
 import Module154 from './modules/Poteaux/Module154';
 import Module155 from './modules/Poutres/Module155';
+import Module156 from './modules/Dalles/Module156';
+import Module157 from './modules/Dalles/Module157';
 
-type ModuleKey = '101' | '103' | '104' | '105' | '107' | '111' | '121' | '124' | '108' | '112' | '113' | '119' | '114' | '115' | '116' | '117' | '118' | '120' | '122' | '123' | '109' | '125' | '126' | '127' | '128' | '129' | '130' | '132' | '133' | '135' | '137' | '139' | '140' | '141' | '136' | '142' | '143' | '145' | '146' | '147' | '148' | '149' | '150' | '151' | '152' | '153' | '154' | '155';
+type ModuleKey = '101' | '103' | '104' | '105' | '107' | '111' | '121' | '124' | '108' | '112' | '113' | '119' | '114' | '115' | '116' | '117' | '118' | '120' | '122' | '123' | '109' | '125' | '126' | '127' | '128' | '129' | '130' | '132' | '133' | '135' | '137' | '139' | '140' | '141' | '136' | '142' | '143' | '145' | '146' | '147' | '148' | '149' | '150' | '151' | '152' | '153' | '154' | '155' | '156' | '157';
 
 interface NavGroup {
   group: string;
@@ -204,6 +206,8 @@ export default function App() {
           {module === '153' && <Module153 />}
           {module === '154' && <Module154 />}
           {module === '155' && <Module155 />}
+          {module === '156' && <Module156 />}
+          {module === '157' && <Module157 />}
         </main>
       </div>
     </div>

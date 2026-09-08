@@ -1758,3 +1758,87 @@ export interface EffTrComparOutput {
   verdict: string;
   diag: string[];
 }
+
+export interface DalleRetraitFerraillageInputs {
+  b: number;
+  h: number;
+  d: number;
+  dp: number;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  classe_ciment: string;
+  rh: number;
+  t: number;
+  ts: number;
+  t0: number;
+  ec2_modulus: number;
+  m: number;
+  aci: number;
+  acs: number;
+}
+
+export interface DalleRetraitFerraillageOutput {
+  h0: number;
+  kh: number;
+  eps_cd: number;
+  eps_ca: number;
+  eps_cs: number;
+  phi: number;
+  neq: number;
+  n_restraint: number;
+  em: number;
+  aci_nec: number;
+  acs_nec: number;
+  sc: number;
+  ss: number;
+  ssp: number;
+  x: number;
+  ec_def: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface DalleContinueFeuInputs {
+  h: number;
+  d: number;
+  dp: number;
+  l: number;
+  n_spans: number;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  q_g: number;
+  q_q: number;
+  gg: number;
+  gq: number;
+  psi: number;
+  r: number;
+  as_inf: number;
+  as_sup: number;
+}
+
+export interface DalleContinueFeuOutput {
+  theta_fire: number;
+  theta_d: number;
+  theta_s: number;
+  k_concrete: number;
+  ks_steel: number;
+  k_tension: number;
+  es_reduction: number;
+  m_support: number;
+  m_midspan: number;
+  as_inf_fi: number;
+  as_sup_fi: number;
+  l_fi: number;
+  x_inf: number;
+  x_sup: number;
+  z_inf: number;
+  z_sup: number;
+  ratio_inf: number;
+  ratio_sup: number;
+  verdict: string;
+  diag: string[];
+}
