@@ -128,9 +128,15 @@ html, body, #root {
   margin: 0;
 }
 
+/* Native number spinners are redundant next to our −/+ steppers — hide them. */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-  opacity: 1;
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* ---------- Note de calcul : printed report ---------- */
