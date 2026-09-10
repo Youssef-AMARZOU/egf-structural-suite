@@ -68,14 +68,14 @@ export default function Module126() {
           <ParamSlider label="h total" unit="mm" value={totalH} min={0} max={0} step={0} onChange={() => {}} />
         </div>
         {Array.from({ length: inp.n_layers }).map((_, i) => (
-          <div key={i} className="grid grid-cols-3 gap-2">
-            <ParamSlider label="?" unit="mm" value={inp.widths_top[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
+          <div key={i} className="grid grid-cols-2 gap-x-3 gap-y-1">
+            <ParamSlider label={`b sup ${i + 1}`} unit="mm" value={inp.widths_top[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
               const w = [...inp.widths_top]; w[i] = v; setInp((p) => ({ ...p, widths_top: w }));
             }} />
-            <ParamSlider label="?" unit="mm" value={inp.widths_bot[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
+            <ParamSlider label={`b inf ${i + 1}`} unit="mm" value={inp.widths_bot[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
               const w = [...inp.widths_bot]; w[i] = v; setInp((p) => ({ ...p, widths_bot: w }));
             }} />
-            <ParamSlider label="?" unit="mm" value={inp.heights[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
+            <ParamSlider label={`h ${i + 1}`} unit="mm" value={inp.heights[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
               const h = [...inp.heights]; h[i] = v; setInp((p) => ({ ...p, heights: h }));
             }} />
           </div>
@@ -85,11 +85,11 @@ export default function Module126() {
           {slider('n_steel', 'n aciers', '-', 1, 10, 1)}
         </div>
         {Array.from({ length: inp.n_steel }).map((_, i) => (
-          <div key={i} className="grid grid-cols-2 gap-2">
-            <ParamSlider label="?" unit="mm" value={inp.steel_depths[i] || 0} min={0} max={3000} step={10} onChange={(v) => {
+          <div key={i} className="grid grid-cols-2 gap-x-3 gap-y-1">
+            <ParamSlider label={`prof ${i + 1}`} unit="mm" value={inp.steel_depths[i] || 0} min={0} max={3000} step={10} onChange={(v) => {
               const d = [...inp.steel_depths]; d[i] = v; setInp((p) => ({ ...p, steel_depths: d }));
             }} />
-            <ParamSlider label="?" unit="cm²" value={inp.steel_areas[i] || 0} min={0} max={100} step={0.5} onChange={(v) => {
+            <ParamSlider label={`A ${i + 1}`} unit="cm²" value={inp.steel_areas[i] || 0} min={0} max={100} step={0.5} onChange={(v) => {
               const a = [...inp.steel_areas]; a[i] = v; setInp((p) => ({ ...p, steel_areas: a }));
             }} />
           </div>

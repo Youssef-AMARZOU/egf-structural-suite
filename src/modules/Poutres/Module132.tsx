@@ -75,9 +75,9 @@ export default function Module132() {
         <div className="grid grid-cols-3 gap-2">
           {[0, 1, 2].map((i) => (
             <div key={i} className="space-y-1">
-              <ParamSlider label="?" unit="kN" value={inp.tab_q[i] || 0} min={0} max={1000} step={10} onChange={(v) => { const q = [...inp.tab_q]; q[i] = v; setInp((p) => ({ ...p, tab_q: q })); }} />
-              <ParamSlider label="?" unit="mm" value={inp.tab_a[i] || 0} min={0} max={20000} step={100} onChange={(v) => { const a = [...inp.tab_a]; a[i] = v; setInp((p) => ({ ...p, tab_a: a })); }} />
-              <ParamSlider label="?" unit="mm" value={inp.tab_pad[i] || 0} min={0} max={1000} step={50} onChange={(v) => { const pad = [...inp.tab_pad]; pad[i] = v; setInp((p) => ({ ...p, tab_pad: pad })); }} />
+              <ParamSlider label={`Q${i + 1}`} unit="kN" value={inp.tab_q[i] || 0} min={0} max={1000} step={10} onChange={(v) => { const q = [...inp.tab_q]; q[i] = v; setInp((p) => ({ ...p, tab_q: q })); }} />
+              <ParamSlider label={`a${i + 1}`} unit="mm" value={inp.tab_a[i] || 0} min={0} max={20000} step={100} onChange={(v) => { const a = [...inp.tab_a]; a[i] = v; setInp((p) => ({ ...p, tab_a: a })); }} />
+              <ParamSlider label={`pad${i + 1}`} unit="mm" value={inp.tab_pad[i] || 0} min={0} max={1000} step={50} onChange={(v) => { const pad = [...inp.tab_pad]; pad[i] = v; setInp((p) => ({ ...p, tab_pad: pad })); }} />
             </div>
           ))}
         </div>

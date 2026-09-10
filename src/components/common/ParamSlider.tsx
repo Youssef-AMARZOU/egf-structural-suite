@@ -68,7 +68,7 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
             max={max}
             step={step}
             onChange={(e) => set(Number(e.target.value))}
-            className="min-w-[56px] flex-1 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
+            className="min-w-0 flex-1 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
             aria-label={`${label}, valeur exacte`}
           />
           <button
