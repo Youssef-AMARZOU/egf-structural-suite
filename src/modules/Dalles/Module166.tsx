@@ -68,20 +68,29 @@ export default function Module166() {
       }
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <SectionCanvas title="Section — aciers" vbW={400} vbH={120}>
-            <rect x={ox} y={oy} width={bw} height={bh} fill="#e0e7ff" stroke="#6366F1" strokeWidth={2} />
-            <line x1={ox - 10} y1={oy + dY} x2={ox + bw + 10} y2={oy + dY} stroke="#22C55E" strokeWidth={1} strokeDasharray="4,4" />
-            <text x={ox - 15} y={oy + dY + 4} fontSize={9} fill="#22C55E">d</text>
-            <line x1={ox + bw / 2} y1={oy + bh / 2} x2={ox + bw / 2} y2={oy + bh / 2 + e0Y} stroke="#F59E0B" strokeWidth={2} />
-            <text x={ox + bw / 2 + 10} y={oy + bh / 2 + e0Y / 2} fontSize={9} fill="#F59E0B">e0</text>
-            <line x1={ox} y1={oy + bh / 2} x2={ox + bw} y2={oy + bh / 2} stroke="#999" strokeWidth={0.5} strokeDasharray="2,2" />
-            <rect x={ox + 10} y={oy + dY - 4} width={bw - 20} height={6} fill="#EF4444" rx={2} />
-            {res && (
-              <text x={ox + bw / 2} y={oy + dY + 18} fontSize={10} fill="#EF4444" textAnchor="middle">As2 = {res.as2.toFixed(0)} mm²/m</text>
+          <SectionCanvas title="Section — aciers" vbW={400} vbH={134} scaleLabel="dalle précontrainte">
+            <rect x={ox} y={oy} width={bw} height={bh} fill="#6366F1" opacity={0.22} stroke="#818CF8" strokeWidth={1.4} />
+            <line x1={ox} y1={oy + bh / 2} x2={ox + bw} y2={oy + bh / 2} stroke="#64748B" strokeWidth={0.7} strokeDasharray="2,2" />
+            <text x={ox - 8} y={oy + bh / 2 + 3} fontSize={8} fill="#64748B" textAnchor="end">axe</text>
+            <line x1={ox} y1={oy + dY} x2={ox + bw} y2={oy + dY} stroke="#22C55E" strokeWidth={1.2} strokeDasharray="4,4" />
+            <text x={ox - 8} y={oy + dY + 3} fontSize={9} fill="#22C55E" fontWeight="bold" textAnchor="end">d</text>
+            {Math.abs(inp.e0) >= 5 && (
+              <>
+                <line x1={ox + bw + 18} y1={oy + bh / 2} x2={ox + bw + 18} y2={oy + bh / 2 + e0Y} stroke="#F59E0B" strokeWidth={1.6} />
+                <circle cx={ox + bw + 18} cy={oy + bh / 2 + e0Y} r={4} fill="#F59E0B" />
+                <text x={ox + bw + 26} y={oy + bh / 2 + e0Y + 3} fontSize={9} fill="#F59E0B">e0 = {inp.e0} mm</text>
+              </>
             )}
-            <circle cx={ox + bw / 2} cy={oy + bh / 2 + e0Y} r={5} fill="#F59E0B" />
-            <text x={ox + bw / 2 + 15} y={oy + bh / 2 + e0Y + 4} fontSize={9} fill="#F59E0B">Ap</text>
-            <DimensionLine x1={ox} y1={oy + bh} x2={ox + bw} y2={oy + bh} offset={12} text={`h = ${inp.h} mm, d = ${inp.d} mm`} />
+            <text x={ox + bw + 8} y={oy + dY - 6} fontSize={9} fill="#F59E0B">Ap</text>
+            {res && res.as2 > 0 && (
+              <rect x={ox + 10} y={oy + dY - 4} width={Math.max(8, bw - 20)} height={6} fill="#EF4444" rx={2} opacity={0.9} />
+            )}
+            <DimensionLine x1={ox} y1={oy + bh} x2={ox + bw} y2={oy + bh} offset={14} text={`h = ${inp.h} mm, d = ${inp.d} mm`} />
+            {res && (
+              <text x={ox + bw / 2} y={oy + bh + 32} fontSize={10} fill="#FCA5A5" textAnchor="middle" fontWeight="bold">
+                As2 = {res.as2.toFixed(0)} mm²/m
+              </text>
+            )}
           </SectionCanvas>
         </div>
       }
