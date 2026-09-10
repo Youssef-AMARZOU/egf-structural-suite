@@ -104,9 +104,11 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
             +
           </button>
         </div>
-        <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-500">
-          <span>min {min}</span>
-          <span>max {max} {unit}</span>
+        <div
+          className="text-[10px] font-mono text-slate-500 dark:text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis"
+          title={`Plage standard : ${min} – ${max} ${unit}`}
+        >
+          {min}–{max} {unit}
         </div>
       </div>
     </div>
