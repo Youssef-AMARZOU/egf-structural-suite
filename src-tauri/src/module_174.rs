@@ -98,19 +98,21 @@ pub fn calculate_dall_lignes_de_rupture_174(
     let mut best_la1 = 0.0_f64;
     let mut best_la2 = 0.0_f64;
 
-    // Iterative optimization
+    // Iterative optimization (counts clamped: pas² × iter work)
+    let pas = p.pas.clamp(2, 200);
+    let iter = p.iter.clamp(1, 100);
     let mut laa1 = 0.0_f64;
     let mut lab1 = 1.0_f64;
     let mut laa2 = 0.0_f64;
     let mut lab2 = 1.0_f64;
 
-    for _ in 0..p.iter {
-        let dla1 = (lab1 - laa1) / p.pas as f64;
-        let dla2 = (lab2 - laa2) / p.pas as f64;
+    for _ in 0..iter {
+        let dla1 = (lab1 - laa1) / pas as f64;
+        let dla2 = (lab2 - laa2) / pas as f64;
 
-        for k1 in 0..=p.pas {
+        for k1 in 0..=pas {
             let la1 = laa1 + dla1 * k1 as f64;
-            for k2 in 0..=p.pas {
+            for k2 in 0..=pas {
                 let la2 = laa2 + dla2 * k2 as f64;
                 let mc = yield_line_moment(p.mu, p.Lx, p.Ly, la1, la2);
                 if mc > mom {
@@ -122,7 +124,7 @@ pub fn calculate_dall_lignes_de_rupture_174(
         }
 
         // Narrow search around best
-        let delta = 0.1 / (p.iter as f64);
+        let delta = 0.1 / (iter as f64);
         laa1 = (best_la1 - delta).max(0.0);
         lab1 = (best_la1 + delta).min(1.0);
         laa2 = (best_la2 - delta).max(0.0);
@@ -134,7 +136,7 @@ pub fn calculate_dall_lignes_de_rupture_174(
 
     let mut diag = Vec::new();
     diag.push(format!("Lx = {:.2} m, Ly = {:.2} m, μ = {:.2} kN·m/m", p.Lx, p.Ly, p.mu));
-    diag.push(format!("Pas = {}, Itérations = {}", p.pas, p.iter));
+    diag.push(format!("Pas = {}, Itérations = {}", pas, iter));
     diag.push(format!("λ1* = {:.3}, λ2* = {:.3}", best_la1, best_la2));
     diag.push(format!("M/mu = {:.4}, M = {:.2} kN·m", mom, mu_mom));
     diag.push(format!("Aire = {:.2} m²", area));
