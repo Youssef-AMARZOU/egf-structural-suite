@@ -14,15 +14,23 @@ interface ParamSliderProps {
 const clamp = (v: number, lo: number, hi: number) =>
   Math.min(hi, Math.max(lo, Number.isFinite(v) ? v : lo));
 
+const decimalsOf = (step: number) => {
+  const s = String(step);
+  const i = s.indexOf('.');
+  return i < 0 ? 0 : s.length - i - 1;
+};
+
 /** Single-affordance control: label + unit → slider → stepper input. */
 export const ParamSlider: React.FC<ParamSliderProps> = ({
   label, unit, value, min, max, step = 1, onChange, accent,
 }) => {
+  const dec = decimalsOf(step);
+  const shown = Number(clamp(value, min, max).toFixed(dec));
   const set = (v: number) => {
     if (!Number.isFinite(v)) return;
-    onChange(clamp(Math.round(v / step) * step, min, max));
+    onChange(clamp(Number((Math.round(v / step) * step).toFixed(dec)), min, max));
   };
-  const pct = max > min ? ((clamp(value, min, max) - min) / (max - min)) * 100 : 0;
+  const pct = max > min ? ((shown - min) / (max - min)) * 100 : 0;
   const acc = accent ?? 'var(--ws-acc, #4C8DFF)';
   return (
     <div className="block min-w-0">
@@ -55,12 +63,12 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           </button>
           <input
             type="number"
-            value={value}
+            value={shown}
             min={min}
             max={max}
             step={step}
             onChange={(e) => set(Number(e.target.value))}
-            className="min-w-0 flex-1 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
+            className="min-w-[56px] flex-1 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
             aria-label={`${label}, valeur exacte`}
           />
           <button
