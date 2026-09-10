@@ -1,5 +1,4 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { getVersion } from '@tauri-apps/api/app';
 import { useAppUpdater } from './hooks/useAppUpdater';
 import { UpdateDialog } from './components/common/UpdateDialog';
 import { CATEGORY_ACCENT, type CategoryKey } from './components/common/Workstation';
@@ -319,13 +318,12 @@ const GROUP_ICON: Record<string, ReactNode> = {
 export default function App() {
   const [module, setModule] = useState<ModuleKey>('104');
   const [dark, setDark] = useState(true);
-  const [appVersion, setAppVersion] = useState('0.1.1');
+  const [appVersion] = useState(__APP_VERSION__);
   const [updateOpen, setUpdateOpen] = useState(false);
   const updater = useAppUpdater();
 
   // Silent OTA check on startup — surfaces UI only if an update exists.
   useEffect(() => {
-    getVersion().then(setAppVersion).catch(() => undefined);
     updater.checkForUpdates(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

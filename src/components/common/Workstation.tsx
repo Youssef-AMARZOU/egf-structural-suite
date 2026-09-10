@@ -96,12 +96,12 @@ export const Workstation: React.FC<WorkstationProps> = ({
         </div>
       </div>
 
-      <div className="ws-grid grid grid-cols-12 gap-4">
-        <div className="ws-params glass rounded-2xl col-span-3 p-5 space-y-4 max-h-[calc(100vh-12rem)] overflow-y-auto">
+      <div className="ws-grid grid grid-cols-1 gap-4 xl:grid-cols-12">
+        <div className="ws-params glass rounded-2xl xl:col-span-3 p-5 space-y-4 xl:max-h-[calc(100vh-12rem)] xl:overflow-y-auto">
           {params}
         </div>
-        <div className="col-span-5 space-y-4 min-w-0">{sketch}</div>
-        <div className="glass rounded-2xl col-span-4 p-5 space-y-4 min-w-0">
+        <div className="xl:col-span-5 space-y-4 min-w-0">{sketch}</div>
+        <div className="glass rounded-2xl xl:col-span-4 p-5 space-y-4 min-w-0">
           {results}
         </div>
       </div>
