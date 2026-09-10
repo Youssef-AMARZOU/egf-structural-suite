@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Deserialize)]
 pub struct FissureCercleInputs {
     pub d: f64,      // diameter (mm)
-    pub n_bar: u32,  // number of bars
+    pub n_bar: f64,  // number of bars (rounded to 3..=60)
     pub phi: f64,    // bar diameter (mm)
     pub c: f64,      // cover (mm)
     pub n_qp: f64,   // quasi-permanent axial, kN (compression > 0)
@@ -36,7 +36,7 @@ pub fn calculate_fissure_cercle_213(
     p: FissureCercleInputs,
 ) -> Result<FissureCercleOutput, String> {
     if p.d <= 0.0 { return Err("d doit être > 0".to_string()); }
-    if p.n_bar < 3 || p.n_bar > 60 { return Err("n_bar doit être dans [3, 60]".to_string()); }
+    let nb = (p.n_bar.round() as usize).clamp(3, 60);
     if p.phi <= 0.0 || p.c < 0.0 { return Err("phi > 0, c >= 0".to_string()); }
     if p.m_qp < 0.0 { return Err("m_qp doit être >= 0".to_string()); }
     if p.fck <= 0.0 { return Err("fck doit être > 0".to_string()); }
@@ -52,7 +52,6 @@ pub fn calculate_fissure_cercle_213(
     let rs = r - p.c - p.phi / 2.0;
     if rs <= 0.0 { return Err("enrobage trop fort pour D".to_string()); }
     let ab = std::f64::consts::PI * p.phi * p.phi / 4.0;
-    let nb = p.n_bar as usize;
     let depths: Vec<f64> = (0..nb).map(|i| {
         let a = 2.0 * std::f64::consts::PI * i as f64 / nb as f64;
         r - rs * a.cos() // depth from top (compression) fibre
@@ -80,18 +79,50 @@ pub fn calculate_fissure_cercle_213(
         (sn, sm)
     };
     let n_n = p.n_qp * 1000.0; // N
-    let m_nmm = p.m_qp * 1e6;  // N·mm
-    // f(x) = M·SN − N·SM = 0
-    let f = |x: f64| { let (sn, sm) = brackets(x); m_nmm * sn - n_n * sm };
-    let (mut lo, mut hi) = (0.01 * p.d, 0.99 * p.d);
-    let (mut flo, mut _fhi) = (f(lo), f(hi));
-    if flo == 0.0 { flo = 1e-9; }
-    for _ in 0..80 {
-        let mid = 0.5 * (lo + hi);
-        let fm = f(mid);
-        if flo * fm <= 0.0 { hi = mid; } else { lo = mid; flo = fm; }
+    let m_nmm = p.m_qp * 1e6; // N·mm
+    // eR(x) = SM/SN : lever arm of the unit-top-stress resultants.
+    // Scan x upward (like the reference sheet) and take the first depth
+    // whose eccentricity matches demand (same sign, |eR| <= |eqp|),
+    // refining around it. Falls back to full compression (x = d).
+    let eqp = if n_n.abs() > 1e-9 { m_nmm / n_n } else { f64::INFINITY };
+    let er_of = |xx: f64| -> Option<f64> {
+        if xx <= 0.0 {
+            return None;
+        }
+        let (sn, sm) = brackets(xx);
+        if sn.abs() < 1e-12 {
+            return None;
+        }
+        Some(sm / sn)
+    };
+    let tiny = 1e-7 * p.d;
+    let (mut x0, mut x1) = (tiny, p.d);
+    let mut dx = (x1 - x0) / 50.0;
+    let mut x = x1;
+    for _ in 0..6 {
+        let mut hit = false;
+        let mut xx = x0;
+        while xx <= x1 {
+            let xxx = xx.max(tiny);
+            if let Some(er) = er_of(xxx) {
+                if er * eqp > 0.0 && er.abs() <= eqp.abs() {
+                    x = xxx;
+                    hit = true;
+                    break;
+                }
+            }
+            xx += dx;
+        }
+        if !hit {
+            break;
+        }
+        x0 = (x - dx).max(tiny);
+        x1 = x;
+        dx = (x1 - x0) / 10.0;
+        if dx < 1e-9 * p.d {
+            break;
+        }
     }
-    let x = 0.5 * (lo + hi);
     let (sn, sm) = brackets(x);
     if sm.abs() < 1e-9 { return Err("équilibre impossible (vérifier N, M)".to_string()); }
     let kappa = if m_nmm.abs() > 1e-9 { m_nmm / sm } else { n_n / sn };
@@ -129,4 +160,34 @@ pub fn calculate_fissure_cercle_213(
         format!("Fissuration excessive — wk = {:.2} mm > {:.2} mm (augmenter As / réduire φ)", wk, p.w_lim)
     };
     Ok(FissureCercleOutput { x, sigma_s, sr_max, eps: eps * 1000.0, wk, ratio, diag, verdict })
+}
+
+#[cfg(test)]
+mod fissure213 {
+    use super::*;
+    fn base() -> FissureCercleInputs {
+        FissureCercleInputs {
+            d: 800.0, n_bar: 12.0, phi: 20.0, c: 40.0, n_qp: 200.0,
+            m_qp: 300.0, fck: 30.0, kt: 0.4, w_lim: 0.3,
+        }
+    }
+    #[test]
+    fn defaults_compute() {
+        // Eccentric torseur: must converge like the reference sheet, not error.
+        let o = calculate_fissure_cercle_213(base()).unwrap();
+        assert!(o.wk.is_finite() && o.wk >= 0.0);
+        assert!(o.ratio.is_finite());
+    }
+    #[test]
+    fn hostile_bar_counts() {
+        // Must never panic, hang, or produce NaN — Err with a message is fine.
+        for nb in [-5.0, 0.0, 2.5, 12.7, 1e9] {
+            let mut p = base();
+            p.n_bar = nb;
+            match calculate_fissure_cercle_213(p) {
+                Ok(o) => assert!(!o.wk.is_nan() && !o.ratio.is_nan()),
+                Err(_) => {}
+            }
+        }
+    }
 }

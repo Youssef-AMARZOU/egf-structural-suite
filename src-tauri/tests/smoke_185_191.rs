@@ -82,8 +82,8 @@ fn smoke_190_fleches() {
 fn smoke_191_voile() {
     let r = module_191::calculate_voile_verif_fc_191(module_191::VoileVerifFcInputs {
         Lw: 3.0, t: 0.2, fck: 30.0, fyk: 500.0, gc: 1.5, gs: 1.15,
-        n_bars: 12, phi_dist: 12.0, A_end: 12.56, cover: 0.03,
-        N_ed: 2500.0, M_ed: 1800.0, n_pts: 60,
+        n_bars: 12.0, phi_dist: 12.0, A_end: 12.56, cover: 0.03,
+        N_ed: 2500.0, M_ed: 1800.0, n_pts: 60.0,
     })
     .unwrap();
     assert!(r.N_max > 10000.0 && r.N_min < 0.0);
