@@ -32,15 +32,7 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           {unit}
         </span>
       </div>
-      <div className="mt-1 flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={() => set(value - step)}
-          className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition"
-          aria-label={`Diminuer ${label}`}
-        >
-          −
-        </button>
+      <div className="mt-1 space-y-1">
         <input
           type="range"
           value={clamp(value, min, max)}
@@ -48,28 +40,38 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           max={max}
           step={step}
           onChange={(e) => set(Number(e.target.value))}
-          className="param-range w-full min-w-0"
+          className="param-range block w-full"
           style={{ background: `linear-gradient(90deg, ${acc} ${pct}%, rgba(148,163,184,0.25) ${pct}%)` }}
           aria-label={label}
         />
-        <button
-          type="button"
-          onClick={() => set(value + step)}
-          className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition"
-          aria-label={`Augmenter ${label}`}
-        >
-          +
-        </button>
-        <input
-          type="number"
-          value={value}
-          min={min}
-          max={max}
-          step={step}
-          onChange={(e) => set(Number(e.target.value))}
-          className="w-[72px] shrink-0 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
-          aria-label={`${label}, valeur exacte`}
-        />
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => set(value - step)}
+            className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition"
+            aria-label={`Diminuer ${label}`}
+          >
+            −
+          </button>
+          <input
+            type="number"
+            value={value}
+            min={min}
+            max={max}
+            step={step}
+            onChange={(e) => set(Number(e.target.value))}
+            className="min-w-0 flex-1 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
+            aria-label={`${label}, valeur exacte`}
+          />
+          <button
+            type="button"
+            onClick={() => set(value + step)}
+            className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition"
+            aria-label={`Augmenter ${label}`}
+          >
+            +
+          </button>
+        </div>
       </div>
     </div>
   );
