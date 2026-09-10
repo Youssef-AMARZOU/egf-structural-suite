@@ -9,6 +9,8 @@ interface ParamSliderProps {
   step?: number;
   onChange: (n: number) => void;
   accent?: string;
+  /** Hide the −/+ steppers (slider + field only). Default true. */
+  steppers?: boolean;
 }
 
 const clamp = (v: number, lo: number, hi: number) =>
@@ -22,7 +24,7 @@ const decimalsOf = (step: number) => {
 
 /** Single-affordance control: label + unit → slider → stepper input. */
 export const ParamSlider: React.FC<ParamSliderProps> = ({
-  label, unit, value, min, max, step = 1, onChange, accent,
+  label, unit, value, min, max, step = 1, onChange, accent, steppers = true,
 }) => {
   const dec = decimalsOf(step);
   const shown = Number(clamp(value, min, max).toFixed(dec));
@@ -69,6 +71,7 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           aria-label={label}
         />
         <div className="flex items-center gap-1.5">
+          {steppers && (
           <button
             type="button"
             onClick={() => set(value - step)}
@@ -79,6 +82,7 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           >
             −
           </button>
+          )}
           <input
             type="text"
             inputMode="decimal"
@@ -93,6 +97,7 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
             className="min-w-0 flex-1 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
             aria-label={`${label}, valeur exacte`}
           />
+          {steppers && (
           <button
             type="button"
             onClick={() => set(value + step)}
@@ -103,6 +108,7 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           >
             +
           </button>
+          )}
         </div>
         <div
           className="text-[10px] font-mono text-slate-500 dark:text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis"
