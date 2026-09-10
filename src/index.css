@@ -139,6 +139,19 @@ input[type="number"] {
   appearance: textfield;
 }
 
+/* ---------- legacy pastel metric cards: dark-mode legibility ----------
+   Worker-built modules use light-only bg-*-50 tiles whose values inherit
+   near-white dark-mode text. Force ink values; verdict banners (no .text-lg)
+   are untouched. */
+.dark .bg-blue-50 .text-lg,
+.dark .bg-purple-50 .text-lg,
+.dark .bg-orange-50 .text-lg,
+.dark .bg-amber-50 .text-lg,
+.dark .bg-gray-50 .text-lg,
+.dark .bg-green-50 .text-lg,
+.dark .bg-red-50 .text-lg,
+.dark .bg-slate-50 .text-lg { color: #0f172a !important; }
+
 /* ---------- Note de calcul : printed report ---------- */
 .ws-print-head { display: none; }
 

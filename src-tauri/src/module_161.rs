@@ -261,6 +261,15 @@ pub struct PourcentMiniSectQQOutput {
 pub fn calculate_pourcent_mini_sect_qq_161(
     p: PourcentMiniSectQQInputs,
 ) -> Result<PourcentMiniSectQQOutput, String> {
+    if p.trapezes.is_empty() {
+        return Err("aucun trapèze défini".to_string());
+    }
+    if p.trapezes.iter().any(|t| t.b1 <= 0.0 || t.b2 <= 0.0 || t.h <= 0.0) {
+        return Err("dimensions des trapèzes strictement positives requises".to_string());
+    }
+    if p.fck <= 0.0 || p.fyk <= 0.0 || p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("paramètres matériaux strictement positifs requis".to_string());
+    }
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
     let n = 15.0; // modular ratio
@@ -277,7 +286,16 @@ pub fn calculate_pourcent_mini_sect_qq_161(
 
     let mcr = cracking_moment(ht, sp.area, sp.i_g, sp.y_bar, fctm);
     let d = ht - sp.y_bar; // effective depth (distance from top to centroid)
-    let (x_neutral, mr_min, lever_arm, as_min) = find_as_for_mcr(mcr, &trapezes, d, n, fyd);
+    if d <= 0.0 {
+        return Err("géométrie incohérente : vérifiez les trapèzes".to_string());
+    }
+    let (x_neutral, mr_min, lever_arm, as_raw) = find_as_for_mcr(mcr, &trapezes, d, n, fyd);
+    // Physical floor: a negative root means plain concrete already resists Mcr.
+    let (as_min, floor_note) = if as_raw < 0.0 {
+        (0.0, "MRd(0) ≥ Mcr : minimum physique 0 appliqué")
+    } else {
+        (as_raw, "")
+    };
 
     let as_min_pct = if sp.area > 0.0 { as_min / sp.area * 100.0 } else { 0.0 };
 
@@ -287,6 +305,9 @@ pub fn calculate_pourcent_mini_sect_qq_161(
     diag.push(format!("fctm = {:.2} MPa, Mcr = {:.1} kN·m", fctm, mcr / 1e6));
     diag.push(format!("x = {:.1} mm, z = {:.1} mm", x_neutral, lever_arm));
     diag.push(format!("As_min = {:.0} mm² ({:.3}%)", as_min, as_min_pct));
+    if !floor_note.is_empty() {
+        diag.push(floor_note.to_string());
+    }
 
     let verdict = if as_min_pct < 0.15 {
         format!("Pourcentage minimum: {:.3}% — OK", as_min_pct)
