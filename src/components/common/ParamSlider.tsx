@@ -31,6 +31,8 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
     onChange(clamp(Number((Math.round(v / step) * step).toFixed(dec)), min, max));
   };
   const pct = max > min ? ((shown - min) / (max - min)) * 100 : 0;
+  const atMin = shown <= min;
+  const atMax = shown >= max;
   // Free-typing draft: the field never reformats mid-keystroke; commit on blur/Enter.
   const [draft, setDraft] = useState<string | null>(null);
   const focused = useRef(false);
@@ -70,8 +72,10 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           <button
             type="button"
             onClick={() => set(value - step)}
-            className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition"
+            disabled={atMin}
+            className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100"
             aria-label={`Diminuer ${label}`}
+            title={atMin ? `Minimum standard : ${min} ${unit}` : `Diminuer ${label}`}
           >
             −
           </button>
@@ -92,11 +96,17 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           <button
             type="button"
             onClick={() => set(value + step)}
-            className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition"
+            disabled={atMax}
+            className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100"
             aria-label={`Augmenter ${label}`}
+            title={atMax ? `Maximum standard : ${max} ${unit}` : `Augmenter ${label}`}
           >
             +
           </button>
+        </div>
+        <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-500">
+          <span>min {min}</span>
+          <span>max {max} {unit}</span>
         </div>
       </div>
     </div>
