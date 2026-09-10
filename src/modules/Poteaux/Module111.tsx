@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import type { PoteauComparInputs, PoteauComparOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas, DimensionLine, RebarGroup,
+} from '../../components/drafting';
 
 const DEFAULT: PoteauComparInputs = {
   bx: 400, by: 400,
@@ -17,21 +22,16 @@ const DEFAULT: PoteauComparInputs = {
   ec2: 2.0, n_parabola: 2.0,
 };
 
+
 export default function Module111() {
   const [inp, setInp] = useState<PoteauComparInputs>(DEFAULT);
-  const [res, setRes] = useState<PoteauComparOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<PoteauComparInputs, PoteauComparOutput>(
+    'calculate_poteau_compar_111', inp,
+  );
 
   const S = (k: keyof PoteauComparInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<PoteauComparOutput>('calculate_poteau_compar_111', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
 
   const chartData = res
     ? res.n_values.map((n, i) => ({
@@ -40,70 +40,110 @@ export default function Module111() {
       }))
     : [];
 
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof PoteauComparInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
   return (
-    <div className="grid grid-cols-12 gap-4">
-      {/* ─── Input Panel ─── */}
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <div>
-          <h2 className="text-sm font-bold">
-            111 Poteau Compar <span className="font-mono text-[11px] text-emerald-500">RUST</span>
-          </h2>
-          <p className="text-[11px] text-slate-500">Interaction N-M — EC2 / BAEL</p>
-        </div>
+    <Workstation
+      title="111 Poteau Compar"
+      subtitle="Interaction N-M — EC2 / BAEL"
+      eurocode="EC2"
+      status={status}
+      live={live}
+      params={
+        <>
 
         {/* Geometry */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="bx" unit="mm" value={inp.bx} onChange={S('bx')} min={100} max={2000} step={50} />
-          <NumField label="by" unit="mm" value={inp.by} onChange={S('by')} min={100} max={2000} step={50} />
+          {slider('bx', 'bx', 'mm', 100, 2000, 50)}
+          {slider('by', 'by', 'mm', 100, 2000, 50)}
         </div>
 
         {/* Reinforcement */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Armatures</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="Couches" unit="-" value={inp.n_layers} onChange={S('n_layers')} min={1} max={6} step={1} />
-          <NumField label="Bar/couche" unit="-" value={inp.bars_per_layer} onChange={S('bars_per_layer')} min={1} max={12} step={1} />
-          <NumField label="φ" unit="mm" value={inp.phi} onChange={S('phi')} min={6} max={40} step={2} />
+          {slider('n_layers', 'Couches', '-', 1, 6, 1)}
+          {slider('bars_per_layer', 'Bar/couche', '-', 1, 12, 1)}
+          {slider('phi', 'φ', 'mm', 6, 40, 2)}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="d1" unit="mm" value={inp.d1} onChange={S('d1')} min={20} max={200} step={5} />
-          <NumField label="d2" unit="mm" value={inp.d2} onChange={S('d2')} min={50} max={1500} step={10} />
+          {slider('d1', 'd1', 'mm', 20, 200, 5)}
+          {slider('d2', 'd2', 'mm', 50, 1500, 10)}
         </div>
 
         {/* Materials */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1.0} max={2.0} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1.0} max={1.5} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1.0, 2.0, 0.05)}
+          {slider('gs', 'γs', '-', 1.0, 1.5, 0.05)}
         </div>
 
         {/* Steel model */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Modèle acier</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="k" unit="-" value={inp.k_steel} onChange={S('k_steel')} min={1.0} max={1.2} step={0.01} />
-          <NumField label="εuk" unit="%" value={inp.euk} onChange={S('euk')} min={1.0} max={10.0} step={0.1} />
+          {slider('k_steel', 'k', '-', 1.0, 1.2, 0.01)}
+          {slider('euk', 'εuk', '%', 1.0, 10.0, 0.1)}
         </div>
 
         {/* Concrete model */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Modèle béton</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="εc2" unit="%" value={inp.ec2} onChange={S('ec2')} min={1.0} max={5.0} step={0.1} />
-          <NumField label="n" unit="-" value={inp.n_parabola} onChange={S('n_parabola')} min={1.0} max={3.0} step={0.1} />
+          {slider('ec2', 'εc2', '%', 1.0, 5.0, 0.1)}
+          {slider('n_parabola', 'n', '-', 1.0, 3.0, 0.1)}
         </div>
 
-        <NumField label="Points" unit="-" value={inp.n_points} onChange={S('n_points')} min={10} max={100} step={5} />
+        {slider('n_points', 'Points', '-', 10, 100, 5)}
 
         {err && (
           <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">
             {err}
           </p>
         )}
-      </div>
-
-      {/* ─── M-N Chart ─── */}
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
+<div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+  <SectionCanvas title="Section + lits d'armatures" vbW={600} vbH={340}>
+    {(() => {
+      const k = Math.min(300 / inp.bx, 220 / inp.by);
+      const ox = 220; const oy = 50;
+      const W = inp.bx * k; const H = inp.by * k;
+      const rows = Math.max(1, Math.round(inp.n_layers));
+      const perRow = Math.max(1, Math.round(inp.bars_per_layer));
+      const bars: { x: number; y: number; phi: number }[] = [];
+      for (let r = 0; r < rows; r++) {
+        const y = rows === 1 ? oy + H / 2 : oy + inp.d1 * k + (r / (rows - 1)) * ((inp.d2 - inp.d1) * k);
+        for (let i = 0; i < perRow; i++) {
+          const x = perRow === 1 ? ox + W / 2 : ox + 14 + (i / (perRow - 1)) * (W - 28);
+          bars.push({ x, y, phi: inp.phi });
+        }
+      }
+      return (
+        <g>
+          <rect x={ox} y={oy} width={W} height={H} fill="#60a5fa" opacity={0.2} stroke="#3b82f6" strokeWidth={1.2} />
+          <RebarGroup bars={bars} pxPerMm={k} />
+          <DimensionLine x1={ox} y1={oy + H} x2={ox + W} y2={oy + H} offset={26} text={`bx = ${inp.bx}`} />
+          <DimensionLine x1={ox} y1={oy} x2={ox} y2={oy + H} offset={-30} text={`by = ${inp.by}`} />
+          {res && (
+            <text x={ox + W / 2} y={oy + H + 44} textAnchor="middle" fontSize={11} fill="#2563eb" fontWeight="bold">
+              Nmax={res.n_max.toFixed(0)} kN
+            </text>
+          )}
+        </g>
+      );
+    })()}
+  </SectionCanvas>
+</div>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Diagramme d'interaction N-M</h2>
           <div className="h-[300px]">
@@ -151,8 +191,13 @@ export default function Module111() {
             </ResponsiveContainer>
           </div>
         </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
 
-        {/* Results summary */}
         {res && (
           <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
             <h2 className="text-sm font-bold mb-2">Résultats</h2>
@@ -163,10 +208,16 @@ export default function Module111() {
             </div>
           </div>
         )}
-      </div>
-
-      {/* ─── AI Diagnostics ─── */}
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Comparaison poteau M-N"
+                latex={String.raw`N_{Rd} = \int_{A_c} \sigma_c \, dA + \sum A_{si} \, \sigma_{si}`}
+                description="Courbe d'interaction balayée"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`N_{Ed}`, meaning: 'Effort normal', value: res.n_max.toFixed(0) },
+                    { symbol: String.raw`M_{Ed}`, meaning: 'Moment', value: res.n_bal.toFixed(0) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {!res ? (
           <p className="text-xs text-slate-500">computing…</p>
@@ -192,7 +243,12 @@ export default function Module111() {
             </li>
           </ul>
         )}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

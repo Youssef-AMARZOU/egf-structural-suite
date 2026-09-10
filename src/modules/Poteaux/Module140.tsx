@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { CisaiCircInputs, CisaiCircOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: CisaiCircInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -14,72 +19,66 @@ const DEFAULT: CisaiCircInputs = {
   l_span: 8000, support_width: 250,
 };
 
+
 export default function Module140() {
   const [inp, setInp] = useState<CisaiCircInputs>(DEFAULT);
-  const [res, setRes] = useState<CisaiCircOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<CisaiCircInputs, CisaiCircOutput>(
+    'calculate_cisai_circ_140', inp,
+  );
   const S = (k: keyof CisaiCircInputs) => (v: number | number[]) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<CisaiCircOutput>('calculate_cisai_circ_140', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : res.ratio_v <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof CisaiCircInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">140 Cisaillement Circ <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Cisaillement section circulaire — EC2 §6.2</p>
+    <Workstation
+      title="140 Cisaillement Circ"
+      subtitle="Cisaillement section circulaire — EC2 §6.2"
+      eurocode="EC2 §6.2"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="φ" unit="mm" value={inp.phi} onChange={S('phi')} min={100} max={2000} step={10} />
-          <NumField label="d" unit="mm" value={inp.d} onChange={S('d')} min={50} max={1900} step={5} />
-          <NumField label="ρl" unit="%" value={inp.rho_l} onChange={S('rho_l')} min={0.1} max={5} step={0.1} />
-          <NumField label="Nb barres" unit="-" value={inp.n_bars} onChange={S('n_bars')} min={4} max={32} step={1} />
-          <NumField label="φ barre" unit="mm" value={inp.d_bar} onChange={S('d_bar')} min={6} max={50} step={2} />
-          <NumField label="Couverture" unit="mm" value={inp.cover} onChange={S('cover')} min={15} max={100} step={5} />
+          {slider('phi', 'φ', 'mm', 100, 2000, 10)}
+          {slider('d', 'd', 'mm', 50, 1900, 5)}
+          {slider('rho_l', 'ρl', '%', 0.1, 5, 0.1)}
+          {slider('n_bars', 'Nb barres', '-', 4, 32, 1)}
+          {slider('d_bar', 'φ barre', 'mm', 6, 50, 2)}
+          {slider('cover', 'Couverture', 'mm', 15, 100, 5)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie poutre</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="L travée" unit="mm" value={inp.l_span} onChange={S('l_span')} min={1000} max={20000} step={500} />
-          <NumField label="t appui" unit="mm" value={inp.support_width} onChange={S('support_width')} min={100} max={1000} step={10} />
-          <NumField label="NEd" unit="kN" value={inp.n_ed} onChange={S('n_ed')} min={0} max={10000} step={10} />
+          {slider('l_span', 'L travée', 'mm', 1000, 20000, 500)}
+          {slider('support_width', 't appui', 'mm', 100, 1000, 10)}
+          {slider('n_ed', 'NEd', 'kN', 0, 10000, 10)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>VRd,c = <b>{res.v_rdc.toFixed(1)}</b> kN | VRd,max = <b>{res.v_rdc_max.toFixed(1)}</b> kN</div>
-              <div>k = <b>{res.k_factor.toFixed(2)}</b> | β = <b>{res.beta_factor.toFixed(2)}</b></div>
-              <div>σcd = <b>{res.sigma_cd.toFixed(1)}</b> MPa</div>
-              <div>VEd,Max = <b>{res.v_ed_max.toFixed(1)}</b> kN</div>
-              <div>u₁ = <b>{res.perimeter_u1.toFixed(0)}</b> mm | Ac = <b>{res.area_concrete.toFixed(0)}</b> mm²</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Enveloppe de cisaillement</h2>
-          <svg viewBox="0 0 400 150" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Enveloppe de cisaillement" vbW={400} vbH={150}>
             {res && (() => {
               const ox = 40, oy = 20, w = 340, h = 110;
               const maxV = Math.max(...res.v_envelope, res.v_rdc, 1);
@@ -118,11 +117,38 @@ export default function Module140() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>VRd,c = <b>{res.v_rdc.toFixed(1)}</b> kN | VRd,max = <b>{res.v_rdc_max.toFixed(1)}</b> kN</div>
+              <div>k = <b>{res.k_factor.toFixed(2)}</b> | β = <b>{res.beta_factor.toFixed(2)}</b></div>
+              <div>σcd = <b>{res.sigma_cd.toFixed(1)}</b> MPa</div>
+              <div>VEd,Max = <b>{res.v_ed_max.toFixed(1)}</b> kN</div>
+              <div>u₁ = <b>{res.perimeter_u1.toFixed(0)}</b> mm | Ac = <b>{res.area_concrete.toFixed(0)}</b> mm²</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Cisaillement circ. (EC2 §6.2)"
+                latex={String.raw`V_{Rd,c} = C_{Rd,c} k (100\rho_l f_{ck})^{1/3} b_w d`}
+                description="Section circulaire équivalente"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`V_{Ed}`, meaning: 'Effort tranchant', value: res.v_ed_max.toFixed(1) },
+                    { symbol: String.raw`V_{Rd,c}`, meaning: 'Résistance béton', value: res.v_rdc.toFixed(1) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -148,7 +174,12 @@ export default function Module140() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

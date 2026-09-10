@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { SemellePortanteInputs, SemellePortanteOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: SemellePortanteInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -10,73 +15,68 @@ const DEFAULT: SemellePortanteInputs = {
   gamma_g: 1.35, gamma_q: 1.5, g_k: 200, q_k: 100,
 };
 
+
 export default function Module142() {
   const [inp, setInp] = useState<SemellePortanteInputs>(DEFAULT);
-  const [res, setRes] = useState<SemellePortanteOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<SemellePortanteInputs, SemellePortanteOutput>(
+    'calculate_semelle_portante_142', inp,
+  );
   const S = (k: keyof SemellePortanteInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<SemellePortanteOutput>('calculate_semelle_portante_142', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : res.ratio_sigma <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof SemellePortanteInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">142 Semelle Portante <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Force portante semelle — EC2/EC7</p>
+    <Workstation
+      title="142 Semelle Portante"
+      subtitle="Force portante semelle — EC2/EC7"
+      eurocode="EC7"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="b" unit="m" value={inp.b} onChange={S('b')} min={0.5} max={5} step={0.1} />
-          <NumField label="l" unit="m" value={inp.l} onChange={S('l')} min={0.5} max={5} step={0.1} />
-          <NumField label="d" unit="m" value={inp.d} onChange={S('d')} min={0.1} max={2} step={0.05} />
-          <NumField label="h" unit="m" value={inp.h} onChange={S('h')} min={0.1} max={2} step={0.05} />
+          {slider('b', 'b', 'm', 0.5, 5, 0.1)}
+          {slider('l', 'l', 'm', 0.5, 5, 0.1)}
+          {slider('d', 'd', 'm', 0.1, 2, 0.05)}
+          {slider('h', 'h', 'm', 0.1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Charges</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="NEd" unit="kN" value={inp.n_ed} onChange={S('n_ed')} min={0} max={10000} step={50} />
-          <NumField label="MEd" unit="kN·m" value={inp.m_ed} onChange={S('m_ed')} min={0} max={5000} step={10} />
-          <NumField label="VEd" unit="kN" value={inp.v_ed} onChange={S('v_ed')} min={0} max={5000} step={10} />
-          <NumField label="γG" unit="-" value={inp.gamma_g} onChange={S('gamma_g')} min={1} max={2} step={0.05} />
-          <NumField label="γQ" unit="-" value={inp.gamma_q} onChange={S('gamma_q')} min={1} max={2} step={0.05} />
-          <NumField label="Gk" unit="kN" value={inp.g_k} onChange={S('g_k')} min={0} max={10000} step={50} />
-          <NumField label="Qk" unit="kN" value={inp.q_k} onChange={S('q_k')} min={0} max={10000} step={50} />
+          {slider('n_ed', 'NEd', 'kN', 0, 10000, 50)}
+          {slider('m_ed', 'MEd', 'kN·m', 0, 5000, 10)}
+          {slider('v_ed', 'VEd', 'kN', 0, 5000, 10)}
+          {slider('gamma_g', 'γG', '-', 1, 2, 0.05)}
+          {slider('gamma_q', 'γQ', '-', 1, 2, 0.05)}
+          {slider('g_k', 'Gk', 'kN', 0, 10000, 50)}
+          {slider('q_k', 'Qk', 'kN', 0, 10000, 50)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>NEd,d = <b>{res.n_ed_design.toFixed(1)}</b> kN | MEd,d = <b>{res.m_ed_design.toFixed(1)}</b> kN·m</div>
-              <div>fcd = <b>{res.fcd.toFixed(2)}</b> MPa | fyd = <b>{res.fyd.toFixed(1)}</b> MPa</div>
-              <div>σed = <b>{res.sigma_ed.toFixed(3)}</b> MPa | e/l = <b>{res.e_ratio.toFixed(2)}</b></div>
-              <div>MRd = <b>{res.mr_d.toFixed(1)}</b> kN·m | VRd = <b>{res.vr_d.toFixed(1)}</b> kN</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Schéma — Semelle</h2>
-          <svg viewBox="0 0 500 200" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Schéma — Semelle" vbW={500} vbH={200}>
             {res && (() => {
               const ox = 80, oy = 20, w = 340, h = 160;
               const bPx = Math.min(w * 0.8, inp.b * 100);
@@ -116,11 +116,37 @@ export default function Module142() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>NEd,d = <b>{res.n_ed_design.toFixed(1)}</b> kN | MEd,d = <b>{res.m_ed_design.toFixed(1)}</b> kN·m</div>
+              <div>fcd = <b>{res.fcd.toFixed(2)}</b> MPa | fyd = <b>{res.fyd.toFixed(1)}</b> MPa</div>
+              <div>σed = <b>{res.sigma_ed.toFixed(3)}</b> MPa | e/l = <b>{res.e_ratio.toFixed(2)}</b></div>
+              <div>MRd = <b>{res.mr_d.toFixed(1)}</b> kN·m | VRd = <b>{res.vr_d.toFixed(1)}</b> kN</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Fondation superficielle (EC7)"
+                latex={String.raw`q_{Ed} = \frac{N}{A} \pm \frac{M}{W} \le q_{Rd}`}
+                description="Contrainte de référence au sol"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`q_{Ed}`, meaning: 'Contrainte appliquée', value: res.n_ed_design.toFixed(1) },
+                    { symbol: String.raw`q_{Rd}`, meaning: 'Capacité portante', value: res.m_ed_design.toFixed(1) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -148,7 +174,12 @@ export default function Module142() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

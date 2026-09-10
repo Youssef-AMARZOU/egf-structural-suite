@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { SemelAncrageInputs, SemelAncrageOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: SemelAncrageInputs = {
   a: 400, b: 400, d: 350,
@@ -10,45 +15,51 @@ const DEFAULT: SemelAncrageInputs = {
   exposure: 1, welded: 0, hook_angle: 0,
 };
 
+
 export default function Module112() {
   const [inp, setInp] = useState<SemelAncrageInputs>(DEFAULT);
-  const [res, setRes] = useState<SemelAncrageOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<SemelAncrageInputs, SemelAncrageOutput>(
+    'calculate_semel_ancrage_112', inp,
+  );
   const S = (k: keyof SemelAncrageInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<SemelAncrageOutput>('calculate_semel_ancrage_112', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof SemelAncrageInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <div>
-          <h2 className="text-sm font-bold">112 Semelle Ancrage <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-          <p className="text-[11px] text-slate-500">Longueur d'ancrage — EC2</p>
-        </div>
+    <Workstation
+      title="112 Semelle Ancrage"
+      subtitle="Longueur d'ancrage — EC2"
+      eurocode="EC2 §8.4"
+      status={status}
+      live={live}
+      params={
+        <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="a" unit="mm" value={inp.a} onChange={S('a')} min={100} max={2000} step={50} />
-          <NumField label="b" unit="mm" value={inp.b} onChange={S('b')} min={100} max={2000} step={50} />
-          <NumField label="d" unit="mm" value={inp.d} onChange={S('d')} min={100} max={2000} step={10} />
+          {slider('a', 'a', 'mm', 100, 2000, 50)}
+          {slider('b', 'b', 'mm', 100, 2000, 50)}
+          {slider('d', 'd', 'mm', 100, 2000, 10)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1.0} max={2.0} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1.0} max={1.5} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1.0, 2.0, 0.05)}
+          {slider('gs', 'γs', '-', 1.0, 1.5, 0.05)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Armatures</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="φ" unit="mm" value={inp.phi} onChange={S('phi')} min={6} max={40} step={2} />
-          <NumField label="φt" unit="mm" value={inp.phi_t} onChange={S('phi_t')} min={4} max={16} step={1} />
-          <NumField label="cnom" unit="mm" value={inp.c_nom} onChange={S('c_nom')} min={10} max={100} step={5} />
+          {slider('phi', 'φ', 'mm', 6, 40, 2)}
+          {slider('phi_t', 'φt', 'mm', 4, 16, 1)}
+          {slider('c_nom', 'cnom', 'mm', 10, 100, 5)}
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div>
@@ -58,29 +69,16 @@ export default function Module112() {
               <option value={0}>Non</option><option value={1}>Oui</option>
             </select>
           </div>
-          <NumField label="θ" unit="°" value={inp.hook_angle} onChange={S('hook_angle')} min={0} max={180} step={15} />
-          <NumField label="Expo" unit="-" value={inp.exposure} onChange={S('exposure')} min={0} max={6} step={1} />
+          {slider('hook_angle', 'θ', '°', 0, 180, 15)}
+          {slider('exposure', 'Expo', '-', 0, 6, 1)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats ancrage</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>fbd = <b>{res.fbd.toFixed(2)}</b> MPa</div>
-              <div>Lb,d0 = <b>{res.lb_d0.toFixed(0)}</b> mm</div>
-              <div>α₁={res.alpha1} α₂={res.alpha2.toFixed(2)} α₃={res.alpha3} α₄={res.alpha4}</div>
-              <div>α comb = <b>{res.alpha_comb.toFixed(3)}</b></div>
-              <div>Lb,d = <b>{res.lb_d.toFixed(0)}</b> mm</div>
-              <div>Lbar = <b>{res.bar_length.toFixed(0)}</b> mm</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Plan ancrage (live SVG)</h2>
-          <svg viewBox="0 0 300 250" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Plan ancrage (live SVG)" vbW={300} vbH={250}>
             {(() => {
               const sc = 0.3; const ox = 150, oy = 125;
               const a = inp.a * sc, b = inp.b * sc;
@@ -105,10 +103,38 @@ export default function Module112() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats ancrage</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>fbd = <b>{res.fbd.toFixed(2)}</b> MPa</div>
+              <div>Lb,d0 = <b>{res.lb_d0.toFixed(0)}</b> mm</div>
+              <div>α₁={res.alpha1} α₂={res.alpha2.toFixed(2)} α₃={res.alpha3} α₄={res.alpha4}</div>
+              <div>α comb = <b>{res.alpha_comb.toFixed(3)}</b></div>
+              <div>Lb,d = <b>{res.lb_d.toFixed(0)}</b> mm</div>
+              <div>Lbar = <b>{res.bar_length.toFixed(0)}</b> mm</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
+              <FormulaCard
+                title="Ancrage droit (EC2 §8.4)"
+                latex={String.raw`l_{bd} = \alpha_1 \alpha_2 \alpha_3 \alpha_4 \alpha_5 \, l_{b,rqd} \ge l_{b,min}`}
+                description="Longueur d'ancrage de calcul"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`l_{b,rqd}`, meaning: 'Ancrage de référence', value: res.fbd.toFixed(2) },
+                    { symbol: String.raw`l_{b,min}`, meaning: 'Minimum réglementaire', value: res.lb_d0.toFixed(0) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <ul className="text-xs space-y-2">
@@ -121,7 +147,12 @@ export default function Module112() {
             <li className="text-slate-500">• fyd = {res.fyd.toFixed(0)} MPa</li>
           </ul>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

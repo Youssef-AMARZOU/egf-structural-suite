@@ -1,6 +1,8 @@
 node_modules/
 dist/
+test-ota-server/
 src-tauri/target/
+src-tauri/updater.key
 *.log
 .DS_Store
 Thumbs.db

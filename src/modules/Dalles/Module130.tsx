@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { PlancherDallePoinconnementInputs, PlancherDallePoinconnementOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: PlancherDallePoinconnementInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -24,42 +29,50 @@ const CASES = [
   { val: 9, label: 'Angle NE' },
 ];
 
+
 export default function Module130() {
   const [inp, setInp] = useState<PlancherDallePoinconnementInputs>(DEFAULT);
-  const [res, setRes] = useState<PlancherDallePoinconnementOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<PlancherDallePoinconnementInputs, PlancherDallePoinconnementOutput>(
+    'calculate_plancher_dalle_poinconnement_130', inp,
+  );
   const S = (k: keyof PlancherDallePoinconnementInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<PlancherDallePoinconnementOutput>('calculate_plancher_dalle_poinconnement_130', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
 
   const caseLabel = CASES.find((c) => c.val === inp.cas)?.label || '?';
 
+  const status = !res ? 'computing' : res.ratio_v <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof PlancherDallePoinconnementInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">130 Plancher Dalle Poinç. <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Poinçonnement dalle — EC2 §6.4, périmètres + β + armatures</p>
+    <Workstation
+      title="130 Plancher Dalle Poinç."
+      subtitle="Poinçonnement dalle — EC2 §6.4, périmètres + β + armatures"
+      eurocode="EC2 §6.4"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Poteau</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="c1" unit="mm" value={inp.c1} onChange={S('c1')} min={100} max={1000} step={10} />
-          <NumField label="c2" unit="mm" value={inp.c2} onChange={S('c2')} min={100} max={1000} step={10} />
-          <NumField label="c3" unit="mm" value={inp.c3} onChange={S('c3')} min={500} max={5000} step={50} />
-          <NumField label="c4" unit="mm" value={inp.c4} onChange={S('c4')} min={500} max={5000} step={50} />
+          {slider('c1', 'c1', 'mm', 100, 1000, 10)}
+          {slider('c2', 'c2', 'mm', 100, 1000, 10)}
+          {slider('c3', 'c3', 'mm', 500, 5000, 50)}
+          {slider('c4', 'c4', 'mm', 500, 5000, 50)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Type</div>
         <div className="grid grid-cols-3 gap-1">
@@ -80,50 +93,32 @@ export default function Module130() {
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Dalle</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="h" unit="mm" value={inp.h} onChange={S('h')} min={100} max={500} step={5} />
-          <NumField label="d" unit="mm" value={inp.d} onChange={S('d')} min={80} max={400} step={5} />
-          <NumField label="ρ" unit="%" value={inp.rho * 100} onChange={(v) => S('rho')(v / 100)} min={0.1} max={5} step={0.1} />
+          {slider('h', 'h', 'mm', 100, 500, 5)}
+          {slider('d', 'd', 'mm', 80, 400, 5)}
+          <ParamSlider label="ρ" unit="%" value={inp.rho * 100} min={0.1} max={5} step={0.1} onChange={(v) => S('rho')(v / 100)} />
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitations</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="VEd" unit="kN" value={inp.v_ed} onChange={S('v_ed')} min={0} max={5000} step={10} />
-          <NumField label="MEd,x" unit="kN·m" value={inp.m_ed_x} onChange={S('m_ed_x')} min={0} max={500} step={5} />
-          <NumField label="MEd,y" unit="kN·m" value={inp.m_ed_y} onChange={S('m_ed_y')} min={0} max={500} step={5} />
+          {slider('v_ed', 'VEd', 'kN', 0, 5000, 10)}
+          {slider('m_ed_x', 'MEd,x', 'kN·m', 0, 500, 5)}
+          {slider('m_ed_y', 'MEd,y', 'kN·m', 0, 500, 5)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Armatures poinç.</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="Asw" unit="cm²/m" value={inp.asw} onChange={S('asw')} min={0} max={5} step={0.05} />
-          <NumField label="s,max" unit="mm" value={inp.s_max} onChange={S('s_max')} min={50} max={400} step={10} />
-          <NumField label="φ lien" unit="mm" value={inp.phi_link} onChange={S('phi_link')} min={6} max={16} step={1} />
+          {slider('asw', 'Asw', 'cm²/m', 0, 5, 0.05)}
+          {slider('s_max', 's,max', 'mm', 50, 400, 10)}
+          {slider('phi_link', 'φ lien', 'mm', 6, 16, 1)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats — {caseLabel}</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>u0 = <b>{res.u0.toFixed(0)}</b> mm</div>
-              <div>u1 = <b>{res.u1.toFixed(0)}</b> mm | β = <b>{res.beta.toFixed(3)}</b></div>
-              <div>u_out = <b>{res.u_out.toFixed(0)}</b> mm</div>
-              <hr className="border-slate-200 dark:border-white/10 my-2" />
-              <div>vRd,c*β = <b>{res.v_rdc.toFixed(1)}</b> kN</div>
-              <div>vRd,c,max = <b>{res.v_rdc_max.toFixed(1)}</b> MPa</div>
-              {inp.asw > 0 && <div>vRd,s = <b>{res.v_rds.toFixed(1)}</b> kN</div>}
-              <div>Asw,req = <b>{res.asw_req.toFixed(2)}</b> cm²/m</div>
-              <div>Nb anneaux = <b>{res.n_rings}</b> | Nb rayons = <b>{res.n_rays}</b></div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Plan — Périmètres de contrôle</h2>
-          <svg viewBox="0 0 350 300" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Plan — Périmètres de contrôle" vbW={350} vbH={300}>
             {res && (() => {
               const ox = 175, oy = 140;
               const sc = 0.15;
@@ -183,14 +178,13 @@ export default function Module130() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Anneaux de renfort</h2>
           {res && res.asw_per_ring.length > 0 && (
             <div className="h-28">
-              <svg viewBox="0 0 350 80" className="w-full">
+              <SectionCanvas title="Anneaux de renfort" vbW={350} vbH={80}>
                 {(() => {
                   const maxA = Math.max(...res.asw_per_ring, 0.01);
                   const barH = 50;
@@ -207,13 +201,45 @@ export default function Module130() {
                     );
                   });
                 })()}
-              </svg>
+              </SectionCanvas>
             </div>
           )}
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats — {caseLabel}</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>u0 = <b>{res.u0.toFixed(0)}</b> mm</div>
+              <div>u1 = <b>{res.u1.toFixed(0)}</b> mm | β = <b>{res.beta.toFixed(3)}</b></div>
+              <div>u_out = <b>{res.u_out.toFixed(0)}</b> mm</div>
+              <hr className="border-slate-200 dark:border-white/10 my-2" />
+              <div>vRd,c*β = <b>{res.v_rdc.toFixed(1)}</b> kN</div>
+              <div>vRd,c,max = <b>{res.v_rdc_max.toFixed(1)}</b> MPa</div>
+              {inp.asw > 0 && <div>vRd,s = <b>{res.v_rds.toFixed(1)}</b> kN</div>}
+              <div>Asw,req = <b>{res.asw_req.toFixed(2)}</b> cm²/m</div>
+              <div>Nb anneaux = <b>{res.n_rings}</b> | Nb rayons = <b>{res.n_rays}</b></div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+
+              <FormulaCard
+                title="Poinçonnement plancher-dalle"
+                latex={String.raw`v_{Ed} = \frac{\beta V_{Ed}}{u_1 d} \le v_{Rd,cs}`}
+                description="Avec armatures de poinçonnement"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`V_{Ed}`, meaning: 'Réaction d’appui', value: inp.v_ed },
+                    { symbol: String.raw`u_1`, meaning: 'Périmètre à 2d', value: res.u1.toFixed(0) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -237,7 +263,12 @@ export default function Module130() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { EffTrReprBetonInputs, EffTrReprBetonOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: EffTrReprBetonInputs = {
   fck: 30, gc: 1.5, b: 300, bw: 200, h: 600, hf: 120,
@@ -11,70 +16,64 @@ const DEFAULT: EffTrReprBetonInputs = {
   zone_asw_req: [0.8, 0.4, 0.6],
 };
 
+
 export default function Module128() {
   const [inp, setInp] = useState<EffTrReprBetonInputs>(DEFAULT);
-  const [res, setRes] = useState<EffTrReprBetonOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<EffTrReprBetonInputs, EffTrReprBetonOutput>(
+    'calculate_eff_tr_repr_beton_128', inp,
+  );
   const S = (k: keyof EffTrReprBetonInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<EffTrReprBetonOutput>('calculate_eff_tr_repr_beton_128', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof EffTrReprBetonInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">128 Eff. Tranchants <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Cadres shear — k, β, espacement étriers</p>
+    <Workstation
+      title="128 Eff. Tranchants"
+      subtitle="Cadres shear — k, β, espacement étriers"
+      eurocode="EC2 §6.2"
+      status={status}
+      live={live}
+      params={
+        <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Section</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="b" unit="mm" value={inp.b} onChange={S('b')} min={100} max={2000} step={10} />
-          <NumField label="bw" unit="mm" value={inp.bw} onChange={S('bw')} min={100} max={1000} step={10} />
-          <NumField label="h" unit="mm" value={inp.h} onChange={S('h')} min={100} max={2000} step={10} />
-          <NumField label="hf" unit="mm" value={inp.hf} onChange={S('hf')} min={0} max={500} step={10} />
-          <NumField label="d" unit="mm" value={inp.d} onChange={S('d')} min={50} max={2000} step={5} />
-          <NumField label="dp" unit="mm" value={inp.dp} onChange={S('dp')} min={20} max={200} step={5} />
+          {slider('b', 'b', 'mm', 100, 2000, 10)}
+          {slider('bw', 'bw', 'mm', 100, 1000, 10)}
+          {slider('h', 'h', 'mm', 100, 2000, 10)}
+          {slider('hf', 'hf', 'mm', 0, 500, 10)}
+          {slider('d', 'd', 'mm', 50, 2000, 5)}
+          {slider('dp', 'dp', 'mm', 20, 200, 5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitations</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="MEd" unit="kN·m" value={inp.m_ed} onChange={S('m_ed')} min={-500} max={2000} step={5} />
-          <NumField label="VEd" unit="kN" value={inp.v_ed} onChange={S('v_ed')} min={0} max={1000} step={5} />
+          {slider('m_ed', 'MEd', 'kN·m', -500, 2000, 5)}
+          {slider('v_ed', 'VEd', 'kN', 0, 1000, 5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Étriers</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="Asw" unit="cm²" value={inp.asw} onChange={S('asw')} min={0.1} max={5} step={0.1} />
-          <NumField label="As,min" unit="cm²/m" value={inp.as_min} onChange={S('as_min')} min={0.1} max={2} step={0.05} />
+          {slider('asw', 'Asw', 'cm²', 0.1, 5, 0.1)}
+          {slider('as_min', 'As,min', 'cm²/m', 0.1, 2, 0.05)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>ξ = <b>{res.ksi.toFixed(3)}</b> | x = <b>{res.x_neutral.toFixed(1)}</b> mm</div>
-              <div>k = <b>{res.k_factor.toFixed(3)}</b> | β = <b>{res.beta.toFixed(3)}</b></div>
-              <div>μ = <b>{res.mu.toFixed(4)}</b></div>
-              <hr className="border-slate-200 dark:border-white/10 my-2" />
-              <div>VRd,max = <b>{res.v_rd_max.toFixed(1)}</b> kN</div>
-              <div>s,max = <b>{res.s_max.toFixed(0)}</b> mm</div>
-              <div>Longueur totale = <b>{res.total_length.toFixed(0)}</b> mm</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Coupe (SVG)</h2>
-          <svg viewBox="0 0 300 200" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Coupe (SVG)" vbW={300} vbH={200}>
             {(() => {
               const ox = 100, oy = 20;
               const sc = 0.25;
@@ -99,13 +98,13 @@ export default function Module128() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Étriers (barres)</h2>
           {res && res.n_stirrups.length > 0 && (
             <div className="h-32">
-              <svg viewBox="0 0 300 80" className="w-full">
+              <SectionCanvas title="Étriers (barres)" vbW={300} vbH={80}>
                 {(() => {
                   const maxN = Math.max(...res.n_stirrups, 1);
                   const barH = 50;
@@ -124,12 +123,41 @@ export default function Module128() {
                     );
                   });
                 })()}
-              </svg>
+              </SectionCanvas>
             </div>
           )}
         </div>
-      </div>
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>ξ = <b>{res.ksi.toFixed(3)}</b> | x = <b>{res.x_neutral.toFixed(1)}</b> mm</div>
+              <div>k = <b>{res.k_factor.toFixed(3)}</b> | β = <b>{res.beta.toFixed(3)}</b></div>
+              <div>μ = <b>{res.mu.toFixed(4)}</b></div>
+              <hr className="border-slate-200 dark:border-white/10 my-2" />
+              <div>VRd,max = <b>{res.v_rd_max.toFixed(1)}</b> kN</div>
+              <div>s,max = <b>{res.s_max.toFixed(0)}</b> mm</div>
+              <div>Longueur totale = <b>{res.total_length.toFixed(0)}</b> mm</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
+              <FormulaCard
+                title="Cisaillement (EC2 §6.2)"
+                latex={String.raw`V_{Rd,s} = \frac{A_{sw}}{s} z f_{ywd} \cot\theta`}
+                description="Treillis à bielle variable"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`A_{sw}/s`, meaning: 'Cours transversal', value: inp.asw },
+                    { symbol: String.raw`\theta`, meaning: 'Angle des bielles', value: res.ksi.toFixed(3) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <ul className="text-xs space-y-2">
@@ -144,7 +172,12 @@ export default function Module128() {
             <li className="text-slate-500">• s,max = {res.s_max.toFixed(0)}mm</li>
           </ul>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

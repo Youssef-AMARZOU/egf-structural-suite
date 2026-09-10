@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { AncrageTsInputs, AncrageTsOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: AncrageTsInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -10,46 +15,54 @@ const DEFAULT: AncrageTsInputs = {
   n_transverse: 4, alpha_ct: 1.0,
 };
 
+
 export default function Module136() {
   const [inp, setInp] = useState<AncrageTsInputs>(DEFAULT);
-  const [res, setRes] = useState<AncrageTsOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<AncrageTsInputs, AncrageTsOutput>(
+    'calculate_ancrage_ts_136', inp,
+  );
   const S = (k: keyof AncrageTsInputs) => (v: number | string) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<AncrageTsOutput>('calculate_ancrage_ts_136', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : res.ratio <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof AncrageTsInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">136 Ancrage TS <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Ancrage & recouvrement treillis soudés — EC2 §8.4.3</p>
+    <Workstation
+      title="136 Ancrage TS"
+      subtitle="Ancrage & recouvrement treillis soudés — EC2 §8.4.3"
+      eurocode="EC2 §8.4.3"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
-          <NumField label="αct" unit="-" value={inp.alpha_ct} onChange={S('alpha_ct')} min={0.5} max={1.5} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
+          {slider('alpha_ct', 'αct', '-', 0.5, 1.5, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Treillis</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="φ" unit="mm" value={inp.phi} onChange={S('phi')} min={4} max={16} step={1} />
-          <NumField label="pas s" unit="mm" value={inp.pitch} onChange={S('pitch')} min={50} max={400} step={10} />
-          <NumField label="φt transv." unit="mm" value={inp.phi_transverse} onChange={S('phi_transverse')} min={4} max={12} step={1} />
-          <NumField label="Nb bras trans." unit="-" value={inp.n_transverse} onChange={S('n_transverse')} min={0} max={10} step={1} />
+          {slider('phi', 'φ', 'mm', 4, 16, 1)}
+          {slider('pitch', 'pas s', 'mm', 50, 400, 10)}
+          {slider('phi_transverse', 'φt transv.', 'mm', 4, 12, 1)}
+          {slider('n_transverse', 'Nb bras trans.', '-', 0, 10, 1)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitation</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="σsd" unit="MPa" value={inp.sigma_sd} onChange={S('sigma_sd')} min={0} max={600} step={5} />
+          {slider('sigma_sd', 'σsd', 'MPa', 0, 600, 5)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Conditions</div>
@@ -65,30 +78,12 @@ export default function Module136() {
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>fctd = <b>{res.fctd.toFixed(2)}</b> MPa | fbd = <b>{res.fbd.toFixed(2)}</b> MPa</div>
-              <div>lb,rqd = <b>{res.lb_rqd.toFixed(1)}</b> mm</div>
-              <div>α1={res.alpha_1.toFixed(2)} α2={res.alpha_2.toFixed(2)} α3={res.alpha_3.toFixed(2)} α4={res.alpha_4.toFixed(2)} α5={res.alpha_5.toFixed(2)}</div>
-              <div>lbd = <b>{res.lbd.toFixed(1)}</b> mm</div>
-              <div>l0 = α6 × lbd = <b>{res.l0.toFixed(1)}</b> mm</div>
-              <div>l0,min = max(0.3α6·lb,rqd, 15φ, 200) = <b>{res.l0_min.toFixed(1)}</b> mm</div>
-              <hr className="border-slate-200 dark:border-white/10 my-1" />
-              <div className="text-sm">l0,final = <b className="text-emerald-500">{res.l0_final.toFixed(0)} mm</b></div>
-              <div>Bras transversaux requis: <b>{res.n_welded_min}</b></div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Schéma — Treillis soudés</h2>
-          <svg viewBox="0 0 500 220" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Schéma — Treillis soudés" vbW={500} vbH={220}>
             {res && (() => {
               const ox = 40, oy = 30, w = 420, h = 160;
               const scale = w / (res.l0_final * 1.8);
@@ -157,11 +152,42 @@ export default function Module136() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>fctd = <b>{res.fctd.toFixed(2)}</b> MPa | fbd = <b>{res.fbd.toFixed(2)}</b> MPa</div>
+              <div>lb,rqd = <b>{res.lb_rqd.toFixed(1)}</b> mm</div>
+              <div>α1={res.alpha_1.toFixed(2)} α2={res.alpha_2.toFixed(2)} α3={res.alpha_3.toFixed(2)} α4={res.alpha_4.toFixed(2)} α5={res.alpha_5.toFixed(2)}</div>
+              <div>lbd = <b>{res.lbd.toFixed(1)}</b> mm</div>
+              <div>l0 = α6 × lbd = <b>{res.l0.toFixed(1)}</b> mm</div>
+              <div>l0,min = max(0.3α6·lb,rqd, 15φ, 200) = <b>{res.l0_min.toFixed(1)}</b> mm</div>
+              <hr className="border-slate-200 dark:border-white/10 my-1" />
+              <div className="text-sm">l0,final = <b className="text-emerald-500">{res.l0_final.toFixed(0)} mm</b></div>
+              <div>Bras transversaux requis: <b>{res.n_welded_min}</b></div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Ancrage treillis soudé"
+                latex={String.raw`l_{bd} = \alpha \, l_{b,rqd} \ge l_{b,min}`}
+                description="EC2 §8.4.3, fils soudés"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`l_{b,rqd}`, meaning: 'Ancrage de référence', value: res.lb_rqd.toFixed(1) },
+                    { symbol: String.raw`\alpha`, meaning: 'Coefficients', value: res.alpha_1.toFixed(2) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -188,7 +214,12 @@ export default function Module136() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

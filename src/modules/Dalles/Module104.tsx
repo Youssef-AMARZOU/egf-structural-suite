@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer, Cell,
 } from 'recharts';
 import type { Punching104Inputs, Punching104Output } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEF: Punching104Inputs = {
   fck: 25, fyk: 500, gc: 1.5,
@@ -13,21 +18,16 @@ const DEF: Punching104Inputs = {
   asx: 7, asy: 7, ved: 0.9641, beta: 1.15, sigcp: 0,
 };
 
+
 export default function Module104() {
   const [inp, setInp] = useState<Punching104Inputs>(DEF);
-  const [res, setRes] = useState<Punching104Output | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<Punching104Inputs, Punching104Output>(
+    'calculate_punching_104', inp,
+  );
 
   const S = (k: keyof Punching104Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<Punching104Output>('calculate_punching_104', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
 
   const bars = res
     ? [
@@ -36,54 +36,58 @@ export default function Module104() {
       ]
     : [];
 
+  const status = !res ? 'computing' : res.ratio0 <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof Punching104Inputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
   return (
-    <div className="grid grid-cols-12 gap-4">
-      {/* ─── Input Panel ─── */}
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3">
-        <div>
-          <h2 className="text-sm font-bold">
-            104 Poinçonnement{' '}
-            <span className="font-mono text-[11px] text-emerald-500">RUST</span>
-          </h2>
-          <p className="text-[11px] text-slate-500">
-            D'après EGF N°104 © Henry Thonier — EC2 §6.4
-          </p>
+    <Workstation
+      title="104 Poinçonnement"
+      subtitle="D'après EGF N°104 © Henry Thonier — EC2 §6.4"
+      eurocode="EC2 §6.4"
+      status={status}
+      live={live}
+      params={
+        <>
+
+        <div className="grid grid-cols-2 gap-2">
+          {slider('c1', 'c1 (≥c2)', 'm', 0.1, 3, 0.05)}
+          {slider('c2', 'c2', 'm', 0.1, 3, 0.05)}
+          {slider('h', 'h', 'm', 0.1, 1, 0.01)}
+          {slider('d', 'd', 'm', 0.05, 1, 0.01)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="c1 (≥c2)" unit="m" value={inp.c1} onChange={S('c1')} min={0.1} max={3} />
-          <NumField label="c2" unit="m" value={inp.c2} onChange={S('c2')} min={0.1} max={3} />
-          <NumField label="h" unit="m" value={inp.h} onChange={S('h')} min={0.1} max={1} />
-          <NumField label="d" unit="m" value={inp.d} onChange={S('d')} min={0.05} max={1} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
+          {slider('asx', 'Asx total', 'cm²', 0, 200, 0.5)}
+          {slider('asy', 'Asy total', 'cm²', 0, 200, 0.5)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="Asx total" unit="cm²" value={inp.asx} onChange={S('asx')} min={0} max={200} step={0.5} />
-          <NumField label="Asy total" unit="cm²" value={inp.asy} onChange={S('asy')} min={0} max={200} step={0.5} />
+          {slider('ved', 'VEd', 'MN', 0, 10, 0.01)}
+          {slider('beta', 'β', '–', 1, 1.6, 0.01)}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <NumField label="VEd" unit="MN" value={inp.ved} onChange={S('ved')} min={0} max={10} step={0.01} />
-          <NumField label="β" unit="–" value={inp.beta} onChange={S('beta')} min={1} max={1.6} step={0.01} />
-        </div>
-
-        <NumField label="σcp" unit="MPa" value={inp.sigcp} onChange={S('sigcp')} min={0} max={5} step={0.1} />
+        {slider('sigcp', 'σcp', 'MPa', 0, 5, 0.1)}
 
         {err && (
           <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">
             {err}
           </p>
         )}
-      </div>
-
-      {/* ─── Charts + Results ─── */}
-      <div className="col-span-5 space-y-4">
-        {/* Bar chart */}
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Ratios (seuil 1.0)</h2>
           <div className="h-[220px]">
@@ -129,11 +133,8 @@ export default function Module104() {
             </div>
           )}
         </div>
-
-        {/* Plan SVG */}
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Plan (live SVG)</h2>
-          <svg viewBox="0 0 280 220" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Plan (live SVG)" vbW={280} vbH={220}>
             {(() => {
               const s = 90;
               const cx = 140;
@@ -161,12 +162,25 @@ export default function Module104() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
 
-      {/* ─── AI Diagnostics ─── */}
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Poinçonnement rectangulaire (EC2 §6.4)"
+                latex={String.raw`v_{Ed} = \frac{\beta V_{Ed}}{u_1 d} \le v_{Rd,c}`}
+                description="Vérification au périmètre u1"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`V_{Ed}`, meaning: 'Effort de poinçonnement', value: res.asw_req.toFixed(1) },
+                    { symbol: String.raw`u_1`, meaning: 'Périmètre à 2d', value: res.uout.toFixed(2) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {!res ? (
           <p className="text-xs text-slate-500">computing…</p>
@@ -192,7 +206,12 @@ export default function Module104() {
             </li>
           </ul>
         )}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

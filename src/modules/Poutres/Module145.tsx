@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { ReservoirCirculaireInputs, ReservoirCirculaireOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: ReservoirCirculaireInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -14,74 +19,68 @@ const DEFAULT: ReservoirCirculaireInputs = {
   ecap: 0.8, qf: 0.3, qv: 0.3,
 };
 
+
 export default function Module145() {
   const [inp, setInp] = useState<ReservoirCirculaireInputs>(DEFAULT);
-  const [res, setRes] = useState<ReservoirCirculaireOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<ReservoirCirculaireInputs, ReservoirCirculaireOutput>(
+    'calculate_reservoir_circulaire_145', inp,
+  );
   const S = (k: keyof ReservoirCirculaireInputs) => (v: number | string) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<ReservoirCirculaireOutput>('calculate_reservoir_circulaire_145', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof ReservoirCirculaireInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">145 Réservoir Circulaire <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Réservoirs circulaires béton armé — EC2</p>
+    <Workstation
+      title="145 Réservoir Circulaire"
+      subtitle="Réservoirs circulaires béton armé — EC2"
+      eurocode="EC2"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="φ" unit="mm" value={inp.phi} onChange={S('phi')} min={1000} max={50000} step={500} />
-          <NumField label="h" unit="mm" value={inp.h} onChange={S('h')} min={100} max={1000} step={10} />
-          <NumField label="e" unit="mm" value={inp.e} onChange={S('e')} min={50} max={500} step={10} />
-          <NumField label="L" unit="mm" value={inp.l} onChange={S('l')} min={500} max={20000} step={100} />
-          <NumField label="h_eau" unit="mm" value={inp.h_eau} onChange={S('h_eau')} min={0} max={20000} step={100} />
-          <NumField label="hw" unit="mm" value={inp.hw} onChange={S('hw')} min={0} max={20000} step={100} />
+          {slider('phi', 'φ', 'mm', 1000, 50000, 500)}
+          {slider('h', 'h', 'mm', 100, 1000, 10)}
+          {slider('e', 'e', 'mm', 50, 500, 10)}
+          {slider('l', 'L', 'mm', 500, 20000, 100)}
+          {slider('h_eau', 'h_eau', 'mm', 0, 20000, 100)}
+          {slider('hw', 'hw', 'mm', 0, 20000, 100)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Armatures</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="Nb liserés" unit="-" value={inp.nli} onChange={S('nli')} min={1} max={20} step={1} />
-          <NumField label="φ armature" unit="mm" value={inp.phi_s} onChange={S('phi_s')} min={6} max={40} step={1} />
-          <NumField label="s" unit="mm" value={inp.s} onChange={S('s')} min={50} max={500} step={10} />
-          <NumField label="c" unit="mm" value={inp.c} onChange={S('c')} min={10} max={100} step={5} />
-          <NumField label="a0" unit="mm" value={inp.a0} onChange={S('a0')} min={10} max={100} step={5} />
+          {slider('nli', 'Nb liserés', '-', 1, 20, 1)}
+          {slider('phi_s', 'φ armature', 'mm', 6, 40, 1)}
+          {slider('s', 's', 'mm', 50, 500, 10)}
+          {slider('c', 'c', 'mm', 10, 100, 5)}
+          {slider('a0', 'a0', 'mm', 10, 100, 5)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>μ = <b>{res.mu.toFixed(3)}</b> | μ_max = {res.omega_max.toFixed(3)}</div>
-              <div>ω = <b>{res.omega.toFixed(3)}</b> | ξ = {res.ns.toFixed(3)}</div>
-              <div>As = <b>{(res.as_prov / 100).toFixed(1)}</b> cm²/m | z = {res.z_arm.toFixed(3)} m</div>
-              <div>wk = <b>{res.wk.toFixed(3)}</b> mm | wk_lim = {res.wk_lim.toFixed(1)} mm</div>
-              <div>fctd = {res.fctd.toFixed(2)} MPa | fyd = {res.fyd.toFixed(0)} MPa</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Coupe réservoir</h2>
-          <svg viewBox="0 0 500 200" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Coupe réservoir" vbW={500} vbH={200}>
             {res && (() => {
               const ox = 40, oy = 20, w = 420, h = 160;
               const scale = Math.min(w / (inp.phi / 1000), h / (inp.h / 1000)) * 0.8;
@@ -109,11 +108,38 @@ export default function Module145() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>μ = <b>{res.mu.toFixed(3)}</b> | μ_max = {res.omega_max.toFixed(3)}</div>
+              <div>ω = <b>{res.omega.toFixed(3)}</b> | ξ = {res.ns.toFixed(3)}</div>
+              <div>As = <b>{(res.as_prov / 100).toFixed(1)}</b> cm²/m | z = {res.z_arm.toFixed(3)} m</div>
+              <div>wk = <b>{res.wk.toFixed(3)}</b> mm | wk_lim = {res.wk_lim.toFixed(1)} mm</div>
+              <div>fctd = {res.fctd.toFixed(2)} MPa | fyd = {res.fyd.toFixed(0)} MPa</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Réservoir circulaire"
+                latex={String.raw`w_k = s_{r,max}(\varepsilon_{sm} - \varepsilon_{cm})`}
+                description="Ouverture des fissures + retrait"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`w_k`, meaning: 'Ouverture caractéristique', value: res.wk.toFixed(3) },
+                    { symbol: String.raw`\varepsilon_{sm}`, meaning: 'Déformation acier', value: res.ns.toFixed(3) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -136,7 +162,12 @@ export default function Module145() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

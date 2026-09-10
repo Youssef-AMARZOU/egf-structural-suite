@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { BoussinesqLagrangeInputs, BoussinesqLagrangeOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: BoussinesqLagrangeInputs = {
   ha: 2.0, hb: 3.0, hc: 0.0,
@@ -12,79 +17,72 @@ const DEFAULT: BoussinesqLagrangeInputs = {
   code: 1, r_plaque: 0.375,
 };
 
+
 export default function Module125() {
   const [inp, setInp] = useState<BoussinesqLagrangeInputs>(DEFAULT);
-  const [res, setRes] = useState<BoussinesqLagrangeOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<BoussinesqLagrangeInputs, BoussinesqLagrangeOutput>(
+    'calculate_boussinesq_lagrange_125', inp,
+  );
   const S = (k: keyof BoussinesqLagrangeInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<BoussinesqLagrangeOutput>('calculate_boussinesq_lagrange_125', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
 
   const totalDepth = inp.ha + inp.hb + inp.hc;
 
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof BoussinesqLagrangeInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">125 Boussinesq-Lagrange <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Tassement multicouche — plaques Westergaard</p>
+    <Workstation
+      title="125 Boussinesq-Lagrange"
+      subtitle="Tassement multicouche — plaques Westergaard"
+      status={status}
+      live={live}
+      params={
+        <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Couche 1 (haut)</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="ha" unit="m" value={inp.ha} onChange={S('ha')} min={0} max={20} step={0.5} />
-          <NumField label="Ea" unit="MN/m²" value={inp.ea} onChange={S('ea')} min={1} max={200} step={1} />
+          {slider('ha', 'ha', 'm', 0, 20, 0.5)}
+          {slider('ea', 'Ea', 'MN/m²', 1, 200, 1)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Couche 2</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="hb" unit="m" value={inp.hb} onChange={S('hb')} min={0} max={20} step={0.5} />
-          <NumField label="Eb" unit="MN/m²" value={inp.eb} onChange={S('eb')} min={1} max={200} step={1} />
+          {slider('hb', 'hb', 'm', 0, 20, 0.5)}
+          {slider('eb', 'Eb', 'MN/m²', 1, 200, 1)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Couche 3 (base)</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="hc" unit="m" value={inp.hc} onChange={S('hc')} min={0} max={20} step={0.5} />
-          <NumField label="Ec" unit="MN/m²" value={inp.ec} onChange={S('ec')} min={1} max={200} step={1} />
+          {slider('hc', 'hc', 'm', 0, 20, 0.5)}
+          {slider('ec', 'Ec', 'MN/m²', 1, 200, 1)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Charge</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="q" unit="MN/m²" value={inp.q} onChange={S('q')} min={0.001} max={1} step={0.01} />
-          <NumField label="R plaque" unit="m" value={inp.r_plaque} onChange={S('r_plaque')} min={0.1} max={2} step={0.025} />
+          {slider('q', 'q', 'MN/m²', 0.001, 1, 0.01)}
+          {slider('r_plaque', 'R plaque', 'm', 0.1, 2, 0.025)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Grille</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="nx" unit="-" value={inp.nx} onChange={S('nx')} min={2} max={20} step={1} />
-          <NumField label="ny" unit="-" value={inp.ny} onChange={S('ny')} min={2} max={20} step={1} />
-          <NumField label="dx" unit="m" value={inp.dx} onChange={S('dx')} min={0.1} max={5} step={0.1} />
-          <NumField label="dy" unit="m" value={inp.dy} onChange={S('dy')} min={0.1} max={5} step={0.1} />
+          {slider('nx', 'nx', '-', 2, 20, 1)}
+          {slider('ny', 'ny', '-', 2, 20, 1)}
+          {slider('dx', 'dx', 'm', 0.1, 5, 0.1)}
+          {slider('dy', 'dy', 'm', 0.1, 5, 0.1)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Plaque Westergaard</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="code" unit="-" value={inp.code} onChange={S('code')} min={0} max={1} step={1} />
+          {slider('code', 'code', '-', 0, 1, 1)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>wmax = <b>{(res.w_max * 1000).toFixed(1)}</b> mm</div>
-              <div>wavg = <b>{(res.w_avg * 1000).toFixed(1)}</b> mm</div>
-              <div>pente max = <b>{(res.slope_max * 1000).toFixed(2)}</b> mm/m</div>
-              <hr className="border-slate-200 dark:border-white/10 my-2" />
-              <div>k rigide = <b>{res.kw_rigid.toFixed(1)}</b> MN/m³</div>
-              <div>k souple = <b>{res.kw_flexible.toFixed(1)}</b> MN/m³</div>
-              <div>Rsol max = <b>{res.reaction_max.toFixed(3)}</b> MN/m²</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Profil de sol</h2>
-          <svg viewBox="0 0 300 200" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Profil de sol" vbW={300} vbH={200}>
             {(() => {
               const ox = 60, oy = 20;
               const maxH = Math.max(totalDepth, 1);
@@ -107,13 +105,13 @@ export default function Module125() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Tassement (Recharts)</h2>
           {res && res.w_settlement.length > 0 && (
             <div className="h-48">
-              <svg viewBox="0 0 300 120" className="w-full">
+              <SectionCanvas title="Tassement (Recharts)" vbW={300} vbH={120}>
                 {(() => {
                   const data = res.w_settlement.map((w) => w * 1000);
                   const maxVal = Math.max(...data, 0.1);
@@ -127,12 +125,41 @@ export default function Module125() {
                 })()}
                 <line x1={0} y1={110} x2={300} y2={110} stroke="#94a3b8" strokeWidth={0.5} />
                 <text x={5} y={10} fontSize={7} fill="#64748b">w (mm)</text>
-              </svg>
+              </SectionCanvas>
             </div>
           )}
         </div>
-      </div>
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>wmax = <b>{(res.w_max * 1000).toFixed(1)}</b> mm</div>
+              <div>wavg = <b>{(res.w_avg * 1000).toFixed(1)}</b> mm</div>
+              <div>pente max = <b>{(res.slope_max * 1000).toFixed(2)}</b> mm/m</div>
+              <hr className="border-slate-200 dark:border-white/10 my-2" />
+              <div>k rigide = <b>{res.kw_rigid.toFixed(1)}</b> MN/m³</div>
+              <div>k souple = <b>{res.kw_flexible.toFixed(1)}</b> MN/m³</div>
+              <div>Rsol max = <b>{res.reaction_max.toFixed(3)}</b> MN/m²</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
+              <FormulaCard
+                title="Boussinesq multicouche"
+                latex={String.raw`\Delta\sigma_z = \frac{3Q}{2\pi z^2}\cos^5\theta`}
+                description="Diffusion ponctuelle + Westergaard"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`Q`, meaning: 'Charge ponctuelle', value: res.kw_rigid.toFixed(1) },
+                    { symbol: String.raw`z`, meaning: 'Profondeur', value: res.kw_flexible.toFixed(1) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <ul className="text-xs space-y-2">
@@ -148,7 +175,12 @@ export default function Module125() {
             <li className="text-slate-500">• Grille: {inp.nx}×{inp.ny} = {(inp.nx + 1) * (inp.ny + 1)} noeuds</li>
           </ul>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

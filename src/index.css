@@ -1,3 +1,4 @@
+@import 'katex/dist/katex.min.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,4 +16,41 @@ html, body, #root {
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   opacity: 1;
+}
+
+/* ---------- Note de calcul : printed report ---------- */
+.ws-print-head { display: none; }
+
+@media print {
+  @page { margin: 11mm; }
+
+  /* app chrome & controls never print */
+  aside, button, input[type="range"], .screen-only { display: none !important; }
+
+  /* report header, screen-hidden */
+  .ws-print-head { display: block !important; margin-bottom: 8px; }
+  .ws-print-head h1 { font-size: 18px; font-weight: 800; color: #0f172a; }
+  .ws-print-head p { font-size: 11px; color: #475569; }
+
+  /* stack workstation columns, expand scroll areas */
+  .ws-grid { display: block !important; }
+  .ws-grid > * { margin-bottom: 10px; }
+  .ws-params, .overflow-y-auto { max-height: none !important; overflow: visible !important; }
+
+  /* force light, ink-friendly surfaces */
+  .dark\:bg-\[\#0f172a\], .dark\:bg-\[\#0b1120\] { background-color: #ffffff !important; }
+  .dark\:bg-white\/5, .dark\:bg-white\/10 { background-color: #f1f5f9 !important; }
+  .bg-slate-900\/60 { background-color: #f8fafc !important; }
+  .bg-slate-950\/40 { background-color: #f1f5f9 !important; }
+  .dark\:text-slate-100, .text-slate-100 { color: #0f172a !important; }
+  .dark\:text-slate-200 { color: #1e293b !important; }
+  .dark\:text-slate-300, .text-slate-300 { color: #334155 !important; }
+  .dark\:text-slate-400, .text-slate-400 { color: #475569 !important; }
+  .dark\:border-white\/10, .dark\:border-white\/15 { border-color: #cbd5e1 !important; }
+  .text-amber-400 { color: #92400e !important; }
+  .text-emerald-400 { color: #047857 !important; }
+  .text-rose-400 { color: #be123c !important; }
+  .text-blue-400, .text-blue-500 { color: #1d4ed8 !important; }
+
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

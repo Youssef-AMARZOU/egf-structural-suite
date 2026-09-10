@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { PoinconnementTremieInputs, PoinconnementTremieOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: PoinconnementTremieInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -10,70 +15,65 @@ const DEFAULT: PoinconnementTremieInputs = {
   ed: 500, n_ed: 500, gamma_f: 1.0,
 };
 
+
 export default function Module146() {
   const [inp, setInp] = useState<PoinconnementTremieInputs>(DEFAULT);
-  const [res, setRes] = useState<PoinconnementTremieOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<PoinconnementTremieInputs, PoinconnementTremieOutput>(
+    'calculate_poinconnement_tremie_146', inp,
+  );
   const S = (k: keyof PoinconnementTremieInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<PoinconnementTremieOutput>('calculate_poinconnement_tremie_146', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : res.ratio <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof PoinconnementTremieInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">146 Poinç. Trémie <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Poinçonnement semelle sur trémie — EC2 §6.4</p>
+    <Workstation
+      title="146 Poinç. Trémie"
+      subtitle="Poinçonnement semelle sur trémie — EC2 §6.4"
+      eurocode="EC2 §6.4"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="h" unit="mm" value={inp.h} onChange={S('h')} min={100} max={2000} step={50} />
-          <NumField label="a0" unit="mm" value={inp.a0} onChange={S('a0')} min={10} max={200} step={5} />
-          <NumField label="c1" unit="mm" value={inp.c1} onChange={S('c1')} min={100} max={5000} step={50} />
-          <NumField label="c2" unit="mm" value={inp.c2} onChange={S('c2')} min={100} max={5000} step={50} />
-          <NumField label="D pile" unit="mm" value={inp.d_pile} onChange={S('d_pile')} min={100} max={3000} step={50} />
-          <NumField label="D trémie" unit="mm" value={inp.d_tremie} onChange={S('d_tremie')} min={100} max={3000} step={50} />
+          {slider('h', 'h', 'mm', 100, 2000, 50)}
+          {slider('a0', 'a0', 'mm', 10, 200, 5)}
+          {slider('c1', 'c1', 'mm', 100, 5000, 50)}
+          {slider('c2', 'c2', 'mm', 100, 5000, 50)}
+          {slider('d_pile', 'D pile', 'mm', 100, 3000, 50)}
+          {slider('d_tremie', 'D trémie', 'mm', 100, 3000, 50)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitation</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="Ed" unit="kN" value={inp.ed} onChange={S('ed')} min={0} max={10000} step={10} />
-          <NumField label="NEd" unit="kN" value={inp.n_ed} onChange={S('n_ed')} min={0} max={10000} step={10} />
+          {slider('ed', 'Ed', 'kN', 0, 10000, 10)}
+          {slider('n_ed', 'NEd', 'kN', 0, 10000, 10)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>u0 = <b>{res.u0.toFixed(3)}</b> m | u1 = <b>{res.u1.toFixed(3)}</b> m</div>
-              <div>τ_ED = <b>{res.vr_ed.toFixed(2)}</b> MPa</div>
-              <div>τ_RD,c = <b>{res.vr_d_c.toFixed(2)}</b> MPa | τ_RD,max = {res.vr_d_max.toFixed(2)} MPa</div>
-              <div>α_ED = {res.alpha_ed.toFixed(2)} | ρ_l = {res.rho_l.toFixed(3)}</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Coupe — Poinçonnement trémie</h2>
-          <svg viewBox="0 0 500 200" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Coupe — Poinçonnement trémie" vbW={500} vbH={200}>
             {res && (() => {
               const ox = 40, oy = 20, w = 420, h = 160;
               const cx = ox + w / 2;
@@ -100,11 +100,37 @@ export default function Module146() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>u0 = <b>{res.u0.toFixed(3)}</b> m | u1 = <b>{res.u1.toFixed(3)}</b> m</div>
+              <div>τ_ED = <b>{res.vr_ed.toFixed(2)}</b> MPa</div>
+              <div>τ_RD,c = <b>{res.vr_d_c.toFixed(2)}</b> MPa | τ_RD,max = {res.vr_d_max.toFixed(2)} MPa</div>
+              <div>α_ED = {res.alpha_ed.toFixed(2)} | ρ_l = {res.rho_l.toFixed(3)}</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Poinçonnement pieu-trémie"
+                latex={String.raw`v_{Ed} = \frac{\beta V_{Ed}}{u_1 d} \le v_{Rd,c}`}
+                description="Fût de pieu et trémie"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`V_{Ed}`, meaning: 'Effort transmis', value: inp.ed },
+                    { symbol: String.raw`u_1`, meaning: 'Périmètre', value: res.u1.toFixed(3) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -128,7 +154,12 @@ export default function Module146() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

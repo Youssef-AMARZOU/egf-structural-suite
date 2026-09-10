@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
 } from 'recharts';
 import type { Wall121Inputs, Wall121Output } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 interface LoadCase {
   eps: number;
@@ -34,10 +39,12 @@ const DEF: Wall121Inputs = {
   n5: 50, n6: 30, n1: 40, n2: 20,
 };
 
+
 export default function Module121() {
   const [inp, setInp] = useState<Wall121Inputs>(DEF);
-  const [res, setRes] = useState<Wall121Output | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<Wall121Inputs, Wall121Output>(
+    'calculate_wall_121', inp,
+  );
   const [showCases, setShowCases] = useState(false);
 
   const S = (k: keyof Wall121Inputs) => (v: number) =>
@@ -51,13 +58,6 @@ export default function Module121() {
     });
   };
 
-  useEffect(() => {
-    let dead = false;
-    invoke<Wall121Output>('calculate_wall_121', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
 
   const bars = res
     ? [
@@ -67,50 +67,55 @@ export default function Module121() {
       ]
     : [];
 
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof Wall121Inputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
   return (
-    <div className="grid grid-cols-12 gap-4">
-      {/* ─── Input Panel ─── */}
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <div>
-          <h2 className="text-sm font-bold">
-            121 Mur de soutènement{' '}
-            <span className="font-mono text-[11px] text-emerald-500">RUST</span>
-          </h2>
-          <p className="text-[11px] text-slate-500">
-            D'après EGF N°121 © Henry Thonier — EC2/RRA
-          </p>
+    <Workstation
+      title="121 Mur de soutènement"
+      subtitle="D'après EGF N°121 © Henry Thonier — EC2/RRA"
+      eurocode="EC2"
+      status={status}
+      live={live}
+      params={
+        <>
+
+        <div className="grid grid-cols-2 gap-2">
+          {slider('h_tot', 'H total', 'm', 1, 10, 0.1)}
+          {slider('l1', 'L1 (jambe)', 'm', 0.5, 8, 0.1)}
+          {slider('l2', 'L2 (talon)', 'm', 0.1, 3, 0.05)}
+          {slider('l3', 'L3 (talon arrière)', 'm', 0.1, 5, 0.05)}
+          {slider('e_predalle', 'Ép. predalle', 'm', 0.1, 1, 0.01)}
+          {slider('l_fond', 'L fondation', 'm', 0.5, 10, 0.1)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="H total" unit="m" value={inp.h_tot} onChange={S('h_tot')} min={1} max={10} />
-          <NumField label="L1 (jambe)" unit="m" value={inp.l1} onChange={S('l1')} min={0.5} max={8} />
-          <NumField label="L2 (talon)" unit="m" value={inp.l2} onChange={S('l2')} min={0.1} max={3} />
-          <NumField label="L3 (talon arrière)" unit="m" value={inp.l3} onChange={S('l3')} min={0.1} max={5} />
-          <NumField label="Ép. predalle" unit="m" value={inp.e_predalle} onChange={S('e_predalle')} min={0.1} max={1} />
-          <NumField label="L fondation" unit="m" value={inp.l_fond} onChange={S('l_fond')} min={0.5} max={10} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('phi', 'φ', 'deg', 10, 45, 1)}
+          {slider('delta', 'δ', 'deg', 0, 30, 1)}
+          {slider('gamma_sol', 'γ sol', 'kN/m³', 10, 25, 0.5)}
+          {slider('gamma_beton', 'γ béton', 'kN/m³', 20, 26, 0.5)}
+          {slider('ks', 'Ka', '–', 0.1, 1, 0.01)}
+          {slider('kp', 'Kp', '–', 1, 10, 0.1)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="φ" unit="deg" value={inp.phi} onChange={S('phi')} min={10} max={45} step={1} />
-          <NumField label="δ" unit="deg" value={inp.delta} onChange={S('delta')} min={0} max={30} step={1} />
-          <NumField label="γ sol" unit="kN/m³" value={inp.gamma_sol} onChange={S('gamma_sol')} min={10} max={25} step={0.5} />
-          <NumField label="γ béton" unit="kN/m³" value={inp.gamma_beton} onChange={S('gamma_beton')} min={20} max={26} step={0.5} />
-          <NumField label="Ka" unit="–" value={inp.ks} onChange={S('ks')} min={0.1} max={1} step={0.01} />
-          <NumField label="Kp" unit="–" value={inp.kp} onChange={S('kp')} min={1} max={10} step={0.1} />
+          {slider('n5', 'N5 (tige)', 'kN', 0, 500, 1)}
+          {slider('n6', 'N6 (talon arrière)', 'kN', 0, 500, 1)}
+          {slider('n1', 'N1 (talon avant)', 'kN', 0, 500, 1)}
+          {slider('n2', 'N2 (talon arrière)', 'kN', 0, 500, 1)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="N5 (tige)" unit="kN" value={inp.n5} onChange={S('n5')} min={0} max={500} step={1} />
-          <NumField label="N6 (talon arrière)" unit="kN" value={inp.n6} onChange={S('n6')} min={0} max={500} step={1} />
-          <NumField label="N1 (talon avant)" unit="kN" value={inp.n1} onChange={S('n1')} min={0} max={500} step={1} />
-          <NumField label="N2 (talon arrière)" unit="kN" value={inp.n2} onChange={S('n2')} min={0} max={500} step={1} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <NumField label="γG" unit="–" value={inp.gG} onChange={S('gG')} min={1.0} max={1.6} step={0.05} />
-          <NumField label="γQ" unit="–" value={inp.gQ} onChange={S('gQ')} min={1.0} max={1.8} step={0.05} />
+          {slider('gG', 'γG', '–', 1.0, 1.6, 0.05)}
+          {slider('gQ', 'γQ', '–', 1.0, 1.8, 0.05)}
         </div>
 
         {/* Load cases toggle */}
@@ -161,14 +166,12 @@ export default function Module121() {
             {err}
           </p>
         )}
-      </div>
-
-      {/* ─── Charts + Results ─── */}
-      <div className="col-span-5 space-y-4">
-        {/* Wall SVG Profile */}
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Coupe du mur (live SVG)</h2>
-          <svg viewBox="0 0 320 240" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Coupe du mur (live SVG)" vbW={320} vbH={240}>
             {(() => {
               const sc = 50;
               const ox = 80, oy = 20;
@@ -180,21 +183,18 @@ export default function Module121() {
 
               return (
                 <g>
-                  {/* Soil hatching (back) */}
                   <rect x={ox + (inp.l2 + w_stem) * sc} y={oy}
                     width={inp.l3 * sc} height={h_wall * sc}
                     fill="#d4c4a0" opacity={0.3} />
                   <text x={ox + (inp.l2 + w_stem + inp.l3 / 2) * sc} y={oy + h_wall * sc / 2}
                     textAnchor="middle" fontSize={8} fill="#8b7355">Sol arrière</text>
 
-                  {/* Foundation slab */}
                   <rect x={ox} y={oy + h_wall * sc}
                     width={total_w * sc} height={h_fond * sc}
                     fill="#6b7280" stroke="#374151" strokeWidth={1.5} />
                   <text x={ox + total_w * sc / 2} y={oy + (h_wall + h_fond / 2) * sc + 3}
                     textAnchor="middle" fontSize={7} fill="#fff">Predalle</text>
 
-                  {/* Stem */}
                   <rect x={ox + inp.l2 * sc} y={oy}
                     width={w_stem * sc} height={h_wall * sc}
                     fill="#1F3864" stroke="#1e3a5f" strokeWidth={1.5} />
@@ -203,7 +203,6 @@ export default function Module121() {
                     {inp.l1.toFixed(1)}m
                   </text>
 
-                  {/* Dimensions */}
                   <line x1={ox} y1={oy + total_h * sc + 15} x2={ox + total_w * sc} y2={oy + total_h * sc + 15}
                     stroke="#94a3b8" strokeWidth={0.8} />
                   <text x={ox + inp.l2 * sc / 2} y={oy + total_h * sc + 25}
@@ -211,7 +210,6 @@ export default function Module121() {
                   <text x={ox + (inp.l2 + w_stem + inp.l3 / 2) * sc} y={oy + total_h * sc + 25}
                     textAnchor="middle" fontSize={7} fill="#94a3b8">L3={inp.l3.toFixed(1)}</text>
 
-                  {/* Earth pressure arrows */}
                   {[0.2, 0.5, 0.8].map((f, i) => (
                     <g key={i}>
                       <line x1={ox - 15} y1={oy + f * h_wall * sc}
@@ -228,10 +226,8 @@ export default function Module121() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-
-        {/* Bar chart */}
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Résultats</h2>
           <div className="h-[180px]">
@@ -271,10 +267,23 @@ export default function Module121() {
             </div>
           )}
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
 
-      {/* ─── AI Diagnostics ─── */}
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Poussée des terres (Rankine)"
+                latex={String.raw`P_a = \frac{1}{2}\gamma H^2 K_a, \; K_a = \tan^2\left(45^\circ - \varphi'/2\right)`}
+                description="Mur de soutènement, écran vertical"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`K_a`, meaning: 'Coefficient de poussée', value: res.eccentricity.toFixed(3) },
+                    { symbol: String.raw`\varphi'`, meaning: 'Angle de frottement', value: inp.phi },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {!res ? (
           <p className="text-xs text-slate-500">computing…</p>
@@ -301,7 +310,12 @@ export default function Module121() {
             </li>
           </ul>
         )}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

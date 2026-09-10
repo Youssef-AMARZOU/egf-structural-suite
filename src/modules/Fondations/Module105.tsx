@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer, Cell,
@@ -8,7 +7,13 @@ import type {
   CircularPunching105Inputs,
   CircularPunching105Output,
 } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEF: CircularPunching105Inputs = {
   c: 0.6,
@@ -23,21 +28,16 @@ const DEF: CircularPunching105Inputs = {
   nbrin: 4,
 };
 
+
 export default function Module105() {
   const [inp, setInp] = useState<CircularPunching105Inputs>(DEF);
-  const [res, setRes] = useState<CircularPunching105Output | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<CircularPunching105Inputs, CircularPunching105Output>(
+    'calculate_circular_punching_105', inp,
+  );
 
   const S = (k: keyof CircularPunching105Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<CircularPunching105Output>('calculate_circular_punching_105', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
 
   const bars = res
     ? [
@@ -46,43 +46,48 @@ export default function Module105() {
       ]
     : [];
 
+  const status = !res ? 'computing' : res.ratio0 <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof CircularPunching105Inputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
   return (
-    <div className="grid grid-cols-12 gap-4">
-      {/* ─── Input Panel ─── */}
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3">
-        <div>
-          <h2 className="text-sm font-bold">
-            105 Poinçonnement circulaire{' '}
-            <span className="font-mono text-[11px] text-emerald-500">RUST</span>
-          </h2>
-          <p className="text-[11px] text-slate-500">
-            D'après EGF N°105 © Henry Thonier — EC2 §6.4
-          </p>
+    <Workstation
+      title="105 Poinçonnement circulaire"
+      subtitle="D'après EGF N°105 © Henry Thonier — EC2 §6.4"
+      eurocode="EC2 §6.4"
+      status={status}
+      live={live}
+      params={
+        <>
+
+        <div className="grid grid-cols-2 gap-2">
+          {slider('c', 'c (diamètre)', 'm', 0.1, 3, 0.05)}
+          {slider('d', 'd', 'm', 0.05, 1, 0.01)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="c (diamètre)" unit="m" value={inp.c} onChange={S('c')} min={0.1} max={3} step={0.05} />
-          <NumField label="d" unit="m" value={inp.d} onChange={S('d')} min={0.05} max={1} step={0.01} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
+          {slider('rho', 'ρ', '%', 0.1, 5, 0.1)}
+          {slider('scp', 'σcp', 'MPa', 0, 5, 0.1)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="ρ" unit="%" value={inp.rho} onChange={S('rho')} min={0.1} max={5} step={0.1} />
-          <NumField label="σcp" unit="MPa" value={inp.scp} onChange={S('scp')} min={0} max={5} step={0.1} />
+          {slider('g_ved', 'GVEd', 'MN', 0, 20, 0.05)}
+          {slider('gc', 'γc', '–', 1.0, 2.0, 0.05)}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="GVEd" unit="MN" value={inp.g_ved} onChange={S('g_ved')} min={0} max={20} step={0.05} />
-          <NumField label="γc" unit="–" value={inp.gc} onChange={S('gc')} min={1.0} max={2.0} step={0.05} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <NumField label="γs" unit="–" value={inp.gs} onChange={S('gs')} min={1.0} max={2.0} step={0.05} />
-          <NumField label="Brins" unit="–" value={inp.nbrin} onChange={(v) => setInp((p) => ({ ...p, nbrin: Math.round(v) }))} min={2} max={8} step={1} />
+          {slider('gs', 'γs', '–', 1.0, 2.0, 0.05)}
+          <ParamSlider label="Brins" unit="–" value={inp.nbrin} min={2} max={8} step={1} onChange={(v) => setInp((p) => ({ ...p, nbrin: Math.round(v) }))} />
         </div>
 
         {err && (
@@ -90,11 +95,10 @@ export default function Module105() {
             {err}
           </p>
         )}
-      </div>
-
-      {/* ─── Charts + Results ─── */}
-      <div className="col-span-5 space-y-4">
-        {/* Bar chart */}
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Ratios (seuil 1.0)</h2>
           <div className="h-[220px]">
@@ -144,11 +148,8 @@ export default function Module105() {
             </div>
           )}
         </div>
-
-        {/* Plan SVG — concentric rings */}
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Plan (live SVG)</h2>
-          <svg viewBox="0 0 280 280" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Plan (live SVG)" vbW={280} vbH={280}>
             {(() => {
               const sc = 80;
               const cx = 140;
@@ -190,11 +191,9 @@ export default function Module105() {
 
               return (
                 <g>
-                  {/* Grid lines */}
                   <line x1={0} y1={cy} x2={280} y2={cy} stroke="#e2e8f0" strokeWidth={0.5} />
                   <line x1={cx} y1={0} x2={cx} y2={280} stroke="#e2e8f0" strokeWidth={0.5} />
 
-                  {/* Circles */}
                   {rings.map((r, i) => (
                     <circle key={i} cx={r.cx} cy={r.cy} r={r.r}
                       fill={i === 0 ? r.color : 'none'} opacity={i === 0 ? 0.9 : 1}
@@ -202,7 +201,6 @@ export default function Module105() {
                       strokeDasharray={r.dash} />
                   ))}
 
-                  {/* Reinforcement dots */}
                   {reinforcementRings.map((ring, ri) =>
                     ring.dots.map((dot, ti) => (
                       <circle key={`${ri}-${ti}`} cx={dot.x} cy={dot.y} r={2.5}
@@ -210,7 +208,6 @@ export default function Module105() {
                     ))
                   )}
 
-                  {/* Labels */}
                   <text x={cx} y={cy + 4} textAnchor="middle" fontSize={8} fill="#fff">
                     φ{inp.c.toFixed(2)}
                   </text>
@@ -223,7 +220,6 @@ export default function Module105() {
                     </text>
                   )}
 
-                  {/* Legend */}
                   <circle cx={10} cy={260} r={4} fill="#1F3864" />
                   <text x={20} y={263} fontSize={7} fill="#64748b">Poteau</text>
                   <circle cx={70} cy={260} r={4} fill="none" stroke="#f59e0b" strokeDasharray="3 2" />
@@ -235,12 +231,25 @@ export default function Module105() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
 
-      {/* ─── AI Diagnostics ─── */}
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Poinçonnement circulaire (EC2 §6.4)"
+                latex={String.raw`v_{Ed} = \frac{\beta V_{Ed}}{u_1 d} \le v_{Rd,c}`}
+                description="Poteau circulaire sans chapiteau"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`V_{Ed}`, meaning: 'Effort de poinçonnement', value: res.ved0.toFixed(2) },
+                    { symbol: String.raw`u_1`, meaning: 'Périmètre à 2d', value: res.vrd_max.toFixed(2) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {!res ? (
           <p className="text-xs text-slate-500">computing…</p>
@@ -274,7 +283,12 @@ export default function Module105() {
             )}
           </ul>
         )}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

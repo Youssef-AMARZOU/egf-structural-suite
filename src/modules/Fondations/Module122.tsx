@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { Sem2PieuxInputs, Sem2PieuxOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas, DimensionLine,
+} from '../../components/drafting';
 
 const DEFAULT: Sem2PieuxInputs = {
   d1: 1.0, d2: 1.0, b_col: 0.4, gd: 0.5, deb: 0.2,
@@ -10,49 +15,90 @@ const DEFAULT: Sem2PieuxInputs = {
   fck: 30, gc: 1.5, fyk: 500, gs: 1.15, cnom: 50, phi: 16,
 };
 
+
 export default function Module122() {
   const [inp, setInp] = useState<Sem2PieuxInputs>(DEFAULT);
-  const [res, setRes] = useState<Sem2PieuxOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<Sem2PieuxInputs, Sem2PieuxOutput>(
+    'calculate_sem2_pieux_122', inp,
+  );
   const S = (k: keyof Sem2PieuxInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<Sem2PieuxOutput>('calculate_sem2_pieux_122', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof Sem2PieuxInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">122 Sem2 Pieux <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
+    <Workstation
+      title="122 Sem2 Pieux"
+      subtitle="D'après EGF N°122 © Henry Thonier — RUST"
+      status={status}
+      live={live}
+      params={
+        <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="d₁" unit="m" value={inp.d1} onChange={S('d1')} min={0.2} max={5} step={0.1} />
-          <NumField label="d₂" unit="m" value={inp.d2} onChange={S('d2')} min={0.2} max={5} step={0.1} />
-          <NumField label="b_col" unit="m" value={inp.b_col} onChange={S('b_col')} min={0.1} max={3} step={0.05} />
+          {slider('d1', 'd₁', 'm', 0.2, 5, 0.1)}
+          {slider('d2', 'd₂', 'm', 0.2, 5, 0.1)}
+          {slider('b_col', 'b_col', 'm', 0.1, 3, 0.05)}
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="GD" unit="m" value={inp.gd} onChange={S('gd')} min={0.1} max={2} step={0.05} />
-          <NumField label="déb" unit="m" value={inp.deb} onChange={S('deb')} min={0.05} max={1} step={0.05} />
-          <NumField label="d" unit="m" value={inp.d_eff} onChange={S('d_eff')} min={0.1} max={3} step={0.05} />
+          {slider('gd', 'GD', 'm', 0.1, 2, 0.05)}
+          {slider('deb', 'déb', 'm', 0.05, 1, 0.05)}
+          {slider('d_eff', 'd', 'm', 0.1, 3, 0.05)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Efforts</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="NEd" unit="MN" value={inp.ned} onChange={S('ned')} min={0.1} max={50} step={0.5} />
-          <NumField label="MEd₀" unit="MNm" value={inp.med0} onChange={S('med0')} min={0} max={20} step={0.25} />
-          <NumField label="HEd" unit="MN" value={inp.hed} onChange={S('hed')} min={0} max={5} step={0.05} />
+          {slider('ned', 'NEd', 'MN', 0.1, 50, 0.5)}
+          {slider('med0', 'MEd₀', 'MNm', 0, 20, 0.25)}
+          {slider('hed', 'HEd', 'MN', 0, 5, 0.05)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Semelle</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="GB" unit="m" value={inp.gb_pc} onChange={S('gb_pc')} min={0.5} max={5} step={0.1} />
-          <NumField label="bp" unit="m" value={inp.bp} onChange={S('bp')} min={0.1} max={3} step={0.05} />
+          {slider('gb_pc', 'GB', 'm', 0.5, 5, 0.1)}
+          {slider('bp', 'bp', 'm', 0.1, 3, 0.05)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
+<div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+  <SectionCanvas title="Semelle sur 2 pieux" vbW={600} vbH={280}>
+    {(() => {
+      const sc = 70;
+      const cx = 300; const yCap = 60; const hCap = 30;
+      const x1 = cx - inp.d1 * sc; const x2 = cx + inp.d2 * sc;
+      const wCap = (x2 - x1) + inp.b_col * sc;
+      return (
+        <g>
+          <rect x={x1 - (inp.b_col * sc) / 2} y={yCap} width={wCap} height={hCap} fill="#e2e8f0" stroke="#64748b" strokeWidth={1} />
+          <rect x={x1 - 12} y={yCap + hCap} width={24} height={100} fill="#1F3864" />
+          <rect x={x2 - 12} y={yCap + hCap} width={24} height={100} fill="#1F3864" />
+          <line x1={cx} y1={yCap - 44} x2={cx} y2={yCap} stroke="#ef4444" strokeWidth={2} />
+          <text x={cx + 6} y={yCap - 34} fontSize={9} fill="#ef4444">NEd</text>
+          <DimensionLine x1={x1} y1={yCap + hCap + 100} x2={x2} y2={yCap + hCap + 100} offset={20} text={`d1+d2 = ${(inp.d1 + inp.d2).toFixed(2)} m`} />
+          {res && (
+            <text x={cx} y={yCap - 50} textAnchor="middle" fontSize={11} fill="#2563eb" fontWeight="bold">
+              Med={res.med.toFixed(3)} MNm
+            </text>
+          )}
+        </g>
+      );
+    })()}
+  </SectionCanvas>
+</div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Résultats</h2>
           {res && (
@@ -67,8 +113,16 @@ export default function Module122() {
             </div>
           )}
         </div>
-      </div>
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Semelle sur pieux (bielles)"
+                latex={String.raw`T = P \frac{e}{d}`}
+                description="Tirant inférieur par la méthode des bielles"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`T`, meaning: 'Traction du tirant', value: res.med.toFixed(3) },
+                    { symbol: String.raw`e/d`, meaning: 'Inclinaison de bielle', value: inp.ned },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <ul className="text-xs space-y-2">
@@ -76,7 +130,12 @@ export default function Module122() {
             <li className="text-slate-500">• cotθ = {res.cot_theta.toFixed(2)}</li>
           </ul>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

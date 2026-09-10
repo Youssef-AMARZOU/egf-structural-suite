@@ -1842,3 +1842,1840 @@ export interface DalleContinueFeuOutput {
   verdict: string;
   diag: string[];
 }
+
+export interface FluageRetraitInputs {
+  b: number;
+  h: number;
+  fck: number;
+  t0: number;
+  t: number;
+  rh: number;
+  classe_ciment: string;
+}
+
+export interface FluageRetraitOutput {
+  phi_0: number;
+  phi_t: number;
+  phi_inf: number;
+  eps_cd: number;
+  eps_ca: number;
+  eps_cs: number;
+  h0: number;
+  kh: number;
+  ecm: number;
+  ec: number;
+  bfcm: number;
+  bct_t0: number;
+  bH: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface PourcentageMiniNonFragiliteInputs {
+  b: number;
+  h: number;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  rho_l: number;
+  n_layers: number;
+  layer_positions: number[];
+}
+
+export interface PourcentageMiniNonFragiliteOutput {
+  rho_min: number;
+  as_min: number;
+  x_nd: number;
+  xd_ratio: number;
+  xd_limit: number;
+  eps_s: number;
+  eps_y: number;
+  is_ductile: boolean;
+  utilisation: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface InteracSectQQv2Inputs {
+  trapezes: Array<{ b1: number; b2: number; h: number }>;
+  steel_layers: Array<{ area: number; position: number }>;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  concrete_model: number;
+  n_points: number;
+}
+
+export interface InteracSectQQv2Output {
+  interaction_curve: [number, number][];
+  n_max: number;
+  m_max: number;
+  n_min: number;
+  m_balance: number;
+  n_balance: number;
+  ht: number;
+  centroid: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface PourcentMiniSectQQInputs {
+  trapezes: Array<{ b1: number; b2: number; h: number }>;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+}
+
+export interface PourcentMiniSectQQOutput {
+  ht: number;
+  area: number;
+  y_bar: number;
+  i_g: number;
+  mcr: number;
+  as_min: number;
+  as_min_pct: number;
+  x_neutral: number;
+  lever_arm: number;
+  mr_min: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface FlexdevV3Inputs {
+  section_points: [number, number][];
+  steel_points: [number, number, number][];
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  concrete_model: number;
+  n_angle_steps: number;
+  n_strain_pts: number;
+}
+
+export interface FlexdevV3Output {
+  interaction_curves: [number, number][][];
+  angles: number[];
+  area: number;
+  centroid: [number, number];
+  n_max_global: number;
+  m_max_global: number;
+  envelope: [number, number][];
+  verdict: string;
+  diag: string[];
+}
+
+export interface PourcentageMiniNonFragiliteSectQQInputs {
+  trapezes: Array<{ b1: number; b2: number; h: number }>;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  xd_limit: number;
+}
+
+export interface PourcentageMiniNonFragiliteSectQQOutput {
+  ht: number;
+  area: number;
+  rho_min: number;
+  as_min: number;
+  xd_ratio: number;
+  eps_s: number;
+  eps_y: number;
+  is_ductile: boolean;
+  verdict: string;
+  diag: string[];
+}
+
+export interface Dalle4apBpVoilePignonInputs {
+  h: number;
+  E: number;
+  nu: number;
+  LA: number;
+  LB: number;
+  loads: Array<{ P0: number; A1: number; A2: number; B1: number; B2: number }>;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  d: number;
+}
+
+export interface Dalle4apBpVoilePignonOutput {
+  mx_max: number;
+  my_max: number;
+  vx_max: number;
+  vy_max: number;
+  w_max: number;
+  asx_els: number;
+  asy_els: number;
+  x_depth: number;
+  mrdu: number;
+  mrdv: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface DalleBpEvasionNPotInputs {
+  spans: number[];
+  loads: number[];
+  E: number;
+  H: number;
+  inertia: number[];
+  section: number[];
+  pa: number;
+  pb: number;
+}
+
+export interface DalleBpEvasionNPotOutput {
+  deflections: number[];
+  moments: number[];
+  shears: number[];
+  slopes: number[];
+  max_deflection: number;
+  max_moment: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface DalleBpArmPassivEc2Inputs {
+  P: number;
+  b: number;
+  h: number;
+  d: number;
+  e0: number;
+  Mg: number;
+  Mq: number;
+  MELU: number;
+  Ap: number;
+  fck: number;
+  fyk: number;
+  fp01: number;
+  gs: number;
+  gc: number;
+}
+
+export interface DalleBpArmPassivEc2Output {
+  as2: number;
+  as_min: number;
+  ksi: number;
+  sigma_s: number;
+  sigma_p: number;
+  eps_p: number;
+  P_final: number;
+  mu: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface BaelBaBpFlecheDalleContinueInputs {
+  L: number;
+  b: number;
+  h: number;
+  d: number;
+  dp: number;
+  E: number;
+  n_mod: number;
+  Ac: number;
+  Acp: number;
+  loads: Array<{ p1: number; p2: number; a: number; lb: number }>;
+  kr: number;
+}
+
+export interface BaelBaBpFlecheDalleContinueOutput {
+  moments: number[];
+  deflections: number[];
+  curvatures: number[];
+  max_moment: number;
+  max_deflection: number;
+  fleche_admis: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface FlecheDispenseV5Inputs {
+  L: number;
+  d: number;
+  sigma_s: number;
+  sigma_sd: number;
+  fck: number;
+  rho: number;
+  rho1: number;
+  code: number;
+}
+
+export interface FlecheDispenseV5Output {
+  ratio_ld: number;
+  fleche_max: number;
+  fleche_admis: number;
+  k_factor: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoteauLambdaminInputs {
+  h: number;
+  L0: number;
+  N_ed: number;
+  fck: number;
+  d_mod: number;
+}
+
+export interface PoteauLambdaminOutput {
+  lambda_x: number;
+  lambda_y: number;
+  lambda_min_x: number;
+  lambda_min_y: number;
+  is_second_order_x: boolean;
+  is_second_order_y: boolean;
+  diag: string[];
+  verdict: string;
+}
+
+export interface DescDeChargesInputs {
+  Gk: number;
+  Qk1: number;
+  Qk2: number;
+  Sk: number;
+  Wk: number;
+  psi0: number;
+  psi1: number;
+  psi2: number;
+}
+
+export interface DescDeChargesOutput {
+  env_uls: number;
+  env_sls_qp: number;
+  env_sls_qk: number;
+  env_sls_rare: number;
+  env_sls_qp_rare: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface MrdDesTsInputs {
+  d: number;
+  fck: number;
+  gc: number;
+  Ac: number;
+  fyk: number;
+  gs: number;
+  euk: number;
+  k: number;
+}
+
+export interface MrdDesTsOutput {
+  MR: number;
+  ss: number;
+  x: number;
+  z: number;
+  es: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface RetraitGeneV2Ph2Inputs {
+  n_sections: number;
+  lengths: number[];
+  heights: number[];
+  widths: number[];
+  E: number;
+  er: number;
+  tete: number;
+}
+
+export interface RetraitGeneV2Ph2Output {
+  forces: number[];
+  moments: number[];
+  deflections: number[];
+  max_force: number;
+  max_moment: number;
+  max_deflection: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PrefaEtDalleRapporteeInputs {
+  h: number;
+  h1: number;
+  b: number;
+  bw: number;
+  hsup: number;
+  hinf: number;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  NEd: number;
+  MEd: number;
+  VEd: number;
+  TEd: number;
+  ec1: number;
+  nc: number;
+}
+
+export interface PrefaEtDalleRapporteeOutput {
+  NR: number;
+  MR: number;
+  tau_v: number;
+  tau_t: number;
+  tau_max: number;
+  taumax_limit: number;
+  is_ok_shear: boolean;
+  is_ok_nm: boolean;
+  diag: string[];
+  verdict: string;
+}
+
+export interface DallLignesDeRuptureInputs {
+  mu: number;
+  Lx: number;
+  Ly: number;
+  pas: number;
+  iter: number;
+}
+
+export interface DallLignesDeRuptureOutput {
+  mom: number;
+  mu_mom: number;
+  area: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface RotPlastoptimBInputs {
+  na: number;
+  L: number[];
+  ine: number[];
+  tg: number[];
+  tq: number[];
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  b: number;
+  h: number;
+  d: number;
+  hf: number;
+}
+
+export interface RotPlastoptimBOutput {
+  moments_appuis: number[];
+  moments_travee: number[];
+  Mrd: number[];
+  xud: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface DalldiffinInputs {
+  n: number;
+  h: number;
+  k_val: number;
+  GD: number;
+  nu: number;
+  p: number[][];
+  kn: number;
+  kw: number;
+  ke: number;
+  ks: number;
+  niter: number;
+}
+
+export interface DalldiffinOutput {
+  z: number[][];
+  max_deflection: number;
+  cas: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface BalconsInputs {
+  L: number;
+  Lg: number;
+  g0: number;
+  g1: number;
+  g2: number;
+  q: number;
+  psi: number;
+  Eqp: number;
+  Infi: number;
+  Ifi: number;
+  h: number;
+  fctm: number;
+}
+
+export interface BalconsOutput {
+  fleche: number;
+  Mcr: number;
+  courbure_max: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoteauPieuV3Inputs {
+  diam: number;
+  fck: number;
+  t0a: number;
+  T: number;
+  RH: number;
+  classe: string;
+  code: number;
+}
+
+export interface PoteauPieuV3Output {
+  phi_inf: number;
+  phi_t_t0: number;
+  t0_adj: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface CisaiSectionQQEnFCInputs {
+  NEd: number;
+  MEd: number;
+  R: number;
+  na: number;
+  Ac: number;
+  tabs: Array<[number, number, number]>;
+  fyk: number;
+  gs: number;
+  k: number;
+  euk: number;
+  fcd: number;
+  ec1: number;
+  ecu1: number;
+  typ: number;
+  itour: number;
+}
+
+export interface CisaiSectionQQEnFCOutput {
+  NRd: number;
+  MRd: number;
+  e1: number;
+  e2: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface DallesRotPlastMethGeneV4Inputs {
+  nap: number;
+  tLn: number[];
+  tEI: number[];
+  tp: number[];
+  tg: number[];
+  tMR: number[];
+  kkr: number;
+}
+
+export interface DallesRotPlastMethGeneV4Output {
+  moments_appuis: number[];
+  moments_travee: number[];
+  moments_max: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoutresRotPlastMethGeneV5Inputs {
+  nap: number;
+  tLn: number[];
+  tEI: number[];
+  tp: number[];
+  tg: number[];
+  tMR: number[];
+  tb: number[];
+  th: number[];
+  tbw: number[];
+  thf: number[];
+  kkr: number;
+}
+
+export interface PoutresRotPlastMethGeneV5Output {
+  moments_appuis: number[];
+  moments_travee: number[];
+  moments_max: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface EviterRotuleEnTraveeXInputs {
+  es: number;
+  Ac: number;
+  fyd: number;
+  ks: number;
+  euk: number;
+  b: number;
+  d: number;
+  fcd: number;
+  ecu2: number;
+  ec2: number;
+}
+
+export interface EviterRotuleEnTraveeXOutput {
+  MRd: number;
+  ss: number;
+  eps_s: number;
+  y: number;
+  z: number;
+  r: number;
+  g: number;
+  ec: number;
+  Fs: number;
+  Fc: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoutreContinueQtesV2Inputs {
+  nap: number;
+  tLn: number[];
+  tEI: number[];
+  tp: number[];
+  tg: number[];
+  tMR: number[];
+  tb: number[];
+  th: number[];
+  td: number[];
+  fck: number;
+  fyd: number;
+  cotq: number;
+}
+
+export interface PoutreContinueQtesV2Output {
+  moments_appuis: number[];
+  moments_travee: number[];
+  Vmin: number[];
+  Vmax: number[];
+  Asw: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface TraveeChargesQQInputs {
+  nc: number;
+  L: number;
+  tp1: number[];
+  tp2: number[];
+  ta: number[];
+  tb: number[];
+  Mg: number;
+  Md: number;
+}
+
+export interface TraveeChargesQQOutput {
+  x: number[];
+  moment: number[];
+  shear: number[];
+  charge: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface TracesCableDalleInputs {
+  L: number;
+  tp1: number[];
+  tp2: number[];
+  ta: number[];
+  tb: number[];
+  P: number;
+  del: number;
+  lam: number;
+  h: number;
+  c_inf: number;
+  c_sup: number;
+}
+
+export interface TracesCableDalleOutput {
+  x: number[];
+  moment: number[];
+  shear: number[];
+  cable_y: number[];
+  m_max: number;
+  m_min: number;
+  v_max: number;
+  w_bal: number;
+  pap: number;
+  ptr: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface SoilLayer186 {
+  h: number;
+  E: number;
+  nu: number;
+}
+
+export interface BoussinesqGrilleInputs {
+  B: number;
+  L: number;
+  q: number;
+  E: number;
+  nu: number;
+  z_max: number;
+  n_depth: number;
+  z_grid: number;
+  grid_n: number;
+  layers: SoilLayer186[];
+}
+
+export interface BoussinesqGrilleOutput {
+  depths: number[];
+  influence_center: number[];
+  influence_corner: number[];
+  stress_center: number[];
+  stress_corner: number[];
+  settlement_profile: number[];
+  settlement_total: number;
+  bulb_z_20: number;
+  bulb_z_10: number;
+  grid_x: number[];
+  grid_y: number[];
+  influence_grid: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface LoadedRect187 {
+  x1: number;
+  y1: number;
+  a: number;
+  b: number;
+  Gp: number;
+}
+
+export interface BoussinesqDtuInputs {
+  rects: LoadedRect187[];
+  x: number;
+  y: number;
+  z_max: number;
+  n_depth: number;
+}
+
+export interface BoussinesqDtuOutput {
+  depths: number[];
+  stress: number[];
+  per_rect_zref: number[];
+  z_ref: number;
+  sigma_max: number;
+  sigma_surf: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface SemelleCirculaireInputs {
+  D: number;
+  h: number;
+  d: number;
+  c_col: number;
+  Df: number;
+  N_ed: number;
+  M_ed: number;
+  V_ed: number;
+  gamma_sol: number;
+  c: number;
+  phi_deg: number;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+}
+
+export interface SemelleCirculaireOutput {
+  e: number;
+  contact: string;
+  q_max: number;
+  q_min: number;
+  A_prime: number;
+  q_ed: number;
+  q_rd: number;
+  ratio_bearing: number;
+  ratio_sliding: number;
+  ratio_overturn: number;
+  As_req: number;
+  v_ed: number;
+  v_rdc: number;
+  ratio_punch: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface RaftRotPlastInputs {
+  spans: number[];
+  g: number;
+  q: number;
+  gg: number;
+  gq: number;
+  b: number;
+  h: number;
+  d: number;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  euk: number;
+  k_steel: number;
+}
+
+export interface RaftRotPlastOutput {
+  support_m_min: number[];
+  support_m_max: number[];
+  span_m_max: number[];
+  as_sup: number[];
+  as_span: number[];
+  mrd_sup: number[];
+  mrd_span: number[];
+  xud: number[];
+  rotation_ok: boolean;
+  envelope_x: number[];
+  envelope_min: number[];
+  envelope_max: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface ComparFlechesInputs {
+  L: number;
+  b: number;
+  h: number;
+  d: number;
+  As: number;
+  Asc: number;
+  w_ser: number;
+  fck: number;
+  fyk: number;
+  phi: number;
+  beta: number;
+}
+
+export interface ComparFlechesOutput {
+  f_methods: number[];
+  method_names: string[];
+  f_adm: number;
+  ratios: number[];
+  m_max: number;
+  mcr: number;
+  i_uncr: number;
+  i_cr: number;
+  zeta: number;
+  curv_x: number[];
+  curv_chi: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface VoileVerifFcInputs {
+  Lw: number;
+  t: number;
+  fck: number;
+  fyk: number;
+  gc: number;
+  gs: number;
+  n_bars: number;
+  phi_dist: number;
+  A_end: number;
+  cover: number;
+  N_ed: number;
+  M_ed: number;
+  n_pts: number;
+}
+
+export interface VoileVerifFcOutput {
+  curve_n: number[];
+  curve_m: number[];
+  N_max: number;
+  N_min: number;
+  M_max: number;
+  Mrd_at_Ned: number;
+  ratio: number;
+  verdict: string;
+  diag: string[];
+}
+
+export interface FlecheNuisibleEC2V2DInputs {
+  b: number;
+  h: number;
+  bw: number;
+  hf: number;
+  d: number;
+  dp: number;
+  L: number;
+  fck: number;
+  fyd: number;
+  rho: number;
+  rho0: number;
+  As: number;
+  Mt: number;
+  Mq: number;
+  T: number;
+  t0: number;
+  RH: number;
+  classe: number;
+}
+
+export interface FlecheNuisibleEC2V2DOutput {
+  fleche_el: number;
+  fleche_fp: number;
+  fleche_fin: number;
+  Lim: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface CreepShrinkageEC2Draft7Inputs {
+  b: number;
+  h: number;
+  RH: number;
+  fck: number;
+  t0: number;
+  classe: number;
+}
+
+export interface CreepShrinkageEC2Draft7Output {
+  phi_inf: number;
+  phi_365: number;
+  eps_sh: number;
+  eps_cd: number;
+  eps_cds: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface CarottesEN13791Inputs {
+  n: number;
+  D: number;
+  phi: number;
+  td: number;
+  Lph: number;
+  ta: number;
+  m: number;
+}
+
+export interface CarottesEN13791Output {
+  fcm: number;
+  fck: number;
+  ka: number;
+  kn: number;
+  kaa: number;
+  Gp: number;
+  kbn: number;
+  fec: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PourcentageMiniAgeInputs {
+  b: number;
+  h: number;
+  d: number;
+  fck: number;
+  fyd: number;
+  t0: number;
+  RH: number;
+  classe: number;
+}
+
+export interface PourcentageMiniAgeOutput {
+  As_min: number;
+  As_min_age: number;
+  rho_min: number;
+  rho_min_age: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PotCirculaireFlamblEC2V2Inputs {
+  D: number;
+  Lo: number;
+  NEd: number;
+  e1: number;
+  fck: number;
+  fyk: number;
+  As: number;
+  phi: number;
+  cover: number;
+}
+
+export interface PotCirculaireFlamblEC2V2Output {
+  lambda: number;
+  lambda_lim: number;
+  phi_eff: number;
+  e2_mm: number;
+  M2: number;
+  M_tot: number;
+  N_Rd: number;
+  M_Rd: number;
+  ratio: number;
+  lo_curve: number[];
+  m2_curve: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface VoilesInertieVarIeqInputs {
+  b: number;
+  qb: number;
+  qh: number;
+  E: number;
+  heights: number[];
+  inertias: number[];
+}
+
+export interface VoilesInertieVarIeqOutput {
+  H: number;
+  V_base: number;
+  M_base: number;
+  f_top: number;
+  Ieq: number;
+  z: number[];
+  V: number[];
+  M: number[];
+  f: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface AncrageCrochetMandrinInputs {
+  phi: number;
+  FEd: number;
+  fck: number;
+  gc: number;
+  eta1: number;
+  a: number;
+  t: number;
+  c: number;
+  c1: number;
+  sc: number;
+  mandrels: number[];
+}
+
+export interface AncrageCrochetMandrinOutput {
+  Lbd: number;
+  Lav: number;
+  phim: number;
+  Lam: number;
+  mu: number;
+  needs_hook: boolean;
+  diag: string[];
+  verdict: string;
+}
+
+export interface VoilePortiqueRdcInputs {
+  l_wall: number;
+  t: number;
+  h: number;
+  e_mpa: number;
+  qh: number;
+  q_top: number;
+  rho_open: number;
+}
+
+export interface VoilePortiqueRdcOutput {
+  i_gross: number;
+  i_net: number;
+  i_eq: number;
+  delta_ref: number;
+  delta_eq: number;
+  v_base: number;
+  m_base: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PortiqueTraversesRigidesInputs {
+  n: number;
+  h: number;
+  fo: number;
+  i_col: number;
+  e_mpa: number;
+  kco: number;
+}
+
+export interface PortiqueTraversesRigidesOutput {
+  p_unif: number;
+  fpo_top: number;
+  fvo_top: number;
+  best_level: number;
+  i_eq: number;
+  dfm_min: number;
+  drift: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface AuxiliairesFlexionInputs {
+  m_ed: number;
+  b: number;
+  h: number;
+  d: number;
+  bw: number;
+  hf: number;
+  dp: number;
+  fck: number;
+  fyk: number;
+}
+
+export interface AuxiliairesFlexionOutput {
+  as_req: number;
+  as_comp: number;
+  x: number;
+  z: number;
+  pivot: string;
+  mu: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface ClasseExpositionInputs {
+  expo: number;
+  fck: number;
+  duree: number;
+  dalle: boolean;
+  liant: boolean;
+}
+
+export interface ClasseExpositionOutput {
+  classe: string;
+  fck_min: number;
+  ec_max: number;
+  s_class: number;
+  cmin_dur: number;
+  cnom: number;
+  note_ciment: string;
+  diag: string[];
+  verdict: string;
+}
+
+export interface FluageRetrait204Inputs {
+  b: number;
+  h: number;
+  fck: number;
+  t0: number;
+  t: number;
+  rh: number;
+  classe_ciment: string;
+}
+
+export interface FluageRetrait204Output {
+  h0: number;
+  ecm: number;
+  phi_0: number;
+  phi_t: number;
+  eps_cd: number;
+  eps_ca: number;
+  eps_cs: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PieuForceHorizMomentInputs {
+  b: number;
+  l: number;
+  e_mpa: number;
+  enc: number;
+  vt: number;
+  mt: number;
+  hc: number[];
+  kc: number[];
+}
+
+export interface PieuForceHorizMomentOutput {
+  lambda: number;
+  l_elastic: number;
+  k_eq: number;
+  y0: number;
+  theta0: number;
+  m_head: number;
+  m_max: number;
+  x_mmax: number;
+  p_max: number;
+  souple: boolean;
+  xs: number[];
+  ys: number[];
+  ms: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoteauFretteInputs {
+  d: number;
+  l: number;
+  c: number;
+  phi_sp: number;
+  s: number;
+  fck: number;
+  fyk: number;
+  as_long: number;
+  n_ed: number;
+}
+
+export interface PoteauFretteOutput {
+  dc: number;
+  rho_w: number;
+  sigma2: number;
+  fck_c: number;
+  n_rd: number;
+  ratio: number;
+  lambda: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface RotulePlastiqueInputs {
+  b: number;
+  d: number;
+  a_s: number;
+  fck: number;
+  fyk: number;
+  acier_b: boolean;
+  lambda_s: number;
+  theta_req: number;
+  delta: number;
+}
+
+export interface RotulePlastiqueOutput {
+  xu_d: number;
+  theta_allow: number;
+  theta_req: number;
+  delta_min: number;
+  redist_ok: boolean;
+  rot_ok: boolean;
+  diag: string[];
+  verdict: string;
+}
+
+export interface EffTrSectQqInputs {
+  v_ed: number;
+  n_ed: number;
+  bw: number;
+  d: number;
+  ac: number;
+  asl: number;
+  asw_s: number;
+  cot_theta: number;
+  fck: number;
+  fyk: number;
+}
+
+export interface EffTrSectQqOutput {
+  vrd_c: number;
+  vrd_s: number;
+  vrd_max: number;
+  vrd: number;
+  ratio: number;
+  arm_transv: boolean;
+  diag: string[];
+  verdict: string;
+}
+
+export interface FissureCercleInputs {
+  d: number;
+  n_bar: number;
+  phi: number;
+  c: number;
+  n_qp: number;
+  m_qp: number;
+  fck: number;
+  kt: number;
+  w_lim: number;
+}
+
+export interface FissureCercleOutput {
+  x: number;
+  sigma_s: number;
+  sr_max: number;
+  eps: number;
+  wk: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface FeuDallesAnalytiqueInputs {
+  h: number;
+  a: number;
+  a_s: number;
+  fck: number;
+  fyk: number;
+  r: number;
+  m_ed_fi: number;
+}
+
+export interface FeuDallesAnalytiqueOutput {
+  theta_g: number;
+  a500: number;
+  theta_s: number;
+  ks: number;
+  m_rd_fi: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoutresCroiseesInputs {
+  la: number;
+  lb: number;
+  eia: number;
+  eib: number;
+  q: number;
+  qa: number;
+  qb: number;
+}
+
+export interface PoutresCroiseesOutput {
+  qa_pt: number;
+  qb_pt: number;
+  m_a: number;
+  m_b: number;
+  y: number;
+  part_a: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface TraveeToutesChargesInputs {
+  l: number;
+  ei: number;
+  q: number;
+  p_vals: number[];
+  p_pos: number[];
+  m_vals: number[];
+  m_pos: number[];
+}
+
+export interface TraveeToutesChargesOutput {
+  ra: number;
+  rb: number;
+  m_max: number;
+  x_mmax: number;
+  m_min: number;
+  v_max: number;
+  y_max: number;
+  xs: number[];
+  ms: number[];
+  vs: number[];
+  ys: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface FeuPoutresAnalytiqueInputs {
+  b: number;
+  h: number;
+  a: number;
+  a_s: number;
+  fck: number;
+  fyk: number;
+  r: number;
+  m_ed_fi: number;
+  faces: number;
+}
+
+export interface FeuPoutresAnalytiqueOutput {
+  theta_g: number;
+  a500: number;
+  beff: number;
+  theta_s: number;
+  ks: number;
+  m_rd_fi: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface CorbeauFdInputs {
+  f_ed: number;
+  h_ed: number;
+  av: number;
+  ac: number;
+  b: number;
+  hc: number;
+  d: number;
+  lb: number;
+  asm: number;
+  fck: number;
+  fyk: number;
+}
+
+export interface CorbeauFdOutput {
+  cas: number;
+  cas_label: string;
+  as_main_req: number;
+  as_h: number;
+  as_v: number;
+  as_w: number;
+  as_ws: number;
+  vrdc: number;
+  bearing: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface InteractionMnFeuRectInputs {
+  b: number;
+  h: number;
+  a: number;
+  as_tot: number;
+  fck: number;
+  fyk: number;
+  r: number;
+  n_ed_fi: number;
+  m_ed_fi: number;
+  faces: number;
+}
+
+export interface InteractionMnFeuRectOutput {
+  theta_s: number;
+  ks: number;
+  n_max: number;
+  m_max: number;
+  ratio: number;
+  curve_m: number[];
+  curve_n: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface InteractionMFeuCircInputs {
+  d: number;
+  n_bar: number;
+  phi: number;
+  a: number;
+  fck: number;
+  fyk: number;
+  r: number;
+  n_ed_fi: number;
+  m_ed_fi: number;
+}
+
+export interface InteractionMFeuCircOutput {
+  theta_s: number;
+  ks: number;
+  d_res: number;
+  n_max: number;
+  m_max: number;
+  ratio: number;
+  curve_m: number[];
+  curve_n: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface FeuFlambementInputs {
+  section: number;
+  b: number;
+  h: number;
+  a: number;
+  as_tot: number;
+  l0fi: number;
+  fck: number;
+  fyk: number;
+  r: number;
+  n_ed_fi: number;
+}
+
+export interface FeuFlambementOutput {
+  az: number;
+  ac_fi: number;
+  lambda_fi: number;
+  chi: number;
+  n_rd_fi: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoutreSolElastiqueInputs {
+  l: number;
+  b: number;
+  h: number;
+  e_mpa: number;
+  ks: number;
+  p: number;
+  m0: number;
+  q: number;
+}
+
+export interface PoutreSolElastiqueOutput {
+  lambda: number;
+  l0: number;
+  y0: number;
+  m_max: number;
+  v_max: number;
+  p_max: number;
+  infini_ok: boolean;
+  xs: number[];
+  ys: number[];
+  ms: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface PieuxEluFlexionInputs {
+  d: number;
+  n_bar: number;
+  phi: number;
+  c: number;
+  fck: number;
+  fyk: number;
+  n_ed: number;
+  m_ed: number;
+}
+
+export interface PieuxEluFlexionOutput {
+  n_max: number;
+  m_max: number;
+  ratio: number;
+  x_eq: number;
+  curve_m: number[];
+  curve_n: number[];
+  diag: string[];
+  verdict: string;
+}
+
+export interface PieuxElsFlexionInputs {
+  d: number;
+  n_bar: number;
+  phi: number;
+  c: number;
+  fck: number;
+  fyk: number;
+  n_els: number;
+  m_els: number;
+}
+
+export interface PieuxElsFlexionOutput {
+  x: number;
+  sig_c: number;
+  sig_s: number;
+  ratio_c: number;
+  ratio_s: number;
+  neq: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface CourbesPointsInputs {
+  xs: number[];
+  ys: number[];
+  x_eval: number;
+}
+
+export interface CourbesPointsOutput {
+  degree: number;
+  coeffs: number[];
+  y_eval: number;
+  slope: number;
+  max_err: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface EquaDroitesCerclesInputs {
+  mode: number;
+  xa: number;
+  ya: number;
+  xb: number;
+  yb: number;
+  xc: number;
+  yc: number;
+  ra: number;
+  rb: number;
+}
+
+export interface EquaDroitesCerclesOutput {
+  kind: string;
+  u: number;
+  v: number;
+  w: number;
+  x0: number;
+  y0: number;
+  r: number;
+  n_pts: number;
+  ix1: number;
+  iy1: number;
+  ix2: number;
+  iy2: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface IntegrationNumInputs {
+  mode: number;
+  a: number;
+  b: number;
+  ys: number[];
+  coeffs: number[];
+}
+
+export interface IntegrationNumOutput {
+  integrale: number;
+  trapeze: number;
+  ecart: number;
+  moment: number;
+  centroide: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface CaracGeoInputs {
+  rects: number[];
+  rects_hole: number[];
+  circs: number[];
+  circs_hole: number[];
+}
+
+export interface CaracGeoOutput {
+  aire: number;
+  xg: number;
+  yg: number;
+  ix: number;
+  iy: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoutrePrecontrainteInputs {
+  ap: number;
+  sig_pmax: number;
+  ep: number;
+  mu: number;
+  theta: number;
+  k: number;
+  x: number;
+  l_beam: number;
+  slip: number;
+  ac: number;
+  ic: number;
+  e_tend: number;
+  m_pp: number;
+  ecm: number;
+  phi: number;
+  eps_cs: number;
+  dsigma_pr: number;
+  sig_c_qp: number;
+}
+
+export interface PoutrePrecontrainteOutput {
+  d_friction: number;
+  d_slip: number;
+  d_elastic: number;
+  d_deferred: number;
+  sig_pinf: number;
+  p_inf: number;
+  perte_pct: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoutreContinue2travInputs {
+  l1: number;
+  l2: number;
+  g1: number;
+  q1: number;
+  g2: number;
+  q2: number;
+  b: number;
+  hf: number;
+  bw: number;
+  d: number;
+  fck: number;
+  fyk: number;
+}
+
+export interface PoutreContinue2travOutput {
+  m_appui: number;
+  m_trav1: number;
+  m_trav2: number;
+  r0: number;
+  r1: number;
+  r2: number;
+  as_trav1: number;
+  as_trav2: number;
+  as_appui: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface DalleAlveoleeInputs {
+  b: number;
+  h: number;
+  n_vides: number;
+  d_vide: number;
+  ap: number;
+  sig_pinf: number;
+  c: number;
+  fck: number;
+  fpu: number;
+  m_ed: number;
+  v_ed: number;
+  m_els: number;
+}
+
+export interface DalleAlveoleeOutput {
+  aire: number;
+  inertie: number;
+  p_inf: number;
+  m_rd: number;
+  ratio_m: number;
+  v_rd: number;
+  ratio_v: number;
+  sig_top: number;
+  sig_bot: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface DalleRectTrapInputs {
+  lx: number;
+  ly: number;
+  q0: number;
+  q1: number;
+  h: number;
+  e_mpa: number;
+  m_rd: number;
+}
+
+export interface DalleRectTrapOutput {
+  mx: number;
+  my: number;
+  x_mx: number;
+  fleche: number;
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PlancherMetalliqueInputs {
+  l: number;
+  w: number;
+  p: number;
+  fy: number;
+  profil: number;
+  lim_fleche: number;
+}
+
+export interface PlancherMetalliqueOutput {
+  profil: string;
+  m_max: number;
+  v_max: number;
+  ratio_m: number;
+  ratio_v: number;
+  ratio_f: number;
+  masse: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface TreillisVerifInputs {
+  l: number;
+  z: number;
+  n_pan: number;
+  w: number;
+  fy: number;
+  chord_a: number;
+  chord_i: number;
+  diag_a: number;
+  diag_i: number;
+  vert_a: number;
+  vert_i: number;
+}
+
+export interface TreillisVerifOutput {
+  n_chord: number;
+  n_diag: number;
+  n_vert: number;
+  ratio_chord: number;
+  ratio_diag: number;
+  ratio_vert: number;
+  chi_diag: number;
+  chi_vert: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PortiqueNoeudsFixesInputs {
+  nodes_x: number[];
+  nodes_y: number[];
+  mem_n1: number[];
+  mem_n2: number[];
+  mem_ei: number[];
+  mem_w: number[];
+  supports: number[];
+}
+
+export interface PortiqueNoeudsFixesOutput {
+  joint_ids: number[];
+  thetas: number[];
+  mem_m1: number[];
+  mem_m2: number[];
+  m_max: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PortiqueCrossInputs {
+  nodes_x: number[];
+  nodes_y: number[];
+  mem_n1: number[];
+  mem_n2: number[];
+  mem_ei: number[];
+  mem_w: number[];
+  supports: number[];
+}
+
+export interface PortiqueCrossOutput {
+  cycles: number;
+  residu: number;
+  mem_m1: number[];
+  mem_m2: number[];
+  m_max: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface PoteauFlambementRectInputs {
+  b: number;
+  h: number;
+  L0: number;
+  e0: number;
+  NEd: number;
+  fck: number;
+  fyk: number;
+  As: number;
+  cover: number;
+  phi: number;
+}
+
+export interface PoteauFlambementRectOutput {
+  lambda: number;
+  lambda_lim: number;
+  EI: number;
+  Nb: number;
+  M0Ed: number;
+  MEd: number;
+  N_curve: number[];
+  M_curve: number[];
+  ratio: number;
+  diag: string[];
+  verdict: string;
+}
+
+export interface MandrinRenardInputs {
+  phi: number;
+  series: number[];
+}
+
+export interface MandrinRenardOutput {
+  mandrel: number;
+  index: number;
+  diag: string[];
+  verdict: string;
+}

@@ -1,0 +1,116 @@
+import { useState } from 'react';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import { SectionCanvas } from '../../components/drafting';
+import { PoteauLambdaminInputs, PoteauLambdaminOutput } from '../../types/engineering';
+
+export default function Module169() {
+  const [inp, setInp] = useState<PoteauLambdaminInputs>({
+    h: 300, L0: 3.0, N_ed: 500, fck: 30, d_mod: 300,
+  });
+  const { data: res, error: err, live } = useModuleCalc<PoteauLambdaminInputs, PoteauLambdaminOutput>(
+    'calculate_poteau_lambdamin_169', inp,
+  );
+  const S = (k: keyof PoteauLambdaminInputs) => (v: number) =>
+    setInp((p) => ({ ...p, [k]: v }));
+
+  const status = !res ? 'computing' : res.is_second_order_x || res.is_second_order_y ? 'warn' : 'pass';
+
+  const slider = (
+    key: keyof PoteauLambdaminInputs, label: string, unit: string,
+    min: number, max: number, step: number,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
+  return (
+    <Workstation
+      title="169 Poteau lambdamin"
+      subtitle="Vérification slenderness minimale (EC2 §5.8.3.1) — RUST"
+      eurocode="EC2 §5.8.3.1"
+      status={status}
+      live={live}
+      params={
+        <>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
+          {slider('h', 'h', 'mm', 100, 800, 10)}
+          {slider('L0', 'L0', 'm', 0.5, 12, 0.1)}
+          {slider('d_mod', 'd_mod', 'mm', 100, 800, 10)}
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux & Charges</div>
+          {slider('N_ed', 'N_ed', 'kN', 0, 5000, 50)}
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
+        </>
+      }
+      sketch={
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <SectionCanvas title="Slenderness" vbW={500} vbH={70}>
+            {res && (() => {
+              const maxVal = Math.max(res.lambda_x * 1.3, res.lambda_min_x * 1.5, 30);
+              const bx = 80, bw = 380;
+              const sc = bw / maxVal;
+              return (
+                <>
+                  <text x={bx - 5} y={20} fontSize={10} fill="#333" textAnchor="end">λ = {res.lambda_x.toFixed(1)}</text>
+                  <rect x={bx} y={10} width={Math.min(res.lambda_x * sc, bw)} height={16} fill="#6366F1" rx={3} />
+                  <text x={bx - 5} y={50} fontSize={10} fill="#333" textAnchor="end">λ_min = {res.lambda_min_x.toFixed(1)}</text>
+                  <rect x={bx} y={40} width={Math.min(res.lambda_min_x * sc, bw)} height={16}
+                    fill={res.is_second_order_x ? '#FBBF24' : '#22C55E'} rx={3} />
+                  <line x1={bx + res.lambda_min_x * sc} y1={8} x2={bx + res.lambda_min_x * sc} y2={60}
+                    stroke="#333" strokeWidth={2} strokeDasharray="4,3" />
+                </>
+              );
+            })()}
+          </SectionCanvas>
+        </div>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                {[
+                  ['λ', res.lambda_x.toFixed(1)],
+                  ['λ_min', res.lambda_min_x.toFixed(1)],
+                  ['2e ordre X', res.is_second_order_x ? 'Oui' : 'Non'],
+                  ['2e ordre Y', res.is_second_order_y ? 'Oui' : 'Non'],
+                ].map(([l, v]) => (
+                  <div key={l} className="bg-slate-50 dark:bg-white/5 rounded p-2">
+                    <div className="text-slate-500">{l}</div>
+                    <div className="font-bold">{v}</div>
+                  </div>
+                ))}
+              </div>
+              <FormulaCard
+                title="Élancement mini poteau"
+                latex={String.raw`\lambda_{lim} = \frac{20ABC}{\sqrt{n}}`}
+                description="EC2 §5.8.3.1"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                  { symbol: String.raw`\lambda`, meaning: 'Élancement', value: res.lambda_x.toFixed(1) },
+                  { symbol: String.raw`\lambda_{lim}`, meaning: 'Élancement limite', value: res.lambda_min_x.toFixed(1) },
+                  { symbol: String.raw`n`, meaning: 'Effort réduit', value: inp.N_ed, unit: 'kN' },
+                ]}
+              />
+              <div className={`p-2 rounded text-xs font-semibold ${!res.is_second_order_x ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'}`}>
+                {res.verdict}
+              </div>
+              <ul className="text-xs space-y-1">
+                {(res.is_second_order_x || res.is_second_order_y) && (
+                  <li className="font-mono text-amber-600">ATTENTION : effets du second ordre à prendre en compte</li>
+                )}
+                {res.diag.map((d: string, i: number) => (
+                  <li key={i} className="font-mono text-slate-600 dark:text-slate-400">{d}</li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
+  );
+}

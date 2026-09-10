@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer, Cell,
 } from 'recharts';
 import type { Slab107Inputs, Slab107Output } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 interface Load {
   q: number;
@@ -37,10 +42,12 @@ const DEF: Slab107Inputs = {
   y0: 0,
 };
 
+
 export default function Module107() {
   const [inp, setInp] = useState<Slab107Inputs>(DEF);
-  const [res, setRes] = useState<Slab107Output | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<Slab107Inputs, Slab107Output>(
+    'calculate_slab_107', inp,
+  );
 
   const S = (k: keyof Slab107Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
@@ -89,13 +96,6 @@ export default function Module107() {
     }));
   };
 
-  useEffect(() => {
-    let dead = false;
-    invoke<Slab107Output>('calculate_slab_107', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
 
   const bars = res
     ? [
@@ -105,32 +105,37 @@ export default function Module107() {
       ]
     : [];
 
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof Slab107Inputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
   return (
-    <div className="grid grid-cols-12 gap-4">
-      {/* ─── Input Panel ─── */}
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <div>
-          <h2 className="text-sm font-bold">
-            107 Dalle DTU 13.3{' '}
-            <span className="font-mono text-[11px] text-emerald-500">RUST</span>
-          </h2>
-          <p className="text-[11px] text-slate-500">
-            D'après EGF N°107 © Henry Thonier — DTU 13.3
-          </p>
-        </div>
+    <Workstation
+      title="107 Dalle DTU 13.3"
+      subtitle="D'après EGF N°107 © Henry Thonier — DTU 13.3"
+      eurocode="DTU 13.3"
+      status={status}
+      live={live}
+      params={
+        <>
 
         {/* Slab geometry */}
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="H dalle" unit="m" value={inp.h} onChange={S('h')} min={0.1} max={1} step={0.01} />
-          <NumField label="fc28" unit="MPa" value={inp.fc28} onChange={S('fc28')} min={20} max={60} step={1} />
-          <NumField label="ν béton" unit="–" value={inp.nub} onChange={S('nub')} min={0.1} max={0.3} step={0.01} />
-          <NumField label="φ fluage" unit="–" value={inp.phi} onChange={S('phi')} min={0} max={4} step={0.5} />
+          {slider('h', 'H dalle', 'm', 0.1, 1, 0.01)}
+          {slider('fc28', 'fc28', 'MPa', 20, 60, 1)}
+          {slider('nub', 'ν béton', '–', 0.1, 0.3, 0.01)}
+          {slider('phi', 'φ fluage', '–', 0, 4, 0.5)}
         </div>
 
         {/* Target point */}
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="x₀" unit="m" value={inp.x0} onChange={S('x0')} min={-50} max={50} step={0.5} />
-          <NumField label="y₀" unit="m" value={inp.y0} onChange={S('y0')} min={-50} max={50} step={0.5} />
+          {slider('x0', 'x₀', 'm', -50, 50, 0.5)}
+          {slider('y0', 'y₀', 'm', -50, 50, 0.5)}
         </div>
 
         {/* Soil layers */}
@@ -146,9 +151,9 @@ export default function Module107() {
                   className="absolute top-1 right-1 text-[10px] text-red-400 hover:text-red-600">✕</button>
                 <div className="text-[10px] text-slate-400 font-mono">Couche {i + 1}</div>
                 <div className="grid grid-cols-3 gap-1">
-                  <NumField label="H" unit="m" value={layer.h_s} onChange={(v) => updateLayer(i, 'h_s', v)} min={0.1} max={20} step={0.5} />
-                  <NumField label="ν" unit="–" value={layer.nu} onChange={(v) => updateLayer(i, 'nu', v)} min={0.1} max={0.5} step={0.05} />
-                  <NumField label="Es" unit="MPa" value={layer.es} onChange={(v) => updateLayer(i, 'es', v)} min={5} max={500} step={5} />
+                  <ParamSlider label="H" unit="m" value={layer.h_s} min={0.1} max={20} step={0.5} onChange={(v) => updateLayer(i, 'h_s', v)} />
+                  <ParamSlider label="ν" unit="–" value={layer.nu} min={0.1} max={0.5} step={0.05} onChange={(v) => updateLayer(i, 'nu', v)} />
+                  <ParamSlider label="Es" unit="MPa" value={layer.es} min={5} max={500} step={5} onChange={(v) => updateLayer(i, 'es', v)} />
                 </div>
               </div>
             ))}
@@ -168,9 +173,9 @@ export default function Module107() {
                   className="absolute top-1 right-1 text-[10px] text-red-400 hover:text-red-600">✕</button>
                 <div className="text-[10px] text-slate-400 font-mono">Q{i + 1}</div>
                 <div className="grid grid-cols-3 gap-1">
-                  <NumField label="Q" unit="kN" value={load.q} onChange={(v) => updateLoad(i, 'q', v)} min={0} max={1000} step={10} />
-                  <NumField label="x" unit="m" value={load.x} onChange={(v) => updateLoad(i, 'x', v)} min={-50} max={50} step={0.5} />
-                  <NumField label="y" unit="m" value={load.y} onChange={(v) => updateLoad(i, 'y', v)} min={-50} max={50} step={0.5} />
+                  <ParamSlider label="Q" unit="kN" value={load.q} min={0} max={1000} step={10} onChange={(v) => updateLoad(i, 'q', v)} />
+                  <ParamSlider label="x" unit="m" value={load.x} min={-50} max={50} step={0.5} onChange={(v) => updateLoad(i, 'x', v)} />
+                  <ParamSlider label="y" unit="m" value={load.y} min={-50} max={50} step={0.5} onChange={(v) => updateLoad(i, 'y', v)} />
                 </div>
               </div>
             ))}
@@ -182,11 +187,10 @@ export default function Module107() {
             {err}
           </p>
         )}
-      </div>
-
-      {/* ─── Charts + Results ─── */}
-      <div className="col-span-5 space-y-4">
-        {/* Bar chart */}
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Résultats</h2>
           <div className="h-[220px]">
@@ -224,11 +228,8 @@ export default function Module107() {
             </div>
           )}
         </div>
-
-        {/* Settlement profile SVG */}
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Profil de tassement (live SVG)</h2>
-          <svg viewBox="0 0 400 200" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Profil de tassement (live SVG)" vbW={400} vbH={200}>
             {(() => {
               const ox = 40, oy = 30, w = 340, h = 140;
               const sc = 5000; // mm scale
@@ -253,20 +254,16 @@ export default function Module107() {
 
               return (
                 <g>
-                  {/* Original ground line */}
                   <line x1={ox} y1={oy} x2={ox + w} y2={oy} stroke="#94a3b8" strokeWidth={1} strokeDasharray="4 3" />
                   <text x={ox - 5} y={oy + 4} textAnchor="end" fontSize={8} fill="#94a3b8">0</text>
 
-                  {/* Settlement area */}
                   <path d={pathD} fill="#2563eb" opacity={0.15} />
 
-                  {/* Settlement curve */}
                   <polyline
                     points={profile.map((p) => `${p.x},${p.y}`).join(' ')}
                     fill="none" stroke="#2563eb" strokeWidth={2}
                   />
 
-                  {/* Load positions */}
                   {inp.loads.map((load, i) => {
                     const frac = (load.x - inp.x0 + 5) / 10; // normalize to [0,1]
                     const px = ox + Math.max(0, Math.min(1, frac)) * w;
@@ -280,25 +277,36 @@ export default function Module107() {
                     );
                   })}
 
-                  {/* Scale label */}
                   <text x={ox - 5} y={oy + (res ? res.settlement * 1000 * sc : 50) + 4}
                     textAnchor="end" fontSize={7} fill="#2563eb">
                     {res ? `${(res.settlement * 1000).toFixed(1)}mm` : ''}
                   </text>
 
-                  {/* Labels */}
                   <text x={ox + w / 2} y={oy + h + 15} textAnchor="middle" fontSize={8} fill="#64748b">
                     Distance (m)
                   </text>
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
 
-      {/* ─── AI Diagnostics ─── */}
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Tassement DTU 13.3"
+                latex={String.raw`s = \sum_i \frac{\Delta\sigma_{zi} \, h_i}{E_{oed,i}}`}
+                description="Somme oedométrique par couches"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`\Delta\sigma_z`, meaning: 'Surcontrainte verticale', value: res.as_req.toFixed(1) },
+                    { symbol: String.raw`E_{oed}`, meaning: 'Module oedométrique', value: res.m_els.toFixed(2) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {!res ? (
           <p className="text-xs text-slate-500">computing…</p>
@@ -328,7 +336,12 @@ export default function Module107() {
             </li>
           </ul>
         )}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

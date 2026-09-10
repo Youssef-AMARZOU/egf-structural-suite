@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { FileOuverturesInputs, FileOuverturesOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: FileOuverturesInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -13,73 +18,65 @@ const DEFAULT: FileOuverturesInputs = {
   ome: 0.5,
 };
 
+
 export default function Module148() {
   const [inp, setInp] = useState<FileOuverturesInputs>(DEFAULT);
-  const [res, setRes] = useState<FileOuverturesOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<FileOuverturesInputs, FileOuverturesOutput>(
+    'calculate_file_ouvertures_148', inp,
+  );
   const S = (k: keyof FileOuverturesInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<FileOuverturesOutput>('calculate_file_ouvertures_148', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof FileOuverturesInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">148 File Ouvertures <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Voile 2 refends — Henry Thonier 1994</p>
+    <Workstation
+      title="148 File Ouvertures"
+      subtitle="Voile 2 refends — Henry Thonier 1994"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="GH" unit="mm" value={inp.gh} onChange={S('gh')} min={500} max={20000} step={100} />
-          <NumField label="h" unit="mm" value={inp.h} onChange={S('h')} min={50} max={500} step={10} />
-          <NumField label="L" unit="mm" value={inp.l} onChange={S('l')} min={100} max={5000} step={50} />
-          <NumField label="H1" unit="mm" value={inp.h1} onChange={S('h1')} min={50} max={500} step={10} />
-          <NumField label="H2" unit="mm" value={inp.h2} onChange={S('h2')} min={50} max={500} step={10} />
-          <NumField label="e" unit="mm" value={inp.e} onChange={S('e')} min={50} max={500} step={10} />
-          <NumField label="ω" unit="-" value={inp.ome} onChange={S('ome')} min={0.01} max={2} step={0.01} />
+          {slider('gh', 'GH', 'mm', 500, 20000, 100)}
+          {slider('h', 'h', 'mm', 50, 500, 10)}
+          {slider('l', 'L', 'mm', 100, 5000, 50)}
+          {slider('h1', 'H1', 'mm', 50, 500, 10)}
+          {slider('h2', 'H2', 'mm', 50, 500, 10)}
+          {slider('e', 'e', 'mm', 50, 500, 10)}
+          {slider('ome', 'ω', '-', 0.01, 2, 0.01)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitations</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="P1" unit="kN" value={inp.p1} onChange={S('p1')} min={0} max={1000} step={10} />
-          <NumField label="P2" unit="kN" value={inp.p2} onChange={S('p2')} min={0} max={1000} step={10} />
+          {slider('p1', 'P1', 'kN', 0, 1000, 10)}
+          {slider('p2', 'P2', 'kN', 0, 1000, 10)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>α = <b>{res.alpha.toFixed(3)}</b> | ω = {res.omega.toFixed(3)}</div>
-              <div>GM_max = <b>{res.gm_max.toFixed(2)}</b> kN·m</div>
-              <div>GV_max = <b>{res.gv_max.toFixed(2)}</b> kN</div>
-              <div>GN_max = <b>{res.gn_max.toFixed(2)}</b> kN</div>
-              <div>f_max = <b>{res.f_max.toFixed(3)}</b> mm</div>
-              <div>I12 = {res.i12.toFixed(3)}</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Diagramme M-V</h2>
-          <svg viewBox="0 0 500 200" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Diagramme M-V" vbW={500} vbH={200}>
             {res && (() => {
               const ox = 40, oy = 20, w = 420, h = 160;
               const gmMax = Math.max(...res.gm.map(Math.abs), 0.001);
@@ -103,11 +100,39 @@ export default function Module148() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>α = <b>{res.alpha.toFixed(3)}</b> | ω = {res.omega.toFixed(3)}</div>
+              <div>GM_max = <b>{res.gm_max.toFixed(2)}</b> kN·m</div>
+              <div>GV_max = <b>{res.gv_max.toFixed(2)}</b> kN</div>
+              <div>GN_max = <b>{res.gn_max.toFixed(2)}</b> kN</div>
+              <div>f_max = <b>{res.f_max.toFixed(3)}</b> mm</div>
+              <div>I12 = {res.i12.toFixed(3)}</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Voile à ouvertures (Thonier)"
+                latex={String.raw`M_{tot} = \sum M_i`}
+                description="Répartition entre refends, 2 files"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`M_{tot}`, meaning: 'Moment total', value: res.alpha.toFixed(3) },
+                    { symbol: String.raw`M_i`, meaning: 'Part par refend', value: res.omega.toFixed(3) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -128,7 +153,12 @@ export default function Module148() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

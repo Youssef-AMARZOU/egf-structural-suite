@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { OuverPoutInputs, OuverPoutOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas, DimensionLine,
+} from '../../components/drafting';
 
 const DEFAULT: OuverPoutInputs = {
   ned: 0.5, b: 0.3, d: 0.5, fcd: 20, m1: 0.2, fyd: 435,
@@ -9,49 +14,90 @@ const DEFAULT: OuverPoutInputs = {
   v_ed: 0.1, sigma_max: 5.0, q_angle: 45,
 };
 
+
 export default function Module123() {
   const [inp, setInp] = useState<OuverPoutInputs>(DEFAULT);
-  const [res, setRes] = useState<OuverPoutOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<OuverPoutInputs, OuverPoutOutput>(
+    'calculate_ouver_pout_123', inp,
+  );
   const S = (k: keyof OuverPoutInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<OuverPoutOutput>('calculate_ouver_pout_123', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof OuverPoutInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">123 Ouver. Poutre <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
+    <Workstation
+      title="123 Ouver. Poutre"
+      subtitle="D'après EGF N°123 © Henry Thonier — RUST"
+      status={status}
+      live={live}
+      params={
+        <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Section</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="b" unit="m" value={inp.b} onChange={S('b')} min={0.1} max={2} step={0.05} />
-          <NumField label="d" unit="m" value={inp.d} onChange={S('d')} min={0.1} max={3} step={0.05} />
+          {slider('b', 'b', 'm', 0.1, 2, 0.05)}
+          {slider('d', 'd', 'm', 0.1, 3, 0.05)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Efforts</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="NEd" unit="MN" value={inp.ned} onChange={S('ned')} min={0} max={50} step={0.1} />
-          <NumField label="M₁" unit="MNm" value={inp.m1} onChange={S('m1')} min={0} max={20} step={0.05} />
-          <NumField label="VEd" unit="MN" value={inp.v_ed} onChange={S('v_ed')} min={0} max={10} step={0.05} />
+          {slider('ned', 'NEd', 'MN', 0, 50, 0.1)}
+          {slider('m1', 'M₁', 'MNm', 0, 20, 0.05)}
+          {slider('v_ed', 'VEd', 'MN', 0, 10, 0.05)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fcd" unit="MPa" value={inp.fcd} onChange={S('fcd')} min={5} max={60} step={1} />
-          <NumField label="fyd" unit="MPa" value={inp.fyd} onChange={S('fyd')} min={200} max={500} step={5} />
+          {slider('fcd', 'fcd', 'MPa', 5, 60, 1)}
+          {slider('fyd', 'fyd', 'MPa', 200, 500, 5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Acier</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="μ₀" unit="-" value={inp.mu0} onChange={S('mu0')} min={0.1} max={0.5} step={0.01} />
-          <NumField label="k" unit="-" value={inp.k} onChange={S('k')} min={1.0} max={1.15} step={0.01} />
-          <NumField label="θ" unit="°" value={inp.q_angle} onChange={S('q_angle')} min={20} max={70} step={5} />
+          {slider('mu0', 'μ₀', '-', 0.1, 0.5, 0.01)}
+          {slider('k', 'k', '-', 1.0, 1.15, 0.01)}
+          {slider('q_angle', 'θ', '°', 20, 70, 5)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
+<div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+  <SectionCanvas title="Poutre avec trémie" vbW={600} vbH={260}>
+    {(() => {
+      const sc = 400;
+      const W = Math.max(60, inp.b * sc); const H = Math.max(80, inp.d * sc);
+      const ox = 300 - W / 2; const oy = 30;
+      const ow = W * 0.4; const oh = H * 0.4;
+      return (
+        <g>
+          <rect x={ox} y={oy} width={W} height={H} fill="#e2e8f0" stroke="#64748b" strokeWidth={1} />
+          <rect x={ox + W / 2 - ow / 2} y={oy + H / 2 - oh / 2} width={ow} height={oh} fill="#ffffff" stroke="#ef4444" strokeWidth={1.2} strokeDasharray="4 2" />
+          <line x1={ox + W / 2 - ow / 2} y1={oy + H / 2 - oh / 2} x2={ox + W / 2 + ow / 2} y2={oy + H / 2 + oh / 2} stroke="#2563eb" strokeWidth={1} />
+          <line x1={ox + W / 2 + ow / 2} y1={oy + H / 2 - oh / 2} x2={ox + W / 2 - ow / 2} y2={oy + H / 2 + oh / 2} stroke="#2563eb" strokeWidth={1} />
+          <DimensionLine x1={ox} y1={oy + H} x2={ox + W} y2={oy + H} offset={22} text={`b = ${inp.b} m`} />
+          <DimensionLine x1={ox} y1={oy} x2={ox} y2={oy + H} offset={-30} text={`d = ${inp.d} m`} />
+          {res && (
+            <text x={ox + W / 2} y={oy + H + 40} textAnchor="middle" fontSize={11} fill="#2563eb" fontWeight="bold">
+              As={(res.as_req * 10000).toFixed(1)} cm²
+            </text>
+          )}
+        </g>
+      );
+    })()}
+  </SectionCanvas>
+</div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <h2 className="text-sm font-bold mb-2">Résultats</h2>
           {res && (
@@ -67,8 +113,16 @@ export default function Module123() {
             </div>
           )}
         </div>
-      </div>
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Trémie en poutre"
+                latex={String.raw`A_{diag} = \frac{V_{Ed}}{f_{yd}\sin\alpha}`}
+                description="Suspentes autour de l'ouverture"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`V_{Ed}`, meaning: 'Effort à suspendre', value: inp.v_ed },
+                    { symbol: String.raw`\alpha`, meaning: 'Angle des suspentes', value: res.alpha_cw.toFixed(2) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <ul className="text-xs space-y-2">
@@ -78,7 +132,12 @@ export default function Module123() {
             <li className="text-slate-500">• σs = {res.sigma_s.toFixed(0)} MPa</li>
           </ul>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

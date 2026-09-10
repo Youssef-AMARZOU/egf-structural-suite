@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { EffTrChargPresAppuiInputs, EffTrChargPresAppuiOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: EffTrChargPresAppuiInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -15,91 +20,81 @@ const DEFAULT: EffTrChargPresAppuiInputs = {
   alpha: 0.0,
 };
 
+
 export default function Module132() {
   const [inp, setInp] = useState<EffTrChargPresAppuiInputs>(DEFAULT);
-  const [res, setRes] = useState<EffTrChargPresAppuiOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<EffTrChargPresAppuiInputs, EffTrChargPresAppuiOutput>(
+    'calculate_eff_tr_charg_pres_appui_132', inp,
+  );
   const S = (k: keyof EffTrChargPresAppuiInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<EffTrChargPresAppuiOutput>('calculate_eff_tr_charg_pres_appui_132', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : res.ratio_v <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof EffTrChargPresAppuiInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">132 Eff. Tranch. Appuis <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Cisaillement EC2 — charges près des appuis, β, enveloppe</p>
+    <Workstation
+      title="132 Eff. Tranch. Appuis"
+      subtitle="Cisaillement EC2 — charges près des appuis, β, enveloppe"
+      eurocode="EC2"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Poutre</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="bw" unit="mm" value={inp.bw} onChange={S('bw')} min={100} max={1000} step={10} />
-          <NumField label="h" unit="mm" value={inp.h} onChange={S('h')} min={100} max={1500} step={10} />
-          <NumField label="d" unit="mm" value={inp.d} onChange={S('d')} min={50} max={1400} step={5} />
-          <NumField label="L" unit="mm" value={inp.l} onChange={S('l')} min={1000} max={20000} step={100} />
+          {slider('bw', 'bw', 'mm', 100, 1000, 10)}
+          {slider('h', 'h', 'mm', 100, 1500, 10)}
+          {slider('d', 'd', 'mm', 50, 1400, 5)}
+          {slider('l', 'L', 'mm', 1000, 20000, 100)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Charges réparties</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="p" unit="kN/m" value={inp.p} onChange={S('p')} min={0} max={100} step={1} />
-          <NumField label="M1" unit="kN·m" value={inp.m1} onChange={S('m1')} min={-500} max={500} step={5} />
-          <NumField label="M2" unit="kN·m" value={inp.m2} onChange={S('m2')} min={-500} max={500} step={5} />
+          {slider('p', 'p', 'kN/m', 0, 100, 1)}
+          {slider('m1', 'M1', 'kN·m', -500, 500, 5)}
+          {slider('m2', 'M2', 'kN·m', -500, 500, 5)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Charges concentrées</div>
         <div className="grid grid-cols-3 gap-2">
           {[0, 1, 2].map((i) => (
             <div key={i} className="space-y-1">
-              <NumField label={`Q${i + 1}`} unit="kN" value={inp.tab_q[i] || 0} onChange={(v) => { const q = [...inp.tab_q]; q[i] = v; setInp((p) => ({ ...p, tab_q: q })); }} min={0} max={1000} step={10} />
-              <NumField label={`a${i + 1}`} unit="mm" value={inp.tab_a[i] || 0} onChange={(v) => { const a = [...inp.tab_a]; a[i] = v; setInp((p) => ({ ...p, tab_a: a })); }} min={0} max={20000} step={100} />
-              <NumField label={`pad${i + 1}`} unit="mm" value={inp.tab_pad[i] || 0} onChange={(v) => { const pad = [...inp.tab_pad]; pad[i] = v; setInp((p) => ({ ...p, tab_pad: pad })); }} min={0} max={1000} step={50} />
+              <ParamSlider label="?" unit="kN" value={inp.tab_q[i] || 0} min={0} max={1000} step={10} onChange={(v) => { const q = [...inp.tab_q]; q[i] = v; setInp((p) => ({ ...p, tab_q: q })); }} />
+              <ParamSlider label="?" unit="mm" value={inp.tab_a[i] || 0} min={0} max={20000} step={100} onChange={(v) => { const a = [...inp.tab_a]; a[i] = v; setInp((p) => ({ ...p, tab_a: a })); }} />
+              <ParamSlider label="?" unit="mm" value={inp.tab_pad[i] || 0} min={0} max={1000} step={50} onChange={(v) => { const pad = [...inp.tab_pad]; pad[i] = v; setInp((p) => ({ ...p, tab_pad: pad })); }} />
             </div>
           ))}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Bielle</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="cot θ" unit="-" value={inp.theta} onChange={S('theta')} min={0.5} max={2.5} step={0.1} />
-          <NumField label="cot α" unit="-" value={inp.alpha} onChange={S('alpha')} min={0} max={2.5} step={0.1} />
+          {slider('theta', 'cot θ', '-', 0.5, 2.5, 0.1)}
+          {slider('alpha', 'cot α', '-', 0, 2.5, 0.1)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>V.gauche = <b>{res.v_left.toFixed(1)}</b> kN | V.droit = <b>{res.v_right.toFixed(1)}</b> kN</div>
-              <div>V,max = <b>{res.v_max.toFixed(1)}</b> kN</div>
-              <hr className="border-slate-200 dark:border-white/10 my-2" />
-              <div>VRd,c = <b>{res.v_rdc.toFixed(1)}</b> kN</div>
-              <div>VRd,max = <b>{res.v_rdc_max.toFixed(1)}</b> kN</div>
-              <div>VRd,s = <b>{res.v_rds.toFixed(1)}</b> kN</div>
-              <div>Asw/s = <b>{(res.asw_s * 10000).toFixed(2)}</b> cm²/m</div>
-              <div>Asw/s,g = <b>{(res.asw_s_left * 10000).toFixed(2)}</b> | Asw/s,d = <b>{(res.asw_s_right * 10000).toFixed(2)}</b></div>
-              <div>z = <b>{res.z.toFixed(1)}</b> mm | cot θ = <b>{res.cot_theta.toFixed(2)}</b></div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Coupe — Enveloppe V(x)</h2>
-          <svg viewBox="0 0 400 160" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Coupe — Enveloppe V(x)" vbW={400} vbH={160}>
             {res && (() => {
               const ox = 40, oy = 80, w = 340, h = 120;
               const env = res.shear_envelope;
@@ -170,12 +165,10 @@ export default function Module132() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Coupe — Bielle inclinée</h2>
-          <svg viewBox="0 0 400 140" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Coupe — Bielle inclinée" vbW={400} vbH={140}>
             {res && (() => {
               const ox = 100, oy = 20, bw = 60, h = 80;
               const thetaAngle = Math.atan(1 / res.cot_theta);
@@ -208,11 +201,43 @@ export default function Module132() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>V.gauche = <b>{res.v_left.toFixed(1)}</b> kN | V.droit = <b>{res.v_right.toFixed(1)}</b> kN</div>
+              <div>V,max = <b>{res.v_max.toFixed(1)}</b> kN</div>
+              <hr className="border-slate-200 dark:border-white/10 my-2" />
+              <div>VRd,c = <b>{res.v_rdc.toFixed(1)}</b> kN</div>
+              <div>VRd,max = <b>{res.v_rdc_max.toFixed(1)}</b> kN</div>
+              <div>VRd,s = <b>{res.v_rds.toFixed(1)}</b> kN</div>
+              <div>Asw/s = <b>{(res.asw_s * 10000).toFixed(2)}</b> cm²/m</div>
+              <div>Asw/s,g = <b>{(res.asw_s_left * 10000).toFixed(2)}</b> | Asw/s,d = <b>{(res.asw_s_right * 10000).toFixed(2)}</b></div>
+              <div>z = <b>{res.z.toFixed(1)}</b> mm | cot θ = <b>{res.cot_theta.toFixed(2)}</b></div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+
+              <FormulaCard
+                title="Cisaillement près appuis"
+                latex={String.raw`V_{Rd,s} = \frac{A_{sw}}{s} z f_{ywd} \cot\theta`}
+                description="Avec réduction β des charges proches"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`\beta`, meaning: 'Facteur de proximité', value: res.v_left.toFixed(1) },
+                    { symbol: String.raw`V_{Ed}`, meaning: 'Effort réduit', value: res.v_right.toFixed(1) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -238,7 +263,12 @@ export default function Module132() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

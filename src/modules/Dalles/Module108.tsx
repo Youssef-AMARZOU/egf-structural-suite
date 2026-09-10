@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { NavierInputs, NavierOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: NavierInputs = {
   h: 200, e: 30000, nu: 0.2,
@@ -10,72 +15,65 @@ const DEFAULT: NavierInputs = {
   x: 3.0, y: 2.5, n_terms: 20,
 };
 
+
 export default function Module108() {
   const [inp, setInp] = useState<NavierInputs>(DEFAULT);
-  const [res, setRes] = useState<NavierOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<NavierInputs, NavierOutput>(
+    'calculate_navier_108', inp,
+  );
   const S = (k: keyof NavierInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<NavierOutput>('calculate_navier_108', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof NavierInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <div>
-          <h2 className="text-sm font-bold">108 Navier <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-          <p className="text-[11px] text-slate-500">Série de Navier — dalle rectangulaire</p>
-        </div>
+    <Workstation
+      title="108 Navier"
+      subtitle="Série de Navier — dalle rectangulaire"
+      status={status}
+      live={live}
+      params={
+        <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Dalle</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="h" unit="mm" value={inp.h} onChange={S('h')} min={80} max={800} step={10} />
-          <NumField label="E" unit="MPa" value={inp.e} onChange={S('e')} min={5000} max={50000} step={1000} />
-          <NumField label="ν" unit="-" value={inp.nu} onChange={S('nu')} min={0} max={0.5} step={0.01} />
+          {slider('h', 'h', 'mm', 80, 800, 10)}
+          {slider('e', 'E', 'MPa', 5000, 50000, 1000)}
+          {slider('nu', 'ν', '-', 0, 0.5, 0.01)}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="LA" unit="m" value={inp.la} onChange={S('la')} min={1} max={30} step={0.5} />
-          <NumField label="LB" unit="m" value={inp.lb} onChange={S('lb')} min={1} max={30} step={0.5} />
+          {slider('la', 'LA', 'm', 1, 30, 0.5)}
+          {slider('lb', 'LB', 'm', 1, 30, 0.5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Charge</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="q" unit="kPa" value={inp.q} onChange={S('q')} min={0} max={100} step={0.5} />
-          <NumField label="A1" unit="m" value={inp.a1} onChange={S('a1')} min={0} max={30} step={0.1} />
-          <NumField label="A2" unit="m" value={inp.a2} onChange={S('a2')} min={0} max={30} step={0.1} />
+          {slider('q', 'q', 'kPa', 0, 100, 0.5)}
+          {slider('a1', 'A1', 'm', 0, 30, 0.1)}
+          {slider('a2', 'A2', 'm', 0, 30, 0.1)}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="B1" unit="m" value={inp.b1} onChange={S('b1')} min={0} max={30} step={0.1} />
-          <NumField label="B2" unit="m" value={inp.b2} onChange={S('b2')} min={0} max={30} step={0.1} />
+          {slider('b1', 'B1', 'm', 0, 30, 0.1)}
+          {slider('b2', 'B2', 'm', 0, 30, 0.1)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Point d'éval</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="X" unit="m" value={inp.x} onChange={S('x')} min={0} max={30} step={0.1} />
-          <NumField label="Y" unit="m" value={inp.y} onChange={S('y')} min={0} max={30} step={0.1} />
-          <NumField label="Termes" unit="-" value={inp.n_terms} onChange={S('n_terms')} min={5} max={50} step={1} />
+          {slider('x', 'X', 'm', 0, 30, 0.1)}
+          {slider('y', 'Y', 'm', 0, 30, 0.1)}
+          {slider('n_terms', 'Termes', '-', 5, 50, 1)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>Mx = <b>{res.mx.toFixed(2)}</b> kNm/m</div>
-              <div>My = <b>{res.my.toFixed(2)}</b> kNm/m</div>
-              <div>Mxy = <b>{res.mxy.toFixed(2)}</b> kNm/m</div>
-              <div>w = <b>{res.w.toFixed(2)}</b> mm</div>
-              <div>D = <b>{res.d_rig.toFixed(1)}</b> kNm</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Plan (live SVG)</h2>
-          <svg viewBox="0 0 300 250" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Plan (live SVG)" vbW={300} vbH={250}>
             {(() => {
               const sc = 30; const ox = 30, oy = 25;
               const la = inp.la * sc, lb = inp.lb * sc;
@@ -90,10 +88,37 @@ export default function Module108() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>Mx = <b>{res.mx.toFixed(2)}</b> kNm/m</div>
+              <div>My = <b>{res.my.toFixed(2)}</b> kNm/m</div>
+              <div>Mxy = <b>{res.mxy.toFixed(2)}</b> kNm/m</div>
+              <div>w = <b>{res.w.toFixed(2)}</b> mm</div>
+              <div>D = <b>{res.d_rig.toFixed(1)}</b> kNm</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
+              <FormulaCard
+                title="Plaque de Navier"
+                latex={String.raw`w(x,y) = \sum_{m,n} a_{mn} \sin\frac{m\pi x}{a}\sin\frac{n\pi y}{b}`}
+                description="Double série sinus sur dalle articulée"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`a_{mn}`, meaning: 'Amplitude modale', value: res.mx.toFixed(2) },
+                    { symbol: String.raw`D`, meaning: 'Rigidité de flexion', value: res.my.toFixed(2) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <ul className="text-xs space-y-2">
@@ -104,7 +129,12 @@ export default function Module108() {
             <li className="text-slate-500">• D = {res.d_rig.toFixed(1)} kNm</li>
           </ul>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

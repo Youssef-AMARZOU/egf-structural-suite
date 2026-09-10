@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { InteracCircInputs, InteracCircOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: InteracCircInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15, euk: 0.02,
@@ -10,71 +15,65 @@ const DEFAULT: InteracCircInputs = {
   diagram: 'parabola',
 };
 
+
 export default function Module137() {
   const [inp, setInp] = useState<InteracCircInputs>(DEFAULT);
-  const [res, setRes] = useState<InteracCircOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<InteracCircInputs, InteracCircOutput>(
+    'calculate_interac_circ_137', inp,
+  );
   const S = (k: keyof InteracCircInputs) => (v: number | string) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<InteracCircOutput>('calculate_interac_circ_137', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
+
+  const status = !res ? 'computing' : res.ratio_nm <= 1 ? 'pass' : 'fail';
+
+  const slider = (
+    key: keyof InteracCircInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">137 Interac. Circulaire <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">Courbe N-M section circulaire — EC2 §6.1</p>
+    <Workstation
+      title="137 Interac. Circulaire"
+      subtitle="Courbe N-M section circulaire — EC2 §6.1"
+      eurocode="EC2 §6.1"
+      status={status}
+      live={live}
+      params={
+        <>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γc" unit="-" value={inp.gc} onChange={S('gc')} min={1} max={2} step={0.05} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={2} step={0.05} />
-          <NumField label="εuk" unit="‰" value={inp.euk * 1000} onChange={(v) => S('euk')(v / 1000)} min={10} max={50} step={1} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gc', 'γc', '-', 1, 2, 0.05)}
+          {slider('gs', 'γs', '-', 1, 2, 0.05)}
+          <ParamSlider label="εuk" unit="‰" value={inp.euk * 1000} min={10} max={50} step={1} onChange={(v) => S('euk')(v / 1000)} />
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="φ" unit="mm" value={inp.phi} onChange={S('phi')} min={100} max={2000} step={10} />
-          <NumField label="Nb barres" unit="-" value={inp.n_bars} onChange={S('n_bars')} min={4} max={32} step={1} />
-          <NumField label="φ barre" unit="mm" value={inp.d_bar} onChange={S('d_bar')} min={6} max={50} step={2} />
-          <NumField label="Couverture" unit="mm" value={inp.cover} onChange={S('cover')} min={15} max={100} step={5} />
-          <NumField label="Nb sections" unit="-" value={inp.n_sec} onChange={S('n_sec')} min={20} max={200} step={5} />
+          {slider('phi', 'φ', 'mm', 100, 2000, 10)}
+          {slider('n_bars', 'Nb barres', '-', 4, 32, 1)}
+          {slider('d_bar', 'φ barre', 'mm', 6, 50, 2)}
+          {slider('cover', 'Couverture', 'mm', 15, 100, 5)}
+          {slider('n_sec', 'Nb sections', '-', 20, 200, 5)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitations</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="NEd" unit="kN" value={inp.n_ed} onChange={S('n_ed')} min={0} max={50000} step={100} />
-          <NumField label="MEd" unit="kN·m" value={inp.m_ed} onChange={S('m_ed')} min={0} max={5000} step={10} />
+          {slider('n_ed', 'NEd', 'kN', 0, 50000, 100)}
+          {slider('m_ed', 'MEd', 'kN·m', 0, 5000, 10)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>N₀ = <b>{res.n0.toFixed(0)}</b> kN</div>
-              <div>ρ_prov = <b>{res.rho_prov.toFixed(2)}</b>% | ρ_min = <b>{res.rho_min.toFixed(0)}</b> mm²</div>
-              <div>μ = <b>{res.mu.toFixed(2)}</b> | ν = <b>{res.nu.toFixed(2)}</b></div>
-              <div>Ratio NM = <b>{res.ratio_nm.toFixed(2)}</b></div>
-              <div>Ratio N = <b>{res.ratio_n.toFixed(2)}</b></div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Courbe d'interaction N-M</h2>
-          <svg viewBox="0 0 400 250" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Courbe d'interaction N-M" vbW={400} vbH={250}>
             {res && (() => {
               const ox = 50, oy = 120, w = 320, h = 200;
               const maxN = Math.max(...res.n_resist.map(Math.abs), 1);
@@ -120,11 +119,38 @@ export default function Module137() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>N₀ = <b>{res.n0.toFixed(0)}</b> kN</div>
+              <div>ρ_prov = <b>{res.rho_prov.toFixed(2)}</b>% | ρ_min = <b>{res.rho_min.toFixed(0)}</b> mm²</div>
+              <div>μ = <b>{res.mu.toFixed(2)}</b> | ν = <b>{res.nu.toFixed(2)}</b></div>
+              <div>Ratio NM = <b>{res.ratio_nm.toFixed(2)}</b></div>
+              <div>Ratio N = <b>{res.ratio_n.toFixed(2)}</b></div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
 
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+              <FormulaCard
+                title="Interaction circulaire"
+                latex={String.raw`N_{Rd} = \int_{A_c} \sigma_c \, dA + \sum A_{si} \, \sigma_{si}`}
+                description="Poteau circulaire, Sargin + P-R"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`N_{Ed}`, meaning: 'Effort normal', value: res.n0.toFixed(0) },
+                    { symbol: String.raw`M_{Ed}`, meaning: 'Moment', value: res.rho_prov.toFixed(2) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <div className="space-y-2">
@@ -150,7 +176,12 @@ export default function Module137() {
             </ul>
           </div>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }

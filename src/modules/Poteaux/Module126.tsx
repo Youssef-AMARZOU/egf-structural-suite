@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from 'react';
 import type { ContraintesSectionQqInputs, ContraintesSectionQqOutput } from '../../types/engineering';
-import NumField from '../../components/NumField';
+import { ParamSlider } from '../../components/common/ParamSlider';
+import { useModuleCalc } from '../../components/common/useModuleCalc';
+import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { FormulaCard } from '../../components/common/FormulaCard';
+import {
+  SectionCanvas,
+} from '../../components/drafting';
 
 const DEFAULT: ContraintesSectionQqInputs = {
   fck: 30, fyk: 500, gs: 1.15, ec1: 2.0, ecu1: 3.5,
@@ -17,98 +22,90 @@ const DEFAULT: ContraintesSectionQqInputs = {
   itour: 15,
 };
 
+
 export default function Module126() {
   const [inp, setInp] = useState<ContraintesSectionQqInputs>(DEFAULT);
-  const [res, setRes] = useState<ContraintesSectionQqOutput | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const { data: res, error: err, live } = useModuleCalc<ContraintesSectionQqInputs, ContraintesSectionQqOutput>(
+    'calculate_contraintes_section_qq_126', inp,
+  );
   const S = (k: keyof ContraintesSectionQqInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
-  useEffect(() => {
-    let dead = false;
-    invoke<ContraintesSectionQqOutput>('calculate_contraintes_section_qq_126', { p: inp })
-      .then((r) => { if (!dead) { setRes(r); setErr(null); } })
-      .catch((e) => { if (!dead) setErr(String(e)); });
-    return () => { dead = true; };
-  }, [inp]);
 
   const totalH = inp.heights.reduce((a, b) => a + b, 0);
   const maxW = Math.max(...inp.widths_top, ...inp.widths_bot);
 
+  const status = !res ? 'computing' : verdictStatus(res.verdict);
+
+  const slider = (
+    key: keyof ContraintesSectionQqInputs, label: string, unit: string,
+    min: number, max: number, step = 1,
+  ) => (
+    <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
+  );
+
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-3 max-h-[calc(100vh-3rem)] overflow-y-auto">
-        <h2 className="text-sm font-bold">126 Contraintes Section QQ <span className="font-mono text-[11px] text-emerald-500">RUST</span></h2>
-        <p className="text-[11px] text-slate-500">M-N — section quelconque, Simpson</p>
+    <Workstation
+      title="126 Contraintes Section QQ"
+      subtitle="M-N — section quelconque, Simpson"
+      status={status}
+      live={live}
+      params={
+        <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="fck" unit="MPa" value={inp.fck} onChange={S('fck')} min={12} max={90} step={1} />
-          <NumField label="fyk" unit="MPa" value={inp.fyk} onChange={S('fyk')} min={400} max={600} step={10} />
-          <NumField label="γs" unit="-" value={inp.gs} onChange={S('gs')} min={1} max={1.5} step={0.05} />
+          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('gs', 'γs', '-', 1, 1.5, 0.05)}
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <NumField label="εc1" unit="‰" value={inp.ec1} onChange={S('ec1')} min={1} max={4} step={0.1} />
-          <NumField label="εcu1" unit="‰" value={inp.ecu1} onChange={S('ecu1')} min={2} max={5} step={0.1} />
-          <NumField label="euk" unit="‰" value={inp.euk} onChange={S('euk')} min={5} max={20} step={0.5} />
+          {slider('ec1', 'εc1', '‰', 1, 4, 0.1)}
+          {slider('ecu1', 'εcu1', '‰', 2, 5, 0.1)}
+          {slider('euk', 'euk', '‰', 5, 20, 0.5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Section (couches)</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="n couches" unit="-" value={inp.n_layers} onChange={S('n_layers')} min={1} max={6} step={1} />
-          <NumField label="h total" unit="mm" value={totalH} onChange={() => {}} min={0} max={0} step={0} />
+          {slider('n_layers', 'n couches', '-', 1, 6, 1)}
+          <ParamSlider label="h total" unit="mm" value={totalH} min={0} max={0} step={0} onChange={() => {}} />
         </div>
         {Array.from({ length: inp.n_layers }).map((_, i) => (
           <div key={i} className="grid grid-cols-3 gap-2">
-            <NumField label={`b_sup${i + 1}`} unit="mm" value={inp.widths_top[i] || 0} onChange={(v) => {
+            <ParamSlider label="?" unit="mm" value={inp.widths_top[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
               const w = [...inp.widths_top]; w[i] = v; setInp((p) => ({ ...p, widths_top: w }));
-            }} min={50} max={2000} step={10} />
-            <NumField label={`b_inf${i + 1}`} unit="mm" value={inp.widths_bot[i] || 0} onChange={(v) => {
+            }} />
+            <ParamSlider label="?" unit="mm" value={inp.widths_bot[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
               const w = [...inp.widths_bot]; w[i] = v; setInp((p) => ({ ...p, widths_bot: w }));
-            }} min={50} max={2000} step={10} />
-            <NumField label={`h${i + 1}`} unit="mm" value={inp.heights[i] || 0} onChange={(v) => {
+            }} />
+            <ParamSlider label="?" unit="mm" value={inp.heights[i] || 0} min={50} max={2000} step={10} onChange={(v) => {
               const h = [...inp.heights]; h[i] = v; setInp((p) => ({ ...p, heights: h }));
-            }} min={50} max={2000} step={10} />
+            }} />
           </div>
         ))}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Aciers</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="n aciers" unit="-" value={inp.n_steel} onChange={S('n_steel')} min={1} max={10} step={1} />
+          {slider('n_steel', 'n aciers', '-', 1, 10, 1)}
         </div>
         {Array.from({ length: inp.n_steel }).map((_, i) => (
           <div key={i} className="grid grid-cols-2 gap-2">
-            <NumField label={`d${i + 1}`} unit="mm" value={inp.steel_depths[i] || 0} onChange={(v) => {
+            <ParamSlider label="?" unit="mm" value={inp.steel_depths[i] || 0} min={0} max={3000} step={10} onChange={(v) => {
               const d = [...inp.steel_depths]; d[i] = v; setInp((p) => ({ ...p, steel_depths: d }));
-            }} min={0} max={3000} step={10} />
-            <NumField label={`As${i + 1}`} unit="cm²" value={inp.steel_areas[i] || 0} onChange={(v) => {
+            }} />
+            <ParamSlider label="?" unit="cm²" value={inp.steel_areas[i] || 0} min={0} max={100} step={0.5} onChange={(v) => {
               const a = [...inp.steel_areas]; a[i] = v; setInp((p) => ({ ...p, steel_areas: a }));
-            }} min={0} max={100} step={0.5} />
+            }} />
           </div>
         ))}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitations</div>
         <div className="grid grid-cols-2 gap-2">
-          <NumField label="NEd" unit="kN" value={inp.n_ed} onChange={S('n_ed')} min={-5000} max={5000} step={10} />
-          <NumField label="MEd" unit="kN·m" value={inp.m_ed} onChange={S('m_ed')} min={0} max={2000} step={5} />
+          {slider('n_ed', 'NEd', 'kN', -5000, 5000, 10)}
+          {slider('m_ed', 'MEd', 'kN·m', 0, 2000, 5)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
-      </div>
-      <div className="col-span-5 space-y-4">
+        </>
+      }
+      sketch={
+        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>NRd = <b>{res.n_rd.toFixed(1)}</b> kN | MRd = <b>{res.m_rd.toFixed(1)}</b> kN·m</div>
-              <div>ε1 = <b>{res.e1.toFixed(2)}</b> ‰ | ε2 = <b>{res.e2.toFixed(2)}</b> ‰</div>
-              <div>x₀ = <b>{res.x_neutral.toFixed(1)}</b> mm</div>
-              <div>σs₁ = <b>{res.sigma_s1.toFixed(0)}</b> MPa | σs₂ = <b>{res.sigma_s2.toFixed(0)}</b> MPa</div>
-              <div>σc sup = <b>{res.sigma_c_top.toFixed(1)}</b> MPa | σc inf = <b>{res.sigma_c_bot.toFixed(1)}</b> MPa</div>
-              <hr className="border-slate-200 dark:border-white/10 my-2" />
-              <div>ΔN = <b>{res.dn.toFixed(1)}</b> kN | ΔM = <b>{res.dm.toFixed(1)}</b> kN·m</div>
-              <div>A = <b>{res.area.toFixed(0)}</b> mm² | y̅ = <b>{res.centroid.toFixed(1)}</b> mm</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Section (SVG)</h2>
-          <svg viewBox="0 0 300 200" className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+<SectionCanvas title="Section (SVG)" vbW={300} vbH={200}>
             {(() => {
               const ox = 150, oy = 20;
               const sc = Math.min(120 / totalH, 250 / maxW);
@@ -139,10 +136,40 @@ export default function Module126() {
                 </g>
               );
             })()}
-          </svg>
+          </SectionCanvas>
         </div>
-      </div>
-      <div className="col-span-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+        </>
+      }
+      results={
+        <>
+          {res ? (
+            <>
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
+          <h2 className="text-sm font-bold mb-2">Résultats</h2>
+          {res && (
+            <div className="font-mono text-xs space-y-1">
+              <div>NRd = <b>{res.n_rd.toFixed(1)}</b> kN | MRd = <b>{res.m_rd.toFixed(1)}</b> kN·m</div>
+              <div>ε1 = <b>{res.e1.toFixed(2)}</b> ‰ | ε2 = <b>{res.e2.toFixed(2)}</b> ‰</div>
+              <div>x₀ = <b>{res.x_neutral.toFixed(1)}</b> mm</div>
+              <div>σs₁ = <b>{res.sigma_s1.toFixed(0)}</b> MPa | σs₂ = <b>{res.sigma_s2.toFixed(0)}</b> MPa</div>
+              <div>σc sup = <b>{res.sigma_c_top.toFixed(1)}</b> MPa | σc inf = <b>{res.sigma_c_bot.toFixed(1)}</b> MPa</div>
+              <hr className="border-slate-200 dark:border-white/10 my-2" />
+              <div>ΔN = <b>{res.dn.toFixed(1)}</b> kN | ΔM = <b>{res.dm.toFixed(1)}</b> kN·m</div>
+              <div>A = <b>{res.area.toFixed(0)}</b> mm² | y̅ = <b>{res.centroid.toFixed(1)}</b> mm</div>
+              <div className="font-bold">{res.verdict}</div>
+            </div>
+          )}
+        </div>
+              <FormulaCard
+                title="Section quelconque N-M"
+                latex={String.raw`N = \int_A \sigma \, dA \quad M = \int_A \sigma y \, dA`}
+                description="Intégration de Simpson, 3 lois béton"
+                status={status === 'computing' ? 'neutral' : status}
+                variables={[
+                    { symbol: String.raw`N`, meaning: 'Effort normal', value: res.n_rd.toFixed(1) },
+                    { symbol: String.raw`M`, meaning: 'Moment résultant', value: res.m_rd.toFixed(1) },
+                ]}
+              />
         <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
         {res ? (
           <ul className="text-xs space-y-2">
@@ -157,7 +184,12 @@ export default function Module126() {
             <li className="text-slate-500">• σc = {res.sigma_c_top.toFixed(1)} MPa</li>
           </ul>
         ) : <p className="text-xs text-slate-500">computing…</p>}
-      </div>
-    </div>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
+          )}
+        </>
+      }
+    />
   );
 }
