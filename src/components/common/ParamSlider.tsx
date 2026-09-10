@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface ParamSliderProps {
   label: string;
@@ -31,6 +31,18 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
     onChange(clamp(Number((Math.round(v / step) * step).toFixed(dec)), min, max));
   };
   const pct = max > min ? ((shown - min) / (max - min)) * 100 : 0;
+  // Free-typing draft: the field never reformats mid-keystroke; commit on blur/Enter.
+  const [draft, setDraft] = useState<string | null>(null);
+  const focused = useRef(false);
+  useEffect(() => {
+    if (!focused.current) setDraft(null);
+  }, [shown]);
+  const commit = () => {
+    if (draft === null) return;
+    const v = Number(draft.replace(/\s/g, '').replace(',', '.'));
+    setDraft(null);
+    if (Number.isFinite(v)) set(v);
+  };
   const acc = accent ?? 'var(--ws-acc, #4C8DFF)';
   return (
     <div className="block min-w-0">
@@ -62,12 +74,16 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
             −
           </button>
           <input
-            type="number"
-            value={shown}
-            min={min}
-            max={max}
-            step={step}
-            onChange={(e) => set(Number(e.target.value))}
+            type="text"
+            inputMode="decimal"
+            value={draft ?? String(shown)}
+            onChange={(e) => setDraft(e.target.value)}
+            onFocus={() => { focused.current = true; }}
+            onBlur={() => { focused.current = false; commit(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+              if (e.key === 'Escape') { setDraft(null); (e.target as HTMLInputElement).blur(); }
+            }}
             className="min-w-0 flex-1 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
             aria-label={`${label}, valeur exacte`}
           />
