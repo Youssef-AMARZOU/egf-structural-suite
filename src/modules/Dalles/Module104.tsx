@@ -158,7 +158,6 @@ export default function Module104() {
               const ox = cx + eo * 0.7;
               const oyy = cy + eo * 0.7;
               const outx = Math.min(ox + 24, 290);
-              const u0tx = Math.max(cx - w / 2 - 8, 42);
               return (
                 <g>
                   <circle cx={cx} cy={cy} r={eo} fill="none" stroke="#34D399" strokeDasharray="4 3" strokeWidth={1.4} />
@@ -172,24 +171,28 @@ export default function Module104() {
                     width={w} height={hh}
                     fill="#4C8DFF" opacity={0.85}
                   />
-                  <text x={cx} y={cy + 4} textAnchor="middle" fontSize={9} fill="#fff" fontWeight="bold">
-                    {inp.c1.toFixed(2)}×{inp.c2.toFixed(2)}
-                  </text>
-                  <DimensionLine x1={cx - w / 2} y1={cy + hh / 2} x2={cx + w / 2} y2={cy + hh / 2} offset={20} text={`c1 = ${inp.c1.toFixed(2)} m`} />
-                  <DimensionLine x1={cx - w / 2} y1={cy - hh / 2} x2={cx - w / 2} y2={cy + hh / 2} offset={-18} text={`c2 = ${inp.c2.toFixed(2)} m`} />
+                  {w > 70 && hh > 26 && (
+                    <text x={cx} y={cy + 4} textAnchor="middle" fontSize={9} fill="#fff" fontWeight="bold">
+                      {inp.c1.toFixed(2)}×{inp.c2.toFixed(2)}
+                    </text>
+                  )}
+                  <DimensionLine x1={cx - w / 2} y1={cy + hh / 2} x2={cx + w / 2} y2={cy + hh / 2} offset={e1 + 16} text={`c1 = ${inp.c1.toFixed(2)} m`} />
+                  <DimensionLine x1={cx - w / 2} y1={cy - hh / 2} x2={cx - w / 2} y2={cy + hh / 2} offset={e1 + 16} text={`c2 = ${inp.c2.toFixed(2)} m`} />
                   <line x1={ux1} y1={uy1} x2={u1tx} y2={uy1 - 12} stroke="#F5A524" strokeWidth={1} />
                   <text x={u1tx + 3} y={uy1 - 10} fontSize={9} fill="#F5A524">u1</text>
                   <line x1={ox} y1={oyy} x2={outx} y2={oyy + 14} stroke="#34D399" strokeWidth={1} />
                   <text x={outx + 3} y={oyy + 18} fontSize={9} fill="#34D399">uout</text>
-                  <line x1={cx - w / 2} y1={cy - hh / 2 + 5} x2={u0tx} y2={cy - hh / 2 - 9} stroke="#4C8DFF" strokeWidth={1} />
-                  <text x={u0tx} y={cy - hh / 2 - 11} fontSize={9} fill="#4C8DFF" textAnchor="end">u0</text>
-                  <g fontSize={8} fill="#93A0B8">
-                    <rect x={14} y={243} width={10} height={3} fill="#4C8DFF" />
-                    <text x={28} y={247}>u0 nu poteau</text>
-                    <rect x={118} y={243} width={10} height={3} fill="#F5A524" />
-                    <text x={132} y={247}>u1 à 2d</text>
-                    <rect x={196} y={243} width={10} height={3} fill="#34D399" />
-                    <text x={210} y={247}>uout</text>
+                  <text x={cx + w / 2 + 5} y={cy - hh / 2 - 4} fontSize={9} fill="#4C8DFF" fontWeight="bold">u0</text>
+                  <g>
+                    <rect x={8} y={8} width={126} height={54} rx={6} fill="rgba(10,14,26,0.66)" stroke="rgba(255,255,255,0.1)" strokeWidth={0.8} />
+                    <g fontSize={8} fill="#93A0B8">
+                      <rect x={16} y={19} width={10} height={3} fill="#4C8DFF" />
+                      <text x={30} y={23}>u0 nu poteau</text>
+                      <rect x={16} y={33} width={10} height={3} fill="#F5A524" />
+                      <text x={30} y={37}>u1 à 2d</text>
+                      <rect x={16} y={47} width={10} height={3} fill="#34D399" />
+                      <text x={30} y={51}>uout</text>
+                    </g>
                   </g>
                 </g>
               );
