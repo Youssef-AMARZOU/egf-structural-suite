@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface SectionCanvasProps {
   title?: string;
@@ -18,9 +18,7 @@ export const SectionCanvas: React.FC<SectionCanvasProps> = ({
   const drag = useRef<{ sx: number; sy: number; vx: number; vy: number } | null>(null);
   const ref = useRef<SVGSVGElement>(null);
 
-  const zoom = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const f = e.deltaY > 0 ? 1.15 : 1 / 1.15;
+  const zoomBy = (f: number) => {
     setVb((v) => {
       const w = Math.min(vbW * 3, Math.max(vbW / 8, v.w * f));
       const h = Math.min(vbH * 3, Math.max(vbH / 8, v.h * f));
@@ -29,6 +27,19 @@ export const SectionCanvas: React.FC<SectionCanvasProps> = ({
       return { x: cx - w / 2, y: cy - h / 2, w, h };
     });
   };
+
+  // Non-passive wheel listener so pinch/scroll zoom never fights the page.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const h = (e: WheelEvent) => {
+      e.preventDefault();
+      zoomBy(e.deltaY > 0 ? 1.15 : 1 / 1.15);
+    };
+    el.addEventListener('wheel', h, { passive: false });
+    return () => el.removeEventListener('wheel', h);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vbW, vbH]);
 
   const down = (e: React.PointerEvent) => {
     (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -63,7 +74,6 @@ export const SectionCanvas: React.FC<SectionCanvasProps> = ({
         ref={ref}
         viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`}
         className="w-full rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 cursor-grab active:cursor-grabbing"
-        onWheel={zoom}
         onPointerDown={down}
         onPointerMove={move}
         onPointerUp={up}

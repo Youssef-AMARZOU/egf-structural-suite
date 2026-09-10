@@ -331,6 +331,7 @@ export default function App() {
   }, []);
 
   const [query, setQuery] = useState('');
+  const [navCollapsed, setNavCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     Poteaux: true, Dalles: true, Poutres: true, Fondations: true,
   });
@@ -343,11 +344,19 @@ export default function App() {
     <div className={dark ? 'dark' : ''}>
       <div className="app-canvas flex h-screen text-slate-900 dark:text-slate-100" style={{ '--cat': CATEGORY_ACCENT[cat] } as CSSProperties}>
         {/* Sidebar */}
-        <aside className="glass-shell w-[260px] shrink-0 p-4 space-y-3 overflow-y-auto rounded-r-2xl">
+        <aside className={`glass-shell shrink-0 overflow-y-auto rounded-r-2xl transition-all duration-200 ${navCollapsed ? 'w-0 p-0 opacity-0 pointer-events-none border-0' : 'w-[260px] p-4 space-y-3'}`}>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold tracking-tight">EGF</span>
             <span className="text-[10px] font-mono text-emerald-500 mt-0.5">SUITE</span>
             <span className="text-[10px] font-mono text-slate-400 mt-0.5">v{appVersion}</span>
+            <button
+              onClick={() => setNavCollapsed(true)}
+              className="ml-auto text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-sm px-1.5 py-0.5 rounded hover:bg-slate-500/10"
+              title="Réduire le menu (plus d'espace)"
+              aria-label="Réduire le menu"
+            >
+              «
+            </button>
           </div>
           {updater.updateAvailable && (
             <button
@@ -436,7 +445,17 @@ export default function App() {
         </aside>
 
         {/* Main workspace */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 min-w-0">
+          {navCollapsed && (
+            <button
+              onClick={() => setNavCollapsed(false)}
+              className="glass rounded-xl px-3 py-2 mb-3 text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-white/25 transition flex items-center gap-2"
+              title="Rouvrir le menu des modules"
+              aria-label="Rouvrir le menu des modules"
+            >
+              <span>☰</span> Modules
+            </button>
+          )}
           {module === '101' && <Module101 />}
           {module === '103' && <Module103 />}
           {module === '104' && <Module104 />}

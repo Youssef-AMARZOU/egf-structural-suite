@@ -135,13 +135,30 @@ export default function Module104() {
         <div className="glass rounded-2xl p-5">
           <SectionCanvas title="Plan — périmètres de contrôle" vbW={340} vbH={260} scaleLabel="u0 au nu · u1 à 2d · uout">
             {(() => {
-              const s = 90;
               const cx = 165;
-              const cy = 120;
+              const cy = 118;
+              const eo0 = res?.rout ?? 1;
+              // auto-fit: column + 2d ring + outer perimeter + labels inside 340×260
+              const s = Math.max(
+                14,
+                Math.min(
+                  90,
+                  215 / Math.max(0.25, inp.c1 + 4 * inp.d),
+                  135 / Math.max(0.25, inp.c2 + 4 * inp.d),
+                  120 / Math.max(0.3, eo0),
+                ),
+              );
               const w = inp.c1 * s;
               const hh = inp.c2 * s;
               const e1 = 2 * inp.d * s;
-              const eo = (res?.rout ?? 1) * s;
+              const eo = eo0 * s;
+              const ux1 = cx + w / 2 + e1;
+              const uy1 = cy - hh / 2 - e1;
+              const u1tx = Math.min(ux1 + 6, 294);
+              const ox = cx + eo * 0.7;
+              const oyy = cy + eo * 0.7;
+              const outx = Math.min(ox + 24, 290);
+              const u0tx = Math.max(cx - w / 2 - 8, 42);
               return (
                 <g>
                   <circle cx={cx} cy={cy} r={eo} fill="none" stroke="#34D399" strokeDasharray="4 3" strokeWidth={1.4} />
@@ -160,19 +177,19 @@ export default function Module104() {
                   </text>
                   <DimensionLine x1={cx - w / 2} y1={cy + hh / 2} x2={cx + w / 2} y2={cy + hh / 2} offset={20} text={`c1 = ${inp.c1.toFixed(2)} m`} />
                   <DimensionLine x1={cx - w / 2} y1={cy - hh / 2} x2={cx - w / 2} y2={cy + hh / 2} offset={-18} text={`c2 = ${inp.c2.toFixed(2)} m`} />
-                  <line x1={cx + w / 2 + e1} y1={cy - hh / 2 - e1 - 4} x2={cx + w / 2 + e1 + 34} y2={cy - hh / 2 - e1 - 18} stroke="#F5A524" strokeWidth={1} />
-                  <text x={cx + w / 2 + e1 + 36} y={cy - hh / 2 - e1 - 18} fontSize={9} fill="#F5A524">u1</text>
-                  <line x1={cx + eo * 0.7} y1={cy + eo * 0.7} x2={cx + eo * 0.7 + 30} y2={cy + eo * 0.7 + 16} stroke="#34D399" strokeWidth={1} />
-                  <text x={cx + eo * 0.7 + 32} y={cy + eo * 0.7 + 20} fontSize={9} fill="#34D399">uout</text>
-                  <line x1={cx - w / 2} y1={cy - hh / 2 + 6} x2={cx - w / 2 - 30} y2={cy - hh / 2 - 8} stroke="#4C8DFF" strokeWidth={1} />
-                  <text x={cx - w / 2 - 58} y={cy - hh / 2 - 8} fontSize={9} fill="#4C8DFF">u0</text>
+                  <line x1={ux1} y1={uy1} x2={u1tx} y2={uy1 - 12} stroke="#F5A524" strokeWidth={1} />
+                  <text x={u1tx + 3} y={uy1 - 10} fontSize={9} fill="#F5A524">u1</text>
+                  <line x1={ox} y1={oyy} x2={outx} y2={oyy + 14} stroke="#34D399" strokeWidth={1} />
+                  <text x={outx + 3} y={oyy + 18} fontSize={9} fill="#34D399">uout</text>
+                  <line x1={cx - w / 2} y1={cy - hh / 2 + 5} x2={u0tx} y2={cy - hh / 2 - 9} stroke="#4C8DFF" strokeWidth={1} />
+                  <text x={u0tx} y={cy - hh / 2 - 11} fontSize={9} fill="#4C8DFF" textAnchor="end">u0</text>
                   <g fontSize={8} fill="#93A0B8">
-                    <rect x={14} y={218} width={10} height={3} fill="#4C8DFF" />
-                    <text x={28} y={222}>u0 nu poteau</text>
-                    <rect x={118} y={218} width={10} height={3} fill="#F5A524" />
-                    <text x={132} y={222}>u1 à 2d</text>
-                    <rect x={196} y={218} width={10} height={3} fill="#34D399" />
-                    <text x={210} y={222}>uout</text>
+                    <rect x={14} y={243} width={10} height={3} fill="#4C8DFF" />
+                    <text x={28} y={247}>u0 nu poteau</text>
+                    <rect x={118} y={243} width={10} height={3} fill="#F5A524" />
+                    <text x={132} y={247}>u1 à 2d</text>
+                    <rect x={196} y={243} width={10} height={3} fill="#34D399" />
+                    <text x={210} y={247}>uout</text>
                   </g>
                 </g>
               );
