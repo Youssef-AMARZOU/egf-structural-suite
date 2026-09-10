@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas } from '../../components/drafting';
+import { RatioBar } from '../../components/common/RatioBar';
 import { PoteauLambdaminInputs, PoteauLambdaminOutput } from '../../types/engineering';
 
 export default function Module169() {
@@ -45,25 +45,20 @@ export default function Module169() {
         </>
       }
       sketch={
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <SectionCanvas title="Slenderness" vbW={500} vbH={70}>
-            {res && (() => {
-              const maxVal = Math.max(res.lambda_x * 1.3, res.lambda_min_x * 1.5, 30);
-              const bx = 80, bw = 380;
-              const sc = bw / maxVal;
-              return (
-                <>
-                  <text x={bx - 5} y={20} fontSize={10} fill="#333" textAnchor="end">λ = {res.lambda_x.toFixed(1)}</text>
-                  <rect x={bx} y={10} width={Math.min(res.lambda_x * sc, bw)} height={16} fill="#6366F1" rx={3} />
-                  <text x={bx - 5} y={50} fontSize={10} fill="#333" textAnchor="end">λ_min = {res.lambda_min_x.toFixed(1)}</text>
-                  <rect x={bx} y={40} width={Math.min(res.lambda_min_x * sc, bw)} height={16}
-                    fill={res.is_second_order_x ? '#FBBF24' : '#22C55E'} rx={3} />
-                  <line x1={bx + res.lambda_min_x * sc} y1={8} x2={bx + res.lambda_min_x * sc} y2={60}
-                    stroke="#333" strokeWidth={2} strokeDasharray="4,3" />
-                </>
-              );
-            })()}
-          </SectionCanvas>
+        <div className="glass rounded-2xl p-5">
+          <div className="text-[15px] font-semibold mb-2">Élancement contre limite</div>
+          {res ? (
+            <RatioBar
+              items={[
+                { name: 'λ', value: res.lambda_x, formula: 'élancement de calcul' },
+              ]}
+              threshold={res.lambda_min_x}
+              height={200}
+              decimals={1}
+            />
+          ) : (
+            <div className="skel rounded-lg" style={{ height: 200 }} />
+          )}
         </div>
       }
       results={
