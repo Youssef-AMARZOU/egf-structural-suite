@@ -129,6 +129,9 @@ export default function Module104() {
               <StatTile label="vRd,c" value={res.vrdc.toFixed(3)} unit="MPa" />
               <StatTile label="Asw req" value={res.asw_req.toFixed(1)} unit="cm²/m" />
               <StatTile label="Épingles" value={`${res.nr}×${res.nt}=${res.total_pins}`} />
+              <StatTile label="u0" value={res.u0.toFixed(2)} unit="m" />
+              <StatTile label="u1" value={res.u1.toFixed(2)} unit="m" />
+              <StatTile label="uout" value={res.uout.toFixed(2)} unit="m" />
             </div>
           )}
         </div>
