@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { getVersion } from '@tauri-apps/api/app';
 import { useAppUpdater } from './hooks/useAppUpdater';
 import { UpdateDialog } from './components/common/UpdateDialog';
+import { CATEGORY_ACCENT, type CategoryKey } from './components/common/Workstation';
 import Module101 from './modules/Poteaux/Module101';
 import Module103 from './modules/Dalles/Module103';
 import Module104 from './modules/Dalles/Module104';
@@ -141,11 +142,31 @@ const NAV_GROUPS: NavGroup[] = [
     group: 'Poteaux',
     items: [
       { key: '101', label: '101 Interaction M-N' },
+      { key: '102', label: '102 Flambement rect' },
       { key: '109', label: '109 Bâton BAEL' },
-      { key: '111', label: '111 Poteau Compar' },
+      { key: '111', label: '111 Poteau compar' },
       { key: '113', label: '113 Corbeau' },
-      { key: '114', label: '114 Contraintes Circ' },
-      { key: '126', label: '126 Contraintes Section QQ' },
+      { key: '114', label: '114 Contraintes circ' },
+      { key: '126', label: '126 Section QQ' },
+      { key: '129', label: '129 N-M-V-T' },
+      { key: '137', label: '137 Interac circ' },
+      { key: '140', label: '140 Cisaillement circ' },
+      { key: '154', label: '154 Non-fragilité' },
+      { key: '159', label: '159 Mini non-fragilité' },
+      { key: '160', label: '160 Interac QQ v2' },
+      { key: '161', label: '161 Mini sect QQ' },
+      { key: '162', label: '162 Flexdev polygone' },
+      { key: '163', label: '163 Mini non-frag v2' },
+      { key: '169', label: '169 Élancement mini' },
+      { key: '179', label: '179 Cisaillement QQ' },
+      { key: '194', label: '194 Carottes EN 13791' },
+      { key: '196', label: '196 Flambement circ' },
+      { key: '200', label: '200 Voile + portique' },
+      { key: '207', label: '207 Poteau fretté' },
+      { key: '213', label: '213 Fissure cercle' },
+      { key: '219', label: '219 M-N feu rect' },
+      { key: '220', label: '220 Moment feu circ' },
+      { key: '221', label: '221 Flambement au feu' },
     ],
   },
   {
@@ -154,35 +175,146 @@ const NAV_GROUPS: NavGroup[] = [
       { key: '103', label: '103 Dalle BP6' },
       { key: '104', label: '104 Poinçonnement' },
       { key: '108', label: '108 Navier' },
-      { key: '117', label: '117 Voûte décharge' },
+      { key: '117', label: '117 Voûte de décharge' },
       { key: '119', label: '119 Prédalle' },
       { key: '120', label: '120 Escalier' },
+      { key: '130', label: '130 Plancher poinçonné' },
+      { key: '133', label: '133 Vérif poinçonnement' },
+      { key: '156', label: '156 Retrait armé' },
+      { key: '157', label: '157 Dalle au feu' },
+      { key: '164', label: '164 Dalle 4 appuis' },
+      { key: '165', label: '165 Évasion N pots' },
+      { key: '166', label: '166 Armatures passives' },
+      { key: '167', label: '167 Flèche continue' },
+      { key: '168', label: '168 Dispense flèche' },
+      { key: '173', label: '173 Préfa + rapportée' },
+      { key: '174', label: '174 Lignes de rupture' },
+      { key: '176', label: '176 Tassement diff' },
+      { key: '180', label: '180 Rot plast V4' },
+      { key: '214', label: '214 Feu analytique' },
+      { key: '235', label: '235 Alvéolée' },
+      { key: '236', label: '236 Charge trapézoïdale' },
     ],
   },
   {
     group: 'Poutres',
     items: [
-      { key: '127', label: '127 Rotplast Abaque' },
-      { key: '128', label: '128 Eff. Tranchants' },
+      { key: '127', label: '127 Rotplast abaque' },
+      { key: '128', label: '128 Eff tranchants' },
+      { key: '132', label: '132 Tranchant appuis' },
+      { key: '135', label: '135 Écrêtement' },
+      { key: '136', label: '136 Ancrage TS' },
+      { key: '139', label: '139 Cisaillement rect' },
+      { key: '141', label: '141 Vent EC1' },
+      { key: '143', label: '143 Torsion tube' },
+      { key: '145', label: '145 Réservoir' },
+      { key: '147', label: '147 Poutre cloison' },
+      { key: '148', label: '148 File ouvertures' },
+      { key: '149', label: '149 Trois refends' },
+      { key: '150', label: '150 CDT voile' },
+      { key: '151', label: '151 Centre torsion' },
+      { key: '152', label: '152 Flèche profil' },
+      { key: '153', label: '153 Flexion As' },
+      { key: '155', label: '155 EC2 contre BAEL' },
+      { key: '158', label: '158 Fluage retrait' },
+      { key: '170', label: '170 Descente charges' },
+      { key: '171', label: '171 MRd en T' },
+      { key: '172', label: '172 Retrait gêné' },
+      { key: '175', label: '175 Rot plastoptim' },
+      { key: '177', label: '177 Balcons' },
+      { key: '181', label: '181 Rot plast V5' },
+      { key: '182', label: '182 Anti-rotule' },
+      { key: '183', label: '183 Poutre continue' },
+      { key: '184', label: '184 Travée charges' },
+      { key: '185', label: '185 Tracés câble' },
+      { key: '186', label: '186 Boussinesq grille' },
+      { key: '187', label: '187 Boussinesq DTU' },
+      { key: '188', label: '188 Semelle circ' },
+      { key: '189', label: '189 Raft rot plast' },
+      { key: '190', label: '190 Flèches BAEL-EC2' },
+      { key: '191', label: '191 Voile vérif FC' },
+      { key: '192', label: '192 Flèche nuisible' },
+      { key: '193', label: '193 Fluage draft7' },
+      { key: '195', label: '195 Mini âge' },
+      { key: '197', label: '197 Voiles Ieq' },
+      { key: '201', label: '201 Traverses rigides' },
+      { key: '202', label: '202 Flexion auxiliaires' },
+      { key: '204', label: '204 Fluage retrait' },
+      { key: '208', label: '208 Rotule plastique' },
+      { key: '212', label: '212 Eff tranch QQ' },
+      { key: '215', label: '215 Poutres croisées' },
+      { key: '216', label: '216 Travée totale' },
+      { key: '217', label: '217 Poutre au feu' },
+      { key: '218', label: '218 Corbeau FD' },
+      { key: '229', label: '229 Courbes points' },
+      { key: '230', label: '230 Droites et cercles' },
+      { key: '231', label: '231 Intégration' },
+      { key: '232', label: '232 Carac géométrie' },
+      { key: '233', label: '233 Précontrainte' },
+      { key: '234', label: '234 Continue 2 travées' },
+      { key: '237', label: '237 Plancher métal' },
+      { key: '239', label: '239 Treillis' },
+      { key: '243', label: '243 Nœuds fixes' },
+      { key: '244', label: '244 Cross' },
     ],
   },
   {
     group: 'Fondations',
     items: [
-      { key: '105', label: '105 Poinç. circulaire' },
+      { key: '105', label: '105 Poinç circulaire' },
+      { key: '106', label: '106 Mandrin Renard' },
       { key: '107', label: '107 Dalle DTU 13.3' },
-      { key: '112', label: '112 Semelle Ancrage' },
-      { key: '115', label: '115 Excentr. pieu' },
-      { key: '116', label: '116 Interac. pieu' },
+      { key: '112', label: '112 Semelle ancrage' },
+      { key: '115', label: '115 Excentr pieu' },
+      { key: '116', label: '116 Interac pieu' },
       { key: '118', label: '118 Tirant' },
-      { key: '121', label: '121 Mur de soutènement' },
-      { key: '122', label: '122 Sem2 pieux' },
-      { key: '123', label: '123 Ouver. poutre' },
+      { key: '121', label: '121 Mur soutènement' },
+      { key: '122', label: '122 Semelle 2 pieux' },
+      { key: '123', label: '123 Ouverture poutre' },
       { key: '124', label: '124 Tassements' },
-      { key: '125', label: '125 Boussinesq-Lagrange' },
+      { key: '125', label: '125 Boussinesq' },
+      { key: '142', label: '142 Semelle portante' },
+      { key: '146', label: '146 Trémie' },
+      { key: '178', label: '178 Poteau pieu' },
+      { key: '198', label: '198 Ancrage crochet' },
+      { key: '203', label: '203 Classe expo' },
+      { key: '206', label: '206 Pieu horizontal' },
+      { key: '222', label: '222 Sol élastique' },
+      { key: '223', label: '223 Pieu ELU' },
+      { key: '224', label: '224 Pieu ELS' },
     ],
   },
 ];
+
+const GROUP_ICON: Record<string, ReactNode> = {
+  Poteaux: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <rect x="9" y="3" width="6" height="15" rx="1" />
+      <line x1="5" y1="21" x2="19" y2="21" />
+      <line x1="7" y1="18" x2="17" y2="18" />
+    </svg>
+  ),
+  Dalles: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <rect x="3" y="9" width="18" height="6" rx="1" />
+      <line x1="6" y1="15" x2="6" y2="20" />
+      <line x1="18" y1="15" x2="18" y2="20" />
+    </svg>
+  ),
+  Poutres: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <line x1="5" y1="5" x2="19" y2="5" />
+      <line x1="5" y1="19" x2="19" y2="19" />
+      <line x1="12" y1="5" x2="12" y2="19" />
+    </svg>
+  ),
+  Fondations: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="M8 4h8l3 9H5z" />
+      <line x1="3" y1="20" x2="21" y2="20" />
+    </svg>
+  ),
+};
 
 export default function App() {
   const [module, setModule] = useState<ModuleKey>('104');
@@ -198,11 +330,20 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [query, setQuery] = useState('');
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    Poteaux: true, Dalles: true, Poutres: true, Fondations: true,
+  });
+  const groupOf = (m: ModuleKey): CategoryKey =>
+    (NAV_GROUPS.find((g) => g.items.some((i) => i.key === m))?.group ?? 'Poutres') as CategoryKey;
+  const cat = groupOf(module);
+  const q = query.trim().toLowerCase();
+
   return (
     <div className={dark ? 'dark' : ''}>
-      <div className="flex h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100">
+      <div className="app-canvas flex h-screen text-slate-900 dark:text-slate-100" style={{ '--cat': CATEGORY_ACCENT[cat] } as CSSProperties}>
         {/* Sidebar */}
-        <aside className="w-56 shrink-0 border-r border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4 space-y-4 overflow-y-auto">
+        <aside className="glass-shell w-[260px] shrink-0 p-4 space-y-3 overflow-y-auto rounded-r-2xl">
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold tracking-tight">EGF</span>
             <span className="text-[10px] font-mono text-emerald-500 mt-0.5">SUITE</span>
@@ -217,27 +358,61 @@ export default function App() {
             </button>
           )}
 
-          <nav className="space-y-3">
-            {NAV_GROUPS.map((g) => (
-              <div key={g.group}>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1 mb-1">
-                  {g.group}
-                </div>
-                {g.items.map((n) => (
+          <div className="relative">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher un module…"
+              className="w-full rounded-lg border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 pl-8 pr-2 py-1.5 text-[13px] focus:ring-2 focus:ring-blue-500 outline-none"
+              aria-label="Rechercher un module"
+            />
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">⌕</span>
+          </div>
+
+          <nav className="space-y-2">
+            {NAV_GROUPS.map((g) => {
+              const acc = CATEGORY_ACCENT[g.group as CategoryKey];
+              const items = q
+                ? g.items.filter((n) => `${n.key} ${n.label}`.toLowerCase().includes(q))
+                : g.items;
+              if (q && items.length === 0) return null;
+              const expanded = q ? true : openGroups[g.group] !== false;
+              return (
+                <div key={g.group}>
                   <button
-                    key={n.key}
-                    onClick={() => setModule(n.key)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                      module === n.key
-                        ? 'bg-blue-600 text-white font-semibold shadow'
-                        : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-400'
-                    }`}
+                    onClick={() => setOpenGroups((o) => ({ ...o, [g.group]: !(o[g.group] !== false) }))}
+                    className="w-full flex items-center gap-2 px-1 py-1 text-[12px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                    aria-expanded={expanded}
                   >
-                    <div className="font-medium">{n.label}</div>
+                    <span style={{ color: acc }}>{GROUP_ICON[g.group]}</span>
+                    <span className="flex-1 text-left">{g.group}</span>
+                    <span className="font-mono text-[10px] opacity-70">{items.length}</span>
+                    <span className={`text-[10px] transition-transform ${expanded ? 'rotate-90' : ''}`}>›</span>
                   </button>
-                ))}
-              </div>
-            ))}
+                  {expanded && (
+                    <div className="space-y-0.5 mt-0.5">
+                      {items.map((n) => {
+                        const active = module === n.key;
+                        return (
+                          <button
+                            key={n.key}
+                            onClick={() => setModule(n.key)}
+                            className={`w-full text-left pl-3 pr-2 py-[7px] rounded-lg text-[13px] transition-all border-l-2 ${
+                              active
+                                ? 'font-semibold text-slate-900 dark:text-white'
+                                : 'border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-500/10'
+                            }`}
+                            style={active ? { borderColor: acc, background: `${acc}1f` } : undefined}
+                          >
+                            <div className="font-medium truncate">{n.label}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
 
           <div className="pt-4 border-t border-slate-200 dark:border-white/10 space-y-2">

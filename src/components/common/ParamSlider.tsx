@@ -8,51 +8,55 @@ interface ParamSliderProps {
   max: number;
   step?: number;
   onChange: (n: number) => void;
+  accent?: string;
 }
 
 const clamp = (v: number, lo: number, hi: number) =>
   Math.min(hi, Math.max(lo, Number.isFinite(v) ? v : lo));
 
-/** Two-way control: slider + stepper buttons + synced numeric readout. */
+/** Single-affordance control: label + unit → slider → stepper input. */
 export const ParamSlider: React.FC<ParamSliderProps> = ({
-  label, unit, value, min, max, step = 1, onChange,
+  label, unit, value, min, max, step = 1, onChange, accent,
 }) => {
-  const shown = clamp(value, min, max);
-  const set = (v: number) => onChange(clamp(Math.round(v / step) * step, min, max));
+  const set = (v: number) => {
+    if (!Number.isFinite(v)) return;
+    onChange(clamp(Math.round(v / step) * step, min, max));
+  };
+  const pct = max > min ? ((clamp(value, min, max) - min) / (max - min)) * 100 : 0;
+  const acc = accent ?? 'var(--ws-acc, #4C8DFF)';
   return (
-    <div className="block">
-      <div className="flex items-baseline justify-between">
-        <span className="text-[11px] font-semibold uppercase text-slate-500">
-          {label} <span className="text-slate-400">({unit})</span>
-        </span>
-        <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
-          {shown}
+    <div className="block min-w-0">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-[13px] text-slate-600 dark:text-slate-300 truncate">{label}</span>
+        <span className="shrink-0 text-[10px] font-mono px-1.5 py-px rounded bg-slate-500/10 text-slate-500 dark:text-slate-400">
+          {unit}
         </span>
       </div>
       <div className="mt-1 flex items-center gap-1.5">
         <button
           type="button"
-          onClick={() => set(shown - step)}
-          className="shrink-0 w-6 h-6 rounded-md border border-slate-300 dark:border-white/15 text-sm leading-none hover:bg-slate-100 dark:hover:bg-white/10"
-          aria-label={`decrease ${label}`}
+          onClick={() => set(value - step)}
+          className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition"
+          aria-label={`Diminuer ${label}`}
         >
           −
         </button>
         <input
           type="range"
-          value={shown}
+          value={clamp(value, min, max)}
           min={min}
           max={max}
           step={step}
           onChange={(e) => set(Number(e.target.value))}
-          className="w-full accent-blue-600"
+          className="param-range w-full min-w-0"
+          style={{ background: `linear-gradient(90deg, ${acc} ${pct}%, rgba(148,163,184,0.25) ${pct}%)` }}
           aria-label={label}
         />
         <button
           type="button"
-          onClick={() => set(shown + step)}
-          className="shrink-0 w-6 h-6 rounded-md border border-slate-300 dark:border-white/15 text-sm leading-none hover:bg-slate-100 dark:hover:bg-white/10"
-          aria-label={`increase ${label}`}
+          onClick={() => set(value + step)}
+          className="shrink-0 w-7 h-7 rounded-md border border-slate-300 dark:border-white/15 text-base leading-none hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition"
+          aria-label={`Augmenter ${label}`}
         >
           +
         </button>
@@ -62,12 +66,9 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           min={min}
           max={max}
           step={step}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            if (Number.isFinite(v)) onChange(v);
-          }}
-          className="w-20 shrink-0 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none"
-          aria-label={`${label} value`}
+          onChange={(e) => set(Number(e.target.value))}
+          className="w-[72px] shrink-0 rounded-md border border-slate-300 dark:border-white/15 bg-white dark:bg-white/5 px-1.5 py-1 text-[13px] font-mono text-right focus:ring-2 focus:ring-blue-500 outline-none"
+          aria-label={`${label}, valeur exacte`}
         />
       </div>
     </div>

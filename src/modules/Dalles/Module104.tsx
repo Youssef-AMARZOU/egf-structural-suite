@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ReferenceLine, ResponsiveContainer, Cell,
-} from 'recharts';
 import type { Punching104Inputs, Punching104Output } from '../../types/engineering';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
-import { Workstation, verdictStatus } from '../../components/common/Workstation';
+import { Workstation } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
+import { StatTile } from '../../components/common/StatTile';
+import { DiagList, type DiagItem } from '../../components/common/DiagList';
+import { RatioBar } from '../../components/common/RatioBar';
 import {
-  SectionCanvas,
+  SectionCanvas, DimensionLine,
 } from '../../components/drafting';
 
 const DEF: Punching104Inputs = {
@@ -29,14 +28,7 @@ export default function Module104() {
     setInp((p) => ({ ...p, [k]: v }));
 
 
-  const bars = res
-    ? [
-        { n: 'vEd0/vRd,max', v: res.ratio0 },
-        { n: 'vEd/vRdc', v: res.ratio1 },
-      ]
-    : [];
-
-  const status = !res ? 'computing' : res.ratio0 <= 1 ? 'pass' : 'fail';
+  const status = !res ? 'computing' : res.ratio0 <= 1 && res.ratio1 <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof Punching104Inputs, label: string, unit: string,
@@ -45,34 +37,63 @@ export default function Module104() {
     <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
 
+  const diags: DiagItem[] = res ? [
+    {
+      severity: res.ratio0 <= 1 ? 'ok' : 'fail',
+      message: res.ratio0 <= 1
+        ? "Pas d'écrasement au nu du poteau (vEd,0 ≤ vRd,max)."
+        : 'Écrasement au nu : chapiteau obligatoire, les armatures seules ne suffisent pas.',
+    },
+    {
+      severity: res.ratio1 <= 1 ? 'ok' : res.ratio1 <= 1.5 ? 'warn' : 'fail',
+      message: res.ratio1 <= 1
+        ? `Vérifié sans armatures de poinçonnement (ρl = ${(res.rhol * 100).toFixed(3)} %).`
+        : res.ratio1 <= 1.5
+          ? `Armer : épingles, 1er cours à 0,5d, espacement ≤ 0,6d, Asw = ${res.asw_req.toFixed(1)} cm²/m.`
+          : 'Ratio très élevé : préférer un chapiteau ou augmenter h.',
+    },
+    ...(res.chap_c1 ? [{
+      severity: 'warn' as const,
+      message: `Chapiteau estimé : ${res.chap_c1.toFixed(2)} × ${res.chap_c2?.toFixed(2)} m.`,
+    }] : []),
+    {
+      severity: 'info',
+      message: `Arrêter les armatures au-delà de uout = ${res.uout.toFixed(2)} m.`,
+    },
+    {
+      severity: 'info',
+      message: `k = ${res.k.toFixed(3)} · ρl = ${(res.rhol * 100).toFixed(3)} % · vmin = ${res.vmin.toFixed(4)} MPa.`,
+    },
+  ] : [];
+
   return (
     <Workstation
       title="104 Poinçonnement"
-      subtitle="D'après EGF N°104 © Henry Thonier — EC2 §6.4"
+      subtitle="D'après EGF N°104 © Henry Thonier"
       eurocode="EC2 §6.4"
+      category="Dalles"
       status={status}
       live={live}
       params={
         <>
-
-        <div className="grid grid-cols-2 gap-2">
-          {slider('c1', 'c1 (≥c2)', 'm', 0.1, 3, 0.05)}
+        <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Poteau et dalle</div>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+          {slider('c1', 'c1 (≥ c2)', 'm', 0.1, 3, 0.05)}
           {slider('c2', 'c2', 'm', 0.1, 3, 0.05)}
           {slider('h', 'h', 'm', 0.1, 1, 0.01)}
           {slider('d', 'd', 'm', 0.05, 1, 0.01)}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide pt-1">Matériaux</div>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1">
           {slider('fck', 'fck', 'MPa', 12, 90, 1)}
           {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
           {slider('asx', 'Asx total', 'cm²', 0, 200, 0.5)}
           {slider('asy', 'Asy total', 'cm²', 0, 200, 0.5)}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide pt-1">Chargement</div>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1">
           {slider('ved', 'VEd', 'MN', 0, 10, 0.01)}
           {slider('beta', 'β', '–', 1, 1.6, 0.01)}
         </div>
@@ -88,77 +109,71 @@ export default function Module104() {
       }
       sketch={
         <>
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Ratios (seuil 1.0)</h2>
-          <div className="h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={bars}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                <XAxis dataKey="n" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <ReferenceLine y={1} stroke="red" strokeDasharray="4 4" />
-                <Bar dataKey="v">
-                  {bars.map((b, i) => (
-                    <Cell key={i} fill={b.v <= 1 ? '#16a34a' : '#dc2626'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
+        <div className="glass rounded-2xl p-5">
+          <div className="text-[15px] font-semibold mb-2">Ratios de vérification</div>
+          {res ? (
+            <RatioBar
+              items={[
+                { name: 'vEd,0 / vRd,max', value: res.ratio0, formula: 'écrasement au nu' },
+                { name: 'vEd / vRd,c', value: res.ratio1, formula: 'périmètre u1' },
+              ]}
+            />
+          ) : (
+            <div className="skel rounded-lg" style={{ height: 220 }} />
+          )}
           {res && (
-            <div className="mt-3 font-mono text-xs space-y-1">
-              <div>
-                u0={res.u0.toFixed(2)}m · u1={res.u1.toFixed(2)}m · uout={res.uout.toFixed(2)}m (rout={res.rout.toFixed(2)}m)
-              </div>
-              <div>
-                vEd0={res.ved0.toFixed(3)} / vRd,max={res.vrdmax.toFixed(3)} →{' '}
-                <b className={res.verdict0 === 'OK' ? 'text-green-600' : 'text-red-600'}>
-                  {res.verdict0}
-                </b>
-              </div>
-              <div>
-                vEd={res.ved.toFixed(3)} / vRdc={res.vrdc.toFixed(3)} →{' '}
-                <b className={res.verdict1 === 'OK' ? 'text-green-600' : 'text-red-600'}>
-                  {res.verdict1}
-                </b>{' '}
-                · Asw={res.asw_req.toFixed(1)}cm²/m · {res.nr}×{res.nt}={res.total_pins} pins
-              </div>
-              {res.chap_c1 && (
-                <div className="text-amber-500">
-                  Chapiteau estimé: {res.chap_c1.toFixed(2)}×{res.chap_c2?.toFixed(2)}m
-                </div>
-              )}
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <StatTile label="vEd,0" value={res.ved0.toFixed(3)} unit="MPa" tone={res.ratio0 <= 1 ? 'pass' : 'fail'} />
+              <StatTile label="vRd,max" value={res.vrdmax.toFixed(3)} unit="MPa" />
+              <StatTile label="vEd" value={res.ved.toFixed(3)} unit="MPa" tone={res.ratio1 <= 1 ? 'pass' : 'fail'} />
+              <StatTile label="vRd,c" value={res.vrdc.toFixed(3)} unit="MPa" />
+              <StatTile label="Asw req" value={res.asw_req.toFixed(1)} unit="cm²/m" />
+              <StatTile label="Épingles" value={`${res.nr}×${res.nt}=${res.total_pins}`} />
             </div>
           )}
         </div>
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-<SectionCanvas title="Plan (live SVG)" vbW={280} vbH={220}>
+        <div className="glass rounded-2xl p-5">
+          <SectionCanvas title="Plan — périmètres de contrôle" vbW={340} vbH={260} scaleLabel="u0 au nu · u1 à 2d · uout">
             {(() => {
               const s = 90;
-              const cx = 140;
-              const cy = 110;
+              const cx = 165;
+              const cy = 120;
               const w = inp.c1 * s;
               const hh = inp.c2 * s;
               const e1 = 2 * inp.d * s;
               const eo = (res?.rout ?? 1) * s;
               return (
                 <g>
-                  <circle cx={cx} cy={cy} r={eo} fill="none" stroke="#16a34a" strokeDasharray="4 3" />
+                  <circle cx={cx} cy={cy} r={eo} fill="none" stroke="#34D399" strokeDasharray="4 3" strokeWidth={1.4} />
                   <rect
                     x={cx - w / 2 - e1} y={cy - hh / 2 - e1}
                     width={w + 2 * e1} height={hh + 2 * e1}
-                    fill="none" stroke="#f59e0b" strokeDasharray="6 3" strokeWidth={1.6}
+                    fill="none" stroke="#F5A524" strokeDasharray="6 3" strokeWidth={1.6}
                   />
                   <rect
                     x={cx - w / 2} y={cy - hh / 2}
                     width={w} height={hh}
-                    fill="#1F3864" opacity={0.9}
+                    fill="#4C8DFF" opacity={0.85}
                   />
-                  <text x={cx} y={cy + 4} textAnchor="middle" fontSize={9} fill="#fff">
+                  <text x={cx} y={cy + 4} textAnchor="middle" fontSize={9} fill="#fff" fontWeight="bold">
                     {inp.c1.toFixed(2)}×{inp.c2.toFixed(2)}
                   </text>
+                  <DimensionLine x1={cx - w / 2} y1={cy + hh / 2} x2={cx + w / 2} y2={cy + hh / 2} offset={20} text={`c1 = ${inp.c1.toFixed(2)} m`} />
+                  <DimensionLine x1={cx - w / 2} y1={cy - hh / 2} x2={cx - w / 2} y2={cy + hh / 2} offset={-18} text={`c2 = ${inp.c2.toFixed(2)} m`} />
+                  <line x1={cx + w / 2 + e1} y1={cy - hh / 2 - e1 - 4} x2={cx + w / 2 + e1 + 34} y2={cy - hh / 2 - e1 - 18} stroke="#F5A524" strokeWidth={1} />
+                  <text x={cx + w / 2 + e1 + 36} y={cy - hh / 2 - e1 - 18} fontSize={9} fill="#F5A524">u1</text>
+                  <line x1={cx + eo * 0.7} y1={cy + eo * 0.7} x2={cx + eo * 0.7 + 30} y2={cy + eo * 0.7 + 16} stroke="#34D399" strokeWidth={1} />
+                  <text x={cx + eo * 0.7 + 32} y={cy + eo * 0.7 + 20} fontSize={9} fill="#34D399">uout</text>
+                  <line x1={cx - w / 2} y1={cy - hh / 2 + 6} x2={cx - w / 2 - 30} y2={cy - hh / 2 - 8} stroke="#4C8DFF" strokeWidth={1} />
+                  <text x={cx - w / 2 - 58} y={cy - hh / 2 - 8} fontSize={9} fill="#4C8DFF">u0</text>
+                  <g fontSize={8} fill="#93A0B8">
+                    <rect x={14} y={218} width={10} height={3} fill="#4C8DFF" />
+                    <text x={28} y={222}>u0 nu poteau</text>
+                    <rect x={118} y={218} width={10} height={3} fill="#F5A524" />
+                    <text x={132} y={222}>u1 à 2d</text>
+                    <rect x={196} y={218} width={10} height={3} fill="#34D399" />
+                    <text x={210} y={222}>uout</text>
+                  </g>
                 </g>
               );
             })()}
@@ -170,42 +185,20 @@ export default function Module104() {
         <>
           {res ? (
             <>
-
+              <StatTile label="Verdict global" value={res.verdict0 === 'OK' && res.verdict1 === 'OK' ? 'CONFORME' : 'NON CONFORME'} tone={status === 'pass' ? 'pass' : 'fail'} />
               <FormulaCard
                 title="Poinçonnement rectangulaire (EC2 §6.4)"
                 latex={String.raw`v_{Ed} = \frac{\beta V_{Ed}}{u_1 d} \le v_{Rd,c}`}
                 description="Vérification au périmètre u1"
                 status={status === 'computing' ? 'neutral' : status}
                 variables={[
-                    { symbol: String.raw`V_{Ed}`, meaning: 'Effort de poinçonnement', value: res.asw_req.toFixed(1) },
-                    { symbol: String.raw`u_1`, meaning: 'Périmètre à 2d', value: res.uout.toFixed(2) },
+                    { symbol: String.raw`V_{Ed}`, meaning: 'Effort de poinçonnement', value: inp.ved.toFixed(3), unit: 'MN' },
+                    { symbol: String.raw`u_1`, meaning: 'Périmètre à 2d', value: res.u1.toFixed(2), unit: 'm' },
+                    { symbol: String.raw`v_{Ed}`, meaning: 'Contrainte appliquée', value: res.ved.toFixed(3), unit: 'MPa' },
+                    { symbol: String.raw`v_{Rd,c}`, meaning: 'Résistance béton', value: res.vrdc.toFixed(3), unit: 'MPa' },
                 ]}
               />
-        <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
-        {!res ? (
-          <p className="text-xs text-slate-500">computing…</p>
-        ) : (
-          <ul className="text-xs space-y-2">
-            <li className={res.ratio0 <= 1 ? 'text-green-600' : 'text-red-600'}>
-              {res.ratio0 <= 1
-                ? '✓ Pas d\'écrasement au nu (vEd0 ≤ vRd,max).'
-                : '✗ Écrasement au nu: chapiteau obligatoire (armatures seules insuffisantes).'}
-            </li>
-            <li className={res.ratio1 <= 1 ? 'text-green-600' : res.ratio1 <= 1.5 ? 'text-amber-500' : 'text-red-600'}>
-              {res.ratio1 <= 1
-                ? `✓ Vérifié sans armatures poinçonnement (ρl=${(res.rhol * 100).toFixed(3)}%).`
-                : res.ratio1 <= 1.5
-                  ? `• Armer nécessaire: épingles 1er cours à 0.5d, sr≤0.6d, Asw=${res.asw_req.toFixed(1)}cm²/m.`
-                  : '✗ Ratio très élevé: préférer chapiteau ou augmenter h.'}
-            </li>
-            <li className="text-slate-500">
-              • uout={res.uout.toFixed(2)}m: arrêter les armatures au-delà de cette périmètre.
-            </li>
-            <li className="text-slate-500">
-              • k={res.k.toFixed(3)} · ρl={(res.rhol * 100).toFixed(3)}% · vmin={res.vmin.toFixed(4)} MPa
-            </li>
-          </ul>
-        )}
+              <DiagList items={diags} />
             </>
           ) : (
             <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>
