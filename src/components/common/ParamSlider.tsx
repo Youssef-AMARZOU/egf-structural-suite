@@ -39,9 +39,11 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
   }, [shown]);
   const commit = () => {
     if (draft === null) return;
+    if (draft.trim() === '') { setDraft(null); return; }
     const v = Number(draft.replace(/\s/g, '').replace(',', '.'));
     setDraft(null);
-    if (Number.isFinite(v)) set(v);
+    // Typed values are accepted exactly — bounds belong to the calculation, not the keyboard.
+    if (Number.isFinite(v)) onChange(v);
   };
   const acc = accent ?? 'var(--ws-acc, #4C8DFF)';
   return (
@@ -76,7 +78,7 @@ export const ParamSlider: React.FC<ParamSliderProps> = ({
           <input
             type="text"
             inputMode="decimal"
-            value={draft ?? String(shown)}
+            value={draft ?? (Number.isFinite(value) ? String(value) : '')}
             onChange={(e) => setDraft(e.target.value)}
             onFocus={() => { focused.current = true; }}
             onBlur={() => { focused.current = false; commit(); }}
