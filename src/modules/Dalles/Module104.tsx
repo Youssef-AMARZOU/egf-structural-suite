@@ -136,16 +136,15 @@ export default function Module104() {
           <SectionCanvas title="Plan — périmètres de contrôle" vbW={340} vbH={260} scaleLabel="u0 au nu · u1 à 2d · uout">
             {(() => {
               const cx = 165;
-              const cy = 118;
+              const cy = 112;
               const eo0 = res?.rout ?? 1;
-              // auto-fit: column + 2d ring + outer perimeter + labels inside 340×260
+              // fit column + 2d ring with margins; uout arc may clip (value in stats)
               const s = Math.max(
                 14,
                 Math.min(
                   90,
-                  215 / Math.max(0.25, inp.c1 + 4 * inp.d),
-                  135 / Math.max(0.25, inp.c2 + 4 * inp.d),
-                  120 / Math.max(0.3, eo0),
+                  200 / Math.max(0.25, inp.c1 + 4 * inp.d),
+                  120 / Math.max(0.25, inp.c2 + 4 * inp.d),
                 ),
               );
               const w = inp.c1 * s;
@@ -155,9 +154,12 @@ export default function Module104() {
               const ux1 = cx + w / 2 + e1;
               const uy1 = cy - hh / 2 - e1;
               const u1tx = Math.min(ux1 + 6, 294);
-              const ox = cx + eo * 0.7;
-              const oyy = cy + eo * 0.7;
-              const outx = Math.min(ox + 24, 290);
+              // uout callout clamped inside the frame along the 45° ray
+              const ex = Math.min(cx + eo * 0.7071, 312);
+              const ey = Math.min(cy + eo * 0.7071, 228);
+              const outx = Math.min(ex + 6, 292);
+              const dimY = cy + hh / 2 + e1 + 18;
+              const dimX = cx - w / 2 - e1 - 18;
               return (
                 <g>
                   <circle cx={cx} cy={cy} r={eo} fill="none" stroke="#34D399" strokeDasharray="4 3" strokeWidth={1.4} />
@@ -176,12 +178,12 @@ export default function Module104() {
                       {inp.c1.toFixed(2)}×{inp.c2.toFixed(2)}
                     </text>
                   )}
-                  <DimensionLine x1={cx - w / 2} y1={cy + hh / 2} x2={cx + w / 2} y2={cy + hh / 2} offset={e1 + 16} text={`c1 = ${inp.c1.toFixed(2)} m`} />
-                  <DimensionLine x1={cx - w / 2} y1={cy - hh / 2} x2={cx - w / 2} y2={cy + hh / 2} offset={e1 + 16} text={`c2 = ${inp.c2.toFixed(2)} m`} />
+                  <DimensionLine x1={cx - w / 2} y1={dimY - e1 - 18} x2={cx + w / 2} y2={dimY - e1 - 18} offset={e1 + 18} text={`c1 = ${inp.c1.toFixed(2)} m`} />
+                  <DimensionLine x1={dimX + e1 + 18} y1={cy - hh / 2} x2={dimX + e1 + 18} y2={cy + hh / 2} offset={e1 + 18} vertical text={`c2 = ${inp.c2.toFixed(2)} m`} />
                   <line x1={ux1} y1={uy1} x2={u1tx} y2={uy1 - 12} stroke="#F5A524" strokeWidth={1} />
                   <text x={u1tx + 3} y={uy1 - 10} fontSize={9} fill="#F5A524">u1</text>
-                  <line x1={ox} y1={oyy} x2={outx} y2={oyy + 14} stroke="#34D399" strokeWidth={1} />
-                  <text x={outx + 3} y={oyy + 18} fontSize={9} fill="#34D399">uout</text>
+                  <line x1={ex} y1={ey} x2={outx} y2={Math.min(ey + 14, 240)} stroke="#34D399" strokeWidth={1} />
+                  <text x={outx + 3} y={Math.min(ey + 18, 244)} fontSize={9} fill="#34D399">uout</text>
                   <text x={cx + w / 2 + 5} y={cy - hh / 2 - 4} fontSize={9} fill="#4C8DFF" fontWeight="bold">u0</text>
                   <g>
                     <rect x={8} y={8} width={126} height={54} rx={6} fill="rgba(10,14,26,0.66)" stroke="rgba(255,255,255,0.1)" strokeWidth={0.8} />

@@ -6,11 +6,13 @@ interface DimensionLineProps {
   text: string;
   color?: string;
   fontSize?: number;
+  /** rotate text along the dimension (for vertical dims) */
+  vertical?: boolean;
 }
 
 /** Civil-engineering dimensioning: extension lines, arrows, centered text. */
 export const DimensionLine: React.FC<DimensionLineProps> = ({
-  x1, y1, x2, y2, offset = 14, text, color = '#94a3b8', fontSize = 10,
+  x1, y1, x2, y2, offset = 14, text, color = '#94a3b8', fontSize = 10, vertical = false,
 }) => {
   const dx = x2 - x1;
   const dy = y2 - y1;
@@ -40,6 +42,7 @@ export const DimensionLine: React.FC<DimensionLineProps> = ({
       <text
         x={mx} y={my} textAnchor="middle" dominantBaseline="central"
         fontSize={fontSize} fill={color} stroke="none"
+        transform={vertical ? `rotate(-90 ${mx} ${my})` : undefined}
         style={{ paintOrder: 'stroke', strokeWidth: 3 }}
         className="fill-slate-600 dark:fill-slate-300"
       >
