@@ -13,12 +13,17 @@ interface StressStrainBlockProps {
   wPx?: number;
   fill?: string;
   showNaLabel?: boolean;
+  /** compression-zone tint */
+  tone?: 'violet' | 'orange' | 'cyan';
+  /** neutral-axis annotation, e.g. "x_u = 142 mm" */
+  naValue?: string;
 }
 
 /** Parabola-rectangle concrete stress block (EC2 §3.1.7, fck ≤ 50 MPa). */
 export const StressStrainBlock: React.FC<StressStrainBlockProps> = ({
-  x, yTop, hPx, xNa, wPx = 60, fill = '#6366f1', showNaLabel = true,
+  x, yTop, hPx, xNa, wPx = 60, fill, showNaLabel = true, tone = 'violet', naValue,
 }) => {
+  const toneFill = fill ?? (tone === 'orange' ? '#F59E0B' : tone === 'cyan' ? '#22D3EE' : '#6366f1');
   const xClamped = Math.max(1, xNa);
   const hc = Math.min(xClamped, hPx); // compressed height actually drawn
   const naY = yTop + xClamped;
@@ -29,7 +34,7 @@ export const StressStrainBlock: React.FC<StressStrainBlockProps> = ({
   const d = `M ${x} ${yNaDraw} Q ${x} ${yRect} ${x - wPx} ${yRect} L ${x - wPx} ${yTop} L ${x} ${yTop} Z`;
   return (
     <g>
-      <path d={d} fill={fill} opacity={0.35} stroke={fill} strokeWidth={1.2} />
+      <path d={d} fill={toneFill} opacity={0.35} stroke={toneFill} strokeWidth={1.2} />
       {xClamped <= hPx * 1.5 && (
         <>
           <line
@@ -38,7 +43,7 @@ export const StressStrainBlock: React.FC<StressStrainBlockProps> = ({
           />
           {showNaLabel && (
             <text x={x + 34} y={naY + 3} fontSize={9} fill="#ef4444" fontWeight="bold">
-              NA
+              {naValue ?? 'NA'}
             </text>
           )}
         </>

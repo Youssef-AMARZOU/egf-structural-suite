@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { useAppUpdater } from './hooks/useAppUpdater';
 import { UpdateDialog } from './components/common/UpdateDialog';
 import { CATEGORY_ACCENT, type CategoryKey } from './components/common/Workstation';
+import { AnnexProvider } from './components/common/AnnexContext';
 import Module101 from './modules/Poteaux/Module101';
 import Module103 from './modules/Dalles/Module103';
 import Module104 from './modules/Dalles/Module104';
@@ -340,6 +341,7 @@ export default function App() {
 
   return (
     <div className={dark ? 'dark' : ''}>
+      <AnnexProvider>
       <div className="app-canvas flex h-screen text-slate-900 dark:text-slate-100" style={{ '--cat': CATEGORY_ACCENT[cat] } as CSSProperties}>
         {/* Sidebar */}
         <aside className={`glass-shell shrink-0 overflow-y-auto rounded-r-2xl transition-all duration-200 ${navCollapsed ? 'w-0 p-0 opacity-0 pointer-events-none border-0' : 'w-[260px] p-4 space-y-3'}`}>
@@ -596,6 +598,7 @@ export default function App() {
           onCheck={() => updater.checkForUpdates(false)}
         />
       </div>
+      </AnnexProvider>
     </div>
   );
 }
