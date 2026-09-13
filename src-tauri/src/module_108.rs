@@ -66,7 +66,8 @@ pub fn calculate_navier_108(p: NavierInputs) -> Result<NavierOutput, String> {
     let h_m = p.h / 1000.0;
     let d_rig = p.e * h_m.powi(3) / 12.0 / (1.0 - p.nu.powi(2)); // kNm
 
-    let n_max = p.n_terms.min(50) as usize;
+    // Fourier terms bound the n_max² double loop.
+    let n_max = p.n_terms.clamp(1, 50) as usize;
     let mut mx = 0.0_f64;
     let mut my = 0.0_f64;
     let mut mxy = 0.0_f64;

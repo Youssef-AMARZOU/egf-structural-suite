@@ -76,6 +76,12 @@ pub fn calculate_eff_tr_compar_ec2_bael_155(
     let ned = p.ned;
     let ved = p.ved;
     let cot_theta = if p.cot_theta == 0.0 { 2.5 } else { p.cot_theta };
+    if gc <= 0.0 || gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if b <= 0.0 || h <= 0.0 || d <= 0.0 || bw <= 0.0 {
+        return Err("b, h, d et bw doivent être > 0".to_string());
+    }
 
     let mut diag = Vec::new();
 

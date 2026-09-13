@@ -57,6 +57,9 @@ pub fn calculate_semelle_circulaire_188(
     if p.N_ed <= 0.0 {
         return Err("N_ed doit etre > 0 (compression)".into());
     }
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent etre > 0".into());
+    }
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
     let area = PI * p.D * p.D / 4.0_f64;

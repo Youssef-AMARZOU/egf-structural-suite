@@ -54,6 +54,12 @@ pub struct FileOuverturesOutput {
 pub fn calculate_file_ouvertures_148(
     p: FileOuverturesInputs,
 ) -> Result<FileOuverturesOutput, String> {
+    if p.gh <= 0.0 || p.h <= 0.0 {
+        return Err("gh et h doivent être > 0".to_string());
+    }
+    if p.ome == 0.0 || p.i1 == 0.0 || p.i1 + p.i2 == 0.0 {
+        return Err("ome, i1 et i1 + i2 doivent être non nuls".to_string());
+    }
     let om2 = p.ome * p.ome;
     let alpha = p.ome * p.gh;
     let a1 = p.h1 - p.ab1;

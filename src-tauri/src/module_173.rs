@@ -126,6 +126,12 @@ pub struct PrefaEtDalleRapporteeOutput {
 pub fn calculate_prefa_et_dalle_rapportee_173(
     p: PrefaEtDalleRapporteeInputs,
 ) -> Result<PrefaEtDalleRapporteeOutput, String> {
+    if p.gc <= 0.0 {
+        return Err("gc doit être > 0".to_string());
+    }
+    if p.h <= 30.0 || p.b <= 0.0 || p.bw <= 0.0 {
+        return Err("h > 30 mm, b et bw > 0 exigés".to_string());
+    }
     let fcd = p.fck / p.gc;
     let (fcm, ecm, ec1, ecu1, nc) = fck_props(p.fck);
 

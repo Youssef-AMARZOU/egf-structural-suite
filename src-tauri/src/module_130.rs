@@ -173,18 +173,19 @@ fn shear_reinforcement_layout(
         1 => {
             let rout = u1 / (2.0 * PI);
             let rout = rout.max(c12 / 2.0 + 2.0 * d);
-            let nc = ((rout - 2.0 * d - c12 / 2.0) / (0.75 * d) + 2.0).floor() as usize;
-            nc.max(2)
+            // Ring count bounds the 0..n_rings loop; float cast saturates so min() caps.
+            let nc = ((rout - 2.0 * d - c12 / 2.0) / (0.75 * d) + 2.0).floor().clamp(2.0, 20.0) as usize;
+            nc.max(2).min(20)
         }
         _ => {
-            let nc = ((u1 / (4.0 * kd)) + 1.0).floor() as usize;
+            let nc = ((u1 / (4.0 * kd)) + 1.0).floor().clamp(2.0, 6.0) as usize;
             nc.max(2).min(6)
         }
     };
 
     let n_rays = match cas {
-        1 => (2.0 * PI * u1 / (kd * 4.0)).floor() as usize,
-        _ => (PI * u1 / (kd * 4.0)).floor() as usize,
+        1 => (2.0 * PI * u1 / (kd * 4.0)).floor().clamp(4.0, 24.0) as usize,
+        _ => (PI * u1 / (kd * 4.0)).floor().clamp(4.0, 24.0) as usize,
     };
     let n_rays = n_rays.max(4).min(24);
 

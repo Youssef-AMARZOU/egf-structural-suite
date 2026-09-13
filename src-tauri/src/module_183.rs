@@ -121,6 +121,16 @@ pub struct PoutreContinueQtesV2Output {
 pub fn calculate_poutre_continue_qtes_v2_183(
     p: PoutreContinueQtesV2Inputs,
 ) -> Result<PoutreContinueQtesV2Output, String> {
+    // Support count bounds the nap×nap system (nap-1 underflows if nap = 0).
+    if p.nap < 1 || p.nap > 200 {
+        return Err("nap doit être dans [1, 200]".to_string());
+    }
+    if p.tLn.len() < p.nap || p.tEI.len() < p.nap || p.tp.len() < p.nap {
+        return Err("tLn, tEI et tp doivent contenir au moins nap valeurs".to_string());
+    }
+    if p.tLn.iter().any(|&l| l <= 0.0) {
+        return Err("tLn : portées strictement positives requises".to_string());
+    }
     let m = solve_three_moment(p.nap, &p.tLn, &p.tEI, &p.tp);
 
     let n_spans = if p.nap > 1 { p.nap - 1 } else { 0 };

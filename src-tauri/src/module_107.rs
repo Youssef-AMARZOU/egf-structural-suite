@@ -249,6 +249,19 @@ pub fn calculate_slab_107(p: Slab107Inputs) -> Result<Slab107Output, String> {
     if p.h <= 0.0 || p.fc28 <= 0.0 || p.layers.is_empty() {
         return Err("Invalid inputs: h, fc28, and at least one soil layer required".into());
     }
+    // Layer/load counts bound the wazta 61x61 integration per layer and load.
+    if p.layers.len() > 100 {
+        return Err("Too many soil layers (100 max)".into());
+    }
+    if p.loads.len() > 2000 {
+        return Err("Too many loads (2000 max)".into());
+    }
+    if p.nub.abs() >= 1.0 {
+        return Err("Invalid inputs: nub must be in (-1, 1)".into());
+    }
+    if p.layers.iter().any(|l| l.es <= 0.0) {
+        return Err("Invalid inputs: layer es must be > 0".into());
+    }
 
     let (deq, kdeq) = compute_deq(p.h, p.fc28, p.nub, p.phi, &p.layers);
     let settlement = compute_settlement(p.x0, p.y0, &p.loads, deq, kdeq, &p.layers);

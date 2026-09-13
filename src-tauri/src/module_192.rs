@@ -101,6 +101,9 @@ fn deflection_limit(l: f64, classe: usize) -> f64 {
 pub fn calculate_fleche_nuisible_ec2_v2d_192(
     p: FlecheNuisibleEC2V2DInputs,
 ) -> Result<FlecheNuisibleEC2V2DOutput, String> {
+    if p.b <= 0.0 || p.h <= 0.0 || p.L <= 0.0 || p.t0 <= 0.0 {
+        return Err("b, h, L et t0 doivent être > 0".to_string());
+    }
     let t_inf = 50.0 * 365.25; // 50 years in days
     let phi = phi_tt0(p.fck, p.t0, t_inf, p.RH, p.classe);
     let ec_eff = ec_eff(p.fck, phi);

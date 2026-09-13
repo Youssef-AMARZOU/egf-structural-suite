@@ -40,6 +40,10 @@ pub fn calculate_portique_cross_244(
     if nm == 0 || p.mem_n2.len() != nm || p.mem_ei.len() != nm || p.mem_w.len() != nm {
         return Err("listes de barres incohérentes".to_string());
     }
+    // Member count bounds the 500-cycle distribution sweeps.
+    if nm > 10000 {
+        return Err("trop de barres (10000 max)".to_string());
+    }
     for (&a, &b) in p.mem_n1.iter().zip(p.mem_n2.iter()) {
         if a < 1 || a > nn || b < 1 || b > nn || a == b {
             return Err("barre : nœuds 1-based distincts dans [1, N]".to_string());

@@ -138,7 +138,14 @@ pub fn calculate_non_fragilite_section_qq_154(
     let med = p.med;
     let ec2 = if p.ec2 == 0.0 { 0.002 } else { p.ec2 };
     let nex = if p.nex == 0.0 { 2.0 } else { p.nex };
-    let n_layers = if p.n_layers == 0 { 4 } else { p.n_layers };
+    // Layer count bounds the 0..n_layers build loop.
+    let n_layers = (if p.n_layers == 0 { 4 } else { p.n_layers }).clamp(1, 100);
+    if gc <= 0.0 || gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if h <= 0.0 || d <= 0.0 {
+        return Err("h et d doivent être > 0".to_string());
+    }
 
     let mut diag = Vec::new();
 

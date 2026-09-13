@@ -135,8 +135,9 @@ pub fn calculate_interac_circ_137(
     let enr = p.cover + p.d_bar / 2.0;
 
     let n0 = 0.5 * p.phi;
-    let n_sec = p.n_sec.max(20).min(200);
-    let n_bars = p.n_bars.max(4);
+    let n_sec = p.n_sec.clamp(20, 200);
+    // Bar count bounds the 1..=n_bars loop.
+    let n_bars = p.n_bars.clamp(4, 400);
 
     let mut n_resist = Vec::new();
     let mut m_resist = Vec::new();

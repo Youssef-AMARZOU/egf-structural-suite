@@ -207,6 +207,12 @@ pub struct PourcentageMiniNonFragiliteSectQQOutput {
 pub fn calculate_pourcentage_mini_non_fragilite_sect_qq_163(
     p: PourcentageMiniNonFragiliteSectQQInputs,
 ) -> Result<PourcentageMiniNonFragiliteSectQQOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.trapezes.len() > 10000 {
+        return Err("trop de trapèzes (10000 max)".to_string());
+    }
     let fcd = p.fck / p.gc;
     let ec2 = 2.0 / 1000.0;
     let n_exp = if p.fck <= 50.0 { 2.0 } else { 1.4 + 23.4 * ((90.0 - p.fck) / 100.0).powf(4.0) };
@@ -225,6 +231,9 @@ pub fn calculate_pourcentage_mini_non_fragilite_sect_qq_163(
         h0 += t.h;
     }
     let v = if area > 0.0 { mu / area } else { 0.0 };
+    if ht <= 0.0 {
+        return Err("hauteur totale nulle — vérifier les trapèzes".to_string());
+    }
     let d = ht - v;
 
     // trapezes as (b1, b2, x1, x2)

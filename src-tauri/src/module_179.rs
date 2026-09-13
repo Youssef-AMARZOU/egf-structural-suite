@@ -214,9 +214,25 @@ pub fn calculate_cisai_section_qq_en_fc_179(
     p: CisaiSectionQQEnFCInputs,
 ) -> Result<CisaiSectionQQEnFCOutput, String> {
     let classe = "D";
+    // Bar count is clamped to the tabs dimensions (ns_steel indexes tabs[0..2][i]).
+    let tab_n = p.tabs.get(0).map_or(0, |r| r.len())
+        .min(p.tabs.get(1).map_or(0, |r| r.len()))
+        .min(p.tabs.get(2).map_or(0, |r| r.len()));
+    if tab_n == 0 {
+        return Err("tabs : 3 lignes non vides de même longueur requises".to_string());
+    }
+    let na = p.na.clamp(0, 200).min(tab_n);
+    // Bisection depth is O(itour² · na) : cap like module 129.
+    let itour = p.itour.clamp(1, 20);
+    if p.gs <= 0.0 {
+        return Err("gs doit être > 0".to_string());
+    }
+    if p.R <= 0.0 || p.euk <= 0.0 {
+        return Err("R et euk doivent être > 0".to_string());
+    }
     let (e1, e2, nrd, mrd) = mn_bisect(
-        p.NEd, p.MEd, p.R, p.na, p.Ac, &p.tabs, p.fyk, p.gs, p.k, p.euk,
-        p.fcd, p.ec1, p.ecu1, p.typ, p.itour, classe, 1.0, 0, &vec![],
+        p.NEd, p.MEd, p.R, na, p.Ac, &p.tabs, p.fyk, p.gs, p.k, p.euk,
+        p.fcd, p.ec1, p.ecu1, p.typ, itour, classe, 1.0, 0, &vec![],
     );
 
     let ratio = if p.MEd.abs() > 1e-10 {

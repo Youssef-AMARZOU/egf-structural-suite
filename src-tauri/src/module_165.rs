@@ -164,6 +164,13 @@ pub struct DalleBpEvasionNPotOutput {
 pub fn calculate_dalle_bp_evasion_n_pot_165(
     p: DalleBpEvasionNPotInputs,
 ) -> Result<DalleBpEvasionNPotOutput, String> {
+    if p.spans.is_empty() {
+        return Err("au moins une travée requise".to_string());
+    }
+    // Span count bounds the O(n²) system matrix.
+    if p.spans.len() > 500 {
+        return Err("trop de travées (500 max)".to_string());
+    }
     let n = p.spans.len();
 
     // Default inertia and section if not provided

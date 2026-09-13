@@ -106,6 +106,10 @@ fn sweep(
 pub fn calculate_voiles_inertie_var_ieq_197(
     p: VoilesInertieVarIeqInputs,
 ) -> Result<VoilesInertieVarIeqOutput, String> {
+    // Story count bounds the n+1 allocations and sweep.
+    if p.heights.len() > 100000 {
+        return Err("trop d'étages (100000 max)".to_string());
+    }
     let n = p.heights.len();
     if n == 0 {
         return Err("heights ne doit pas être vide".to_string());

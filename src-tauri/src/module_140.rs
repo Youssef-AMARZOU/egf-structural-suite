@@ -129,8 +129,14 @@ fn shear_envelope(
 pub fn calculate_cisai_circ_140(
     p: CisaiCircInputs,
 ) -> Result<CisaiCircOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
     let d = p.d.max(p.phi * 0.85);
     let phi = p.phi;
+    if d <= 0.0 || phi <= 0.0 {
+        return Err("d et phi doivent être > 0".to_string());
+    }
 
     let k = k_factor_calc(d);
     let rho_min = rho_min_calc(p.fck);

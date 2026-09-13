@@ -74,6 +74,9 @@ fn ffec(ta: f64, n: usize, m: f64) -> f64 {
 pub fn calculate_carottes_en_13791_194(
     p: CarottesEN13791Inputs,
 ) -> Result<CarottesEN13791Output, String> {
+    if p.phi <= 0.0 {
+        return Err("phi doit être > 0".to_string());
+    }
     let ka = fka(p.phi);
     let kaa = fkaa(p.phi, p.td);
     let gp = fgp(p.phi, p.td);

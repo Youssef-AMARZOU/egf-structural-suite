@@ -194,6 +194,8 @@ pub fn continuous_moments(
     n_spans: usize, // number of spans
 ) -> Vec<(f64, f64, f64)> {
     // Returns vec of (M_support_left, M_midspan, M_support_right) per span
+    // Span count bounds the 0..n_spans allocation + loop.
+    let n_spans = n_spans.clamp(1, 100);
     let mut moments = Vec::new();
     let p = gg * q_g + gq * q_q * psi;
 
@@ -280,6 +282,9 @@ pub struct DalleContinueFeuOutput {
 pub fn calculate_dalle_continue_feu_157(
     p: DalleContinueFeuInputs,
 ) -> Result<DalleContinueFeuOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
     // 1. Temperature profile
     let theta_fire = iso834_temp(p.r);
     let theta_d = temp_at_depth(p.d * 1000.0, p.r);

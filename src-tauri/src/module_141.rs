@@ -127,6 +127,12 @@ fn cscd_calc(h: f64, kp: f64, ivzs: f64, r2: f64, b2: f64) -> f64 {
 pub fn calculate_ec1_vent_141(
     p: Ec1VentInputs,
 ) -> Result<Ec1VentOutput, String> {
+    if p.z0 <= 0.0 || p.b <= 0.0 || p.n1 <= 0.0 {
+        return Err("z0, b et n1 doivent être > 0".to_string());
+    }
+    if p.masseq <= 0.0 || p.zt <= 0.0 || p.c0z <= 0.0 {
+        return Err("masseq, zt et c0z doivent être > 0".to_string());
+    }
     let z0ii = 0.01;
     let kf = kf_calc(p.z0, z0ii);
     let zmin = 0.2_f64.max(p.z0);

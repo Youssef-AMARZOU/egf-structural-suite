@@ -117,6 +117,9 @@ pub struct BalconsOutput {
 pub fn calculate_balcons_177(
     p: BalconsInputs,
 ) -> Result<BalconsOutput, String> {
+    if p.Eqp == 0.0 || p.Infi == 0.0 || p.Ifi == 0.0 {
+        return Err("Eqp, Infi et Ifi doivent être non nuls".to_string());
+    }
     let (fleche, mcr, courbure) = fcour(
         p.L, p.Lg, p.g0, p.g1, p.g2, p.q, p.psi, p.Eqp, p.Infi, p.Ifi, p.h, p.fctm,
     );

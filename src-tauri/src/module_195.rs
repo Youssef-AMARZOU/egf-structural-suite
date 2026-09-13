@@ -42,6 +42,9 @@ fn phi_tt0(fck: f64, t0: f64, t: f64, rh: f64) -> f64 {
 pub fn calculate_pourcentage_mini_age_195(
     p: PourcentageMiniAgeInputs,
 ) -> Result<PourcentageMiniAgeOutput, String> {
+    if p.fyd <= 0.0 || p.b <= 0.0 || p.d <= 0.0 || p.t0 <= 0.0 {
+        return Err("fyd, b, d et t0 doivent être > 0".to_string());
+    }
     // EC2 §9.2.1.1 minimum reinforcement
     let fctm = 0.3 * p.fck.powf(2.0 / 3.0);
     let rho_min_0 = 0.26 * fctm / p.fyd;

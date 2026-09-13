@@ -102,6 +102,12 @@ pub fn calculate_boussinesq_grille_186(
     if p.z_max <= 0.0 {
         return Err("z_max doit etre > 0".into());
     }
+    if p.E <= 0.0 {
+        return Err("E doit etre > 0".into());
+    }
+    if p.layers.len() > 1000 {
+        return Err("trop de couches de sol (1000 max)".into());
+    }
     let n_depth = p.n_depth.clamp(10, 200);
     let grid_n = p.grid_n.clamp(5, 41);
 

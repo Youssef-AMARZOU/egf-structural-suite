@@ -44,6 +44,15 @@ pub fn calculate_poinconnement_tremie_146(
     } else {
         2.12 * ((p.fck + 8.0 - 8.0) / 10.0).ln()
     };
+    if p.gc <= 0.0 {
+        return Err("gc doit être > 0".to_string());
+    }
+    if p.h <= p.a0 {
+        return Err("h doit être > a0".to_string());
+    }
+    if p.d_tremie <= 0.0 || p.c1 + p.c2 <= 0.0 {
+        return Err("d_tremie > 0 et c1 + c2 > 0 exigés".to_string());
+    }
     let fctd = fctm / p.gc;
     let v_ed = p.n_ed * p.gamma_f * 1000.0 / 1000.0;
     let d_eff = (p.h - p.a0) / 1000.0;

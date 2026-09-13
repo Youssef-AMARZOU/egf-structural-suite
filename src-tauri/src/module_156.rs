@@ -351,6 +351,9 @@ pub struct DalleRetraitFerraillageOutput {
 pub fn calculate_dalle_retrait_ferraillage_156(
     p: DalleRetraitFerraillageInputs,
 ) -> Result<DalleRetraitFerraillageOutput, String> {
+    if p.gs <= 0.0 {
+        return Err("gs doit être > 0".to_string());
+    }
     let fcm = p.fck + 8.0;
     let h0 = h0_eff(p.b, p.h, p.b == 1.0);
     let kh0 = kh(h0);

@@ -117,6 +117,8 @@ fn search_eh_eb(
     fcd: f64, ey: f64, ec1: f64, ecu1: f64, kc: f64, nc: f64, typ: i32,
     eudd: f64, itour: usize,
 ) -> (f64, f64, f64, f64) {
+    // Search is O(itour² · 50 · 50): cap iterations like module 126.
+    let itour = itour.clamp(1, 20);
     let xm = 1.25 * n_ed / (b * fcd);
     let esm = ecu1 * (d - xm) / xm;
     let eud = eudd.min(esm);
@@ -175,6 +177,12 @@ fn search_eh_eb(
 pub fn calculate_n_m_v_t_129(
     p: NmvtInputs,
 ) -> Result<NmvtOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.b <= 0.0 || p.h <= 0.0 || p.d <= 0.0 {
+        return Err("b, h et d doivent être > 0".to_string());
+    }
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
 

@@ -179,6 +179,19 @@ pub struct PoutresRotPlastMethGeneV5Output {
 pub fn calculate_poutres_rot_plast_meth_gene_v5_181(
     p: PoutresRotPlastMethGeneV5Inputs,
 ) -> Result<PoutresRotPlastMethGeneV5Output, String> {
+    // Support count bounds the nap×nap system (nap-1 underflows if nap = 0).
+    if p.nap < 1 || p.nap > 200 {
+        return Err("nap doit être dans [1, 200]".to_string());
+    }
+    if p.tLn.len() < p.nap || p.tEI.len() < p.nap || p.tp.len() < p.nap {
+        return Err("tLn, tEI et tp doivent contenir au moins nap valeurs".to_string());
+    }
+    if p.kkr == 1 && p.tMR.len() < p.nap {
+        return Err("tMR doit contenir au moins nap valeurs (mode plastique)".to_string());
+    }
+    if p.tLn.iter().any(|&l| l <= 0.0) {
+        return Err("tLn : portées strictement positives requises".to_string());
+    }
     let m = if p.kkr == 1 {
         solve_three_moment_plastic(p.nap, &p.tLn, &p.tEI, &p.tp, &p.tMR)
     } else {

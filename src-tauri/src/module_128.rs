@@ -100,7 +100,7 @@ fn compute_stirrups(
     asw: f64, as_min: f64,
     zone_lengths: &[f64], zone_asw: &[f64],
 ) -> (Vec<f64>, Vec<f64>, f64) {
-    let n = zone_lengths.len().min(16);
+    let n = zone_lengths.len().min(zone_asw.len()).min(16);
     let a = a0 * 1000.0;
     let b = b0 * 1000.0;
     let mut s_max = vec![0.0f64; 32];
@@ -137,6 +137,9 @@ fn compute_stirrups(
 pub fn calculate_eff_tr_repr_beton_128(
     p: EffTrReprBetonInputs,
 ) -> Result<EffTrReprBetonOutput, String> {
+    if p.gc <= 0.0 {
+        return Err("gc doit être > 0".to_string());
+    }
     let fcd = p.fck / p.gc;
     let ksi = fik(p.m_ed, p.b, p.bw, p.hf, p.d, p.dp, fcd, p.h, 1);
     let mu = fik(p.m_ed, p.b, p.bw, p.hf, p.d, p.dp, fcd, p.h, 2);

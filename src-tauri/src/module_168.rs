@@ -93,6 +93,9 @@ pub fn calculate_fleche_dispense_v5_168(
     let limit_ld = interpo(&tab, k1);
     let rho_factor = compute_rho_factor(p.rho, p.rho1);
 
+    if p.d <= 0.0 {
+        return Err("d doit être > 0".to_string());
+    }
     let l_over_d = p.L * 1000.0 / p.d;
     let adjusted_limit = limit_ld * rho_factor;
 

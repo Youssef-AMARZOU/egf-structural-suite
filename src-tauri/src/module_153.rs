@@ -108,7 +108,11 @@ pub fn calculate_flexion_as_flech_153(p: FlexionAsFlechInputs) -> Result<Flexion
     let md = p.md;
     let neq = p.neq;
     let fctm = p.fctm;
-    let n_ite = if p.n_ite == 0 { 100 } else { p.n_ite };
+    // Sweep steps bound the 0..=n_ite moment sweep.
+    let n_ite = (if p.n_ite == 0 { 100 } else { p.n_ite }).clamp(1, 10000);
+    if ln <= 0.0 || b <= 0.0 || h <= 0.0 || d <= 0.0 {
+        return Err("ln, b, h et d doivent être > 0".to_string());
+    }
 
     let mut diag = Vec::new();
 

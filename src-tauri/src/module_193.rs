@@ -30,6 +30,9 @@ pub struct CreepShrinkageEC2Draft7Output {
 pub fn calculate_creep_shrinkage_ec2_draft7_193(
     p: CreepShrinkageEC2Draft7Inputs,
 ) -> Result<CreepShrinkageEC2Draft7Output, String> {
+    if p.t0 <= 0.0 || p.b <= 0.0 || p.h <= 0.0 {
+        return Err("t0, b et h doivent être > 0".to_string());
+    }
     let fcm = p.fck + 8.0;
     let ho = 2.0 * p.b * p.h / (2.0 * p.b + p.h);
 

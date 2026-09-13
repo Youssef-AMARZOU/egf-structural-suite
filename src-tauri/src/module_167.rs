@@ -131,6 +131,9 @@ pub struct BaelBaBpFlecheDalleContinueOutput {
 pub fn calculate_bael_ba_bp_fleche_dalle_continue_167(
     p: BaelBaBpFlecheDalleContinueInputs,
 ) -> Result<BaelBaBpFlecheDalleContinueOutput, String> {
+    if p.L <= 0.0 || p.b <= 0.0 || p.h <= 0.0 || p.E <= 0.0 {
+        return Err("L, b, h et E doivent être > 0".to_string());
+    }
     let n_pts = 20;
     let e_i = p.E * p.b * p.h * p.h * p.h / 12.0 / (1.0 - 0.2 * 0.2);
 

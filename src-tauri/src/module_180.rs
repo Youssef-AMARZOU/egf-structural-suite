@@ -123,7 +123,7 @@ fn solve_three_moment_plastic(nap: usize, tl: &[f64], tei: &[f64],
             }
             m[i] = sum / pivot;
             // Cap at MR
-            if t_mr[i] > 0.0 && m[i].abs() > t_mr[i] {
+            if i < t_mr.len() && t_mr[i] > 0.0 && m[i].abs() > t_mr[i] {
                 m[i] = t_mr[i] * m[i].signum();
             }
         }
@@ -172,6 +172,19 @@ pub struct DallesRotPlastMethGeneV4Output {
 pub fn calculate_dalles_rot_plast_meth_gene_v4_180(
     p: DallesRotPlastMethGeneV4Inputs,
 ) -> Result<DallesRotPlastMethGeneV4Output, String> {
+    // Support count bounds the nap×nap system (nap-1 underflows if nap = 0).
+    if p.nap < 1 || p.nap > 200 {
+        return Err("nap doit être dans [1, 200]".to_string());
+    }
+    if p.tLn.len() < p.nap || p.tEI.len() < p.nap || p.tp.len() < p.nap {
+        return Err("tLn, tEI et tp doivent contenir au moins nap valeurs".to_string());
+    }
+    if p.kkr == 1 && p.tMR.len() < p.nap {
+        return Err("tMR doit contenir au moins nap valeurs (mode plastique)".to_string());
+    }
+    if p.tLn.iter().any(|&l| l <= 0.0) {
+        return Err("tLn : portées strictement positives requises".to_string());
+    }
     let m = if p.kkr == 1 {
         solve_three_moment_plastic(p.nap, &p.tLn, &p.tEI, &p.tp, &p.tMR)
     } else {

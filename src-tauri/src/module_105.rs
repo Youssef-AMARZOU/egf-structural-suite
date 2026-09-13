@@ -163,6 +163,10 @@ pub fn calculate_circular_punching_105(
     if p.c <= 0.0 || p.d <= 0.0 {
         return Err("Column diameter c and effective depth d must be > 0".into());
     }
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc and gs must be > 0".into());
+    }
+    let nbrin = p.nbrin.clamp(1, 8);
 
     let pi = std::f64::consts::PI;
     let fyd = p.fyk / p.gs;
@@ -220,13 +224,11 @@ pub fn calculate_circular_punching_105(
     let rout_red = rout - 1.5 * p.d;
     let uout_red = uout - 2.0 * pi * 1.5 * p.d;
 
-    // Number of stirrups per ring
-    let mut nt = (uout_red / (2.0 * p.d)).floor() as usize;
-    nt = nt.max(2);
+    // Number of stirrups per ring (clamped: layout count bounds alloc/loop)
+    let mut nt = ((uout_red / (2.0 * p.d)).floor().clamp(2.0, 360.0) as usize).max(2).min(360);
 
-    // Number of rings
-    let mut nr = ((rout_red - 0.5 * p.d - p.c / 2.0) / (0.75 * p.d) + 1.0).floor() as usize;
-    nr = nr.max(2);
+    // Number of rings (clamped: 1..=nr loop + sr division)
+    let mut nr = (((rout_red - 0.5 * p.d - p.c / 2.0) / (0.75 * p.d) + 1.0).floor().clamp(2.0, 50.0) as usize).max(2).min(50);
 
     // Radial spacing
     let sr = if nr > 1 {
@@ -245,7 +247,7 @@ pub fn calculate_circular_punching_105(
             let j = i - 1;
             let xt = (0.5 * p.c + 0.5 * p.d + (j - 1) as f64 * sr) * 2.0 * pi / (1.5 * p.d);
             if xt > nt as f64 {
-                nt = (xt + 1.0).floor() as usize;
+                nt = ((xt + 1.0).floor().clamp(2.0, 360.0) as usize).max(2).min(360);
             }
             st = uout_red / nt as f64;
             break;
@@ -253,10 +255,10 @@ pub fn calculate_circular_punching_105(
     }
 
     // Area per bar
-    let asw1 = asw_req / (p.nbrin as f64 * nt as f64);
+    let asw1 = asw_req / (nbrin as f64 * nt as f64);
 
     // Bar selection
-    let (phi, nbrin_out) = select_bar_dia(asw1, p.nbrin, p.fck, p.fyk, st);
+    let (phi, nbrin_out) = select_bar_dia(asw1, nbrin, p.fck, p.fyk, st);
 
     // Angle between stirrups
     let angle = 2.0 * pi / nt as f64;
