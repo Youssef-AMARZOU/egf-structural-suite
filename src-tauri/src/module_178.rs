@@ -85,6 +85,9 @@ pub struct PoteauPieuV3Output {
 pub fn calculate_poteau_pieu_v3_178(
     p: PoteauPieuV3Inputs,
 ) -> Result<PoteauPieuV3Output, String> {
+    if p.fck <= 0.0 || p.diam <= 0.0 || p.t0a <= 0.0 {
+        return Err("fck, diam et t0a doivent être > 0".to_string());
+    }
     let (phi_inf, phi_t_t0, t0_adj) = flu(
         p.diam, p.fck, p.t0a, p.T, p.RH, &p.classe, p.code,
     );

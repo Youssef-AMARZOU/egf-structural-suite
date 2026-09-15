@@ -43,6 +43,12 @@ pub struct SemellePortanteOutput {
 pub fn calculate_semelle_portante_142(
     p: SemellePortanteInputs,
 ) -> Result<SemellePortanteOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.b <= 0.0 || p.l <= 0.0 || p.d <= 0.0 {
+        return Err("b, l et d doivent être > 0".to_string());
+    }
     let fcd = p.fck / p.gc;
     let fctd = 0.7 * (0.3 * p.fck.powf(2.0 / 3.0)) / p.gc;
     let fyd = p.fyk / p.gs;

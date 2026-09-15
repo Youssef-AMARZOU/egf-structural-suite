@@ -18,8 +18,7 @@ export default function Module235() {
   const S = (k: keyof DalleAlveoleeInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res
-    ? 'computing'
+  const status = err ? 'fail' : !res ? 'computing'
     : res.ratio_m > 1 || res.ratio_v > 1
       ? 'fail'
       : verdictStatus(res.verdict);

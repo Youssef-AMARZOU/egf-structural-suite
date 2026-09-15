@@ -24,7 +24,7 @@ export default function Module136() {
   const S = (k: keyof AncrageTsInputs) => (v: number | string) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof AncrageTsInputs, label: string, unit: string,

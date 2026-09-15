@@ -28,7 +28,7 @@ export default function Module125() {
 
   const totalDepth = inp.ha + inp.hb + inp.hc;
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof BoussinesqLagrangeInputs, label: string, unit: string,

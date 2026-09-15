@@ -147,6 +147,16 @@ pub fn calculate_settlement_124(
     if p.footings.is_empty() || p.layers.is_empty() {
         return Err("At least one footing and one soil layer required".into());
     }
+    // Footing/layer counts bound the np*nc Simpson integration sweep.
+    if p.footings.len() > 1000 || p.layers.len() > 500 {
+        return Err("Too many footings (1000 max) or layers (500 max)".into());
+    }
+    if p.footings.iter().any(|f| f.b <= 0.0 || f.l <= 0.0) {
+        return Err("Footing dimensions b and l must be > 0".into());
+    }
+    if p.layers.iter().any(|l| l.es <= 0.0) {
+        return Err("Layer modulus es must be > 0".into());
+    }
 
     let nc = p.layers.len();
     let np = p.footings.len();

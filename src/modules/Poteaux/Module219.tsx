@@ -4,7 +4,7 @@ import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation } from '../../components/common/Workstation';
 import type { ModuleStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas } from '../../components/drafting';
+import { SectionCanvas, AxisTicks, InlineLegend } from '../../components/drafting';
 import { InteractionMnFeuRectInputs, InteractionMnFeuRectOutput } from '../../types/engineering';
 
 export default function Module219() {
@@ -19,7 +19,7 @@ export default function Module219() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : ok ? 'pass' : 'fail';
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : ok ? 'pass' : 'fail';
   return (
     <Workstation
       title="Module 219 — Interaction M-N feu, poteau rectangulaire"
@@ -82,14 +82,33 @@ export default function Module219() {
                 const pts = result.curve_m.map((m, i) => `${X(m).toFixed(1)},${Y(result.curve_n[i]).toFixed(1)}`).join(' ');
                 return (
                   <>
-                    <line x1={50} y1={Y(0)} x2={370} y2={Y(0)} stroke="#999" strokeDasharray="4,3" />
-                    <polygon points={`50,${Y(0)} ${pts}`} fill="#3B82F6" opacity={0.2} />
-                    <polyline points={pts} fill="none" stroke="#1D4ED8" strokeWidth={2} />
+                    <line x1={50} y1={Y(0)} x2={370} y2={Y(0)} stroke="#64748B" strokeWidth={1} />
+                    <line x1={50} y1={20} x2={50} y2={230} stroke="#64748B" strokeWidth={1} />
+                    <polygon points={`50,${Y(0)} ${pts}`} fill="#3B82F6" opacity={0.15} />
+                    <polyline points={pts} fill="none" stroke="#60A5FA" strokeWidth={2} />
                     <circle cx={X(inputs.m_ed_fi)} cy={Y(inputs.n_ed_fi)} r={6} fill={ok ? '#22C55E' : '#EF4444'} />
-                    <text x={X(inputs.m_ed_fi) + 10} y={Y(inputs.n_ed_fi)} fontSize={10} fill={ok ? '#15803D' : '#B91C1C'}>
-                      ({inputs.m_ed_fi}, {inputs.n_ed_fi})
-                    </text>
-                    <text x={60} y={250} fontSize={10} fill="#333">M (kN·m)</text>
+                    <text x={14} y={120} fontSize={9} fill="#94A3B8" textAnchor="middle" transform="rotate(-90 14 120)">N (kN)</text>
+                    <AxisTicks
+                      values={[0, mMax / 2, mMax]}
+                      map={(v) => [X(v), Y(0)]}
+                      unit="kN·m"
+                      side="below"
+                    />
+                    <AxisTicks
+                      values={[nMin, 0, nMax]}
+                      map={(v) => [X(0), Y(v)]}
+                      unit="kN"
+                      side="left"
+                    />
+                    <text x={60} y={250} fontSize={10} fill="#CBD5E1">M (kN·m)</text>
+                    <InlineLegend
+                      items={[
+                        { label: 'Courbe N-M', color: '#1D4ED8' },
+                        { label: '(MEd, NEd)', color: ok ? '#22C55E' : '#EF4444' },
+                      ]}
+                      x={290}
+                      y={25}
+                    />
                   </>
                 );
               })()}
@@ -101,18 +120,18 @@ export default function Module219() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${ok ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'Taux', value: (res.ratio * 100).toFixed(0), unit: '%', color: 'bg-blue-50' },
-              { label: 'Nmax', value: res.n_max.toFixed(0), unit: 'kN', color: 'bg-purple-50' },
-              { label: 'Mmax', value: res.m_max.toFixed(1), unit: 'kN·m', color: 'bg-orange-50' },
-              { label: 'ks', value: res.ks.toFixed(2), unit: '', color: 'bg-gray-50' },
+              { label: 'Taux', value: (res.ratio * 100).toFixed(0), unit: '%', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'Nmax', value: res.n_max.toFixed(0), unit: 'kN', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'Mmax', value: res.m_max.toFixed(1), unit: 'kN·m', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'ks', value: res.ks.toFixed(2), unit: '', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -131,7 +150,7 @@ export default function Module219() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

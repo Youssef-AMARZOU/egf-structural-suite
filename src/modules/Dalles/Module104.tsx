@@ -28,7 +28,7 @@ export default function Module104() {
     setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio0 <= 1 && res.ratio1 <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio0 <= 1 && res.ratio1 <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof Punching104Inputs, label: string, unit: string,

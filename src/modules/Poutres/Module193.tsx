@@ -16,7 +16,7 @@ export default function Module193() {
   const S = (k: keyof CreepShrinkageEC2Draft7Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof CreepShrinkageEC2Draft7Inputs, label: string, unit: string,

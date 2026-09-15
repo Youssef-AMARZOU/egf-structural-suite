@@ -201,6 +201,18 @@ pub struct FlexdevV3Output {
 
 #[tauri::command]
 pub fn calculate_flexdev_v3_162(p: FlexdevV3Inputs) -> Result<FlexdevV3Output, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.section_points.len() < 3 {
+        return Err("section_points : au moins 3 points requis".to_string());
+    }
+    if p.section_points.len() > 10000 || p.steel_points.len() > 10000 {
+        return Err("trop de points de section (10000 max)".to_string());
+    }
+    // Angle/strain counts bound the nested sweep (alloc per angle).
+    let n_angle_steps = p.n_angle_steps.clamp(1, 360);
+    let n_strain_pts = p.n_strain_pts.clamp(2, 1000);
     let fcd = p.fck / p.gc;
     let ec2 = 2.0 / 1000.0;
     let ec1 = 3.5 / 1000.0;
@@ -217,8 +229,8 @@ pub fn calculate_flexdev_v3_162(p: FlexdevV3Inputs) -> Result<FlexdevV3Output, S
     let mut all_curves = Vec::new();
 
     let angle_max = PI;
-    for i in 0..p.n_angle_steps {
-        let angle = i as f64 / p.n_angle_steps as f64 * angle_max;
+    for i in 0..n_angle_steps {
+        let angle = i as f64 / n_angle_steps as f64 * angle_max;
         angles.push(angle * 180.0 / PI);
 
         let rotated: Vec<(f64, f64)> = p.section_points.iter()
@@ -234,8 +246,8 @@ pub fn calculate_flexdev_v3_162(p: FlexdevV3Inputs) -> Result<FlexdevV3Output, S
         if h_depth < 1e-10 { continue; }
 
         let mut curve = Vec::new();
-        for j in 0..=p.n_strain_pts {
-            let frac = j as f64 / p.n_strain_pts as f64;
+        for j in 0..=n_strain_pts {
+            let frac = j as f64 / n_strain_pts as f64;
             let eh = ec1 * (1.0 - 2.0 * frac);
             let eb = -0.9 * euk * (1.0 - 2.0 * frac);
 

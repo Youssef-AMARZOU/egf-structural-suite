@@ -24,7 +24,7 @@ export default function Module122() {
   const S = (k: keyof Sem2PieuxInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof Sem2PieuxInputs, label: string, unit: string,

@@ -46,6 +46,12 @@ pub struct PoutreCloisonOutput {
 pub fn calculate_poutre_cloison_147(
     p: PoutreCloisonInputs,
 ) -> Result<PoutreCloisonOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.h <= 30.0 {
+        return Err("h doit être > 30 mm (enrobage)".to_string());
+    }
     let fcm = p.fck + 8.0;
     let fctm = if p.fck <= 50.0 {
         0.3 * (fcm - 8.0).powf(2.0 / 3.0)

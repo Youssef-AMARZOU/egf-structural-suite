@@ -4,7 +4,7 @@ import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation } from '../../components/common/Workstation';
 import type { ModuleStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas } from '../../components/drafting';
+import { SectionCanvas, InlineLegend } from '../../components/drafting';
 import { FissureCercleInputs, FissureCercleOutput } from '../../types/engineering';
 
 export default function Module213() {
@@ -19,7 +19,7 @@ export default function Module213() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : ok ? 'pass' : 'fail';
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : ok ? 'pass' : 'fail';
   return (
     <Workstation
       title="Module 213 — Fissuration, section circulaire"
@@ -65,28 +65,42 @@ export default function Module213() {
       </>}
       sketch={<>
 <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-  <SectionCanvas title="Section — zone comprimée / fissures" vbW={400} vbH={220}>
+  <SectionCanvas title="Section — zone comprimée / fissures" vbW={400} vbH={240}>
     {(() => {
       const result = res;
-      if (!result) return (<text x={400 / 2} y={220 / 2} textAnchor="middle" fontSize={12} fill="#94a3b8">computing…</text>);
-      return (<>
-              {(() => {
-                const R = 90, cx = 200, cy = 110;
-                const xPx = (result.x / inputs.d) * 2 * R;
-                return (
-                  <g>
-                    <circle cx={cx} cy={cy} r={R} fill="#E2E8F0" stroke="#333" strokeWidth={2} />
-                    <clipPath id="clip213"><circle cx={cx} cy={cy} r={R} /></clipPath>
-                    <rect x={cx - R} y={cy - R} width={2 * R} height={xPx} fill="#3B82F6" opacity={0.5} clipPath="url(#clip213)" />
-                    <line x1={cx - R} y1={cy - R + xPx} x2={cx + R} y2={cy - R + xPx} stroke="#1D4ED8" strokeWidth={2} strokeDasharray="5,3" />
-                    {[0, 1, 2].map(i => (
-                      <line key={i} x1={cx - 40 + i * 40} y1={cy + R - 15} x2={cx - 30 + i * 40} y2={cy + R - 45} stroke="#EF4444" strokeWidth={2} />
-                    ))}
-                    <text x={cx} y={cy - R - 6} fontSize={10} fill="#1D4ED8" textAnchor="middle">x={result.x.toFixed(0)} — wk={result.wk.toFixed(2)} mm</text>
-                  </g>
-                );
-              })()}
-            </>);
+      if (!result) return (<text x={200} y={120} textAnchor="middle" fontSize={12} fill="#94a3b8">computing…</text>);
+      const R = 85, cx = 200, cy = 125;
+      const nBar = Math.round(inputs.n_bar);
+      const rebarR = Math.max(3, inputs.phi * 0.4);
+      const coverOffset = inputs.c + inputs.phi;
+      const rebarCircleR = R - coverOffset * (R / (inputs.d / 2));
+      const xPx = (result.x / inputs.d) * 2 * R;
+      return (
+        <g>
+          <circle cx={cx} cy={cy} r={R} fill="#E2E8F0" stroke="#64748B" strokeWidth={2} />
+          <clipPath id="clip213"><circle cx={cx} cy={cy} r={R} /></clipPath>
+          <rect x={cx - R} y={cy - R} width={2 * R} height={xPx} fill="#3B82F6" opacity={0.45} clipPath="url(#clip213)" />
+          <line x1={cx - R} y1={cy - R + xPx} x2={cx + R} y2={cy - R + xPx} stroke="#FACC15" strokeWidth={1.5} strokeDasharray="6 3" />
+          {Array.from({ length: nBar }, (_, i) => {
+            const angle = (Math.PI / 2) + (2 * Math.PI * i) / nBar;
+            const bx = cx + rebarCircleR * Math.cos(angle);
+            const by = cy + rebarCircleR * Math.sin(angle);
+            return <circle key={i} cx={bx} cy={by} r={rebarR} fill="#EF4444" stroke="#991B1B" strokeWidth={0.8} />;
+          })}
+          <text x={cx + R + 8} y={cy - R + xPx + 4} fontSize={9} fill="#FACC15" textAnchor="start">
+            Neutre (x={result.x.toFixed(0)} mm)
+          </text>
+          <InlineLegend
+            items={[
+              { label: `Zone comprimée (x = ${result.x.toFixed(0)} mm)`, color: '#3B82F6' },
+              { label: `wk = ${result.wk.toFixed(2)} mm`, color: '#FACC15', dashed: true },
+              { label: `Armatures φ${inputs.phi} × ${nBar}`, color: '#EF4444' },
+            ]}
+            x={cx - R}
+            y={cy + R + 10}
+          />
+        </g>
+      );
     })()}
   </SectionCanvas>
 </div>
@@ -94,18 +108,18 @@ export default function Module213() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${ok ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'wk', value: res.wk.toFixed(2), unit: 'mm', color: 'bg-blue-50' },
-              { label: 'σs', value: res.sigma_s.toFixed(0), unit: 'MPa', color: 'bg-purple-50' },
-              { label: 'sr,max', value: res.sr_max.toFixed(0), unit: 'mm', color: 'bg-orange-50' },
-              { label: 'x', value: res.x.toFixed(0), unit: 'mm', color: 'bg-gray-50' },
+              { label: 'wk', value: res.wk.toFixed(2), unit: 'mm', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'σs', value: res.sigma_s.toFixed(0), unit: 'MPa', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'sr,max', value: res.sr_max.toFixed(0), unit: 'mm', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'x', value: res.x.toFixed(0), unit: 'mm', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -124,7 +138,7 @@ export default function Module213() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

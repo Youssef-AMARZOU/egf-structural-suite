@@ -105,7 +105,7 @@ export default function Module107() {
       ]
     : [];
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof Slab107Inputs, label: string, unit: string,
@@ -151,9 +151,9 @@ export default function Module107() {
                   className="absolute top-1 right-1 text-[10px] text-red-400 hover:text-red-600">✕</button>
                 <div className="text-[10px] text-slate-400 font-mono">Couche {i + 1}</div>
                 <div className="grid grid-cols-3 gap-1">
-                  <ParamSlider label="H" unit="m" value={layer.h_s} min={0.1} max={20} step={0.5} onChange={(v) => updateLayer(i, 'h_s', v)} />
-                  <ParamSlider label="ν" unit="–" value={layer.nu} min={0.1} max={0.5} step={0.05} onChange={(v) => updateLayer(i, 'nu', v)} />
-                  <ParamSlider label="Es" unit="MPa" value={layer.es} min={5} max={500} step={5} onChange={(v) => updateLayer(i, 'es', v)} />
+                  <ParamSlider label="H" unit="m" value={layer.h_s} min={0.1} max={20} step={0.5} steppers={false} onChange={(v) => updateLayer(i, 'h_s', v)} />
+                  <ParamSlider label="ν" unit="–" value={layer.nu} min={0.1} max={0.5} step={0.05} steppers={false} onChange={(v) => updateLayer(i, 'nu', v)} />
+                  <ParamSlider label="Es" unit="MPa" value={layer.es} min={5} max={500} step={5} steppers={false} onChange={(v) => updateLayer(i, 'es', v)} />
                 </div>
               </div>
             ))}
@@ -173,9 +173,9 @@ export default function Module107() {
                   className="absolute top-1 right-1 text-[10px] text-red-400 hover:text-red-600">✕</button>
                 <div className="text-[10px] text-slate-400 font-mono">Q{i + 1}</div>
                 <div className="grid grid-cols-3 gap-1">
-                  <ParamSlider label="Q" unit="kN" value={load.q} min={0} max={1000} step={10} onChange={(v) => updateLoad(i, 'q', v)} />
-                  <ParamSlider label="x" unit="m" value={load.x} min={-50} max={50} step={0.5} onChange={(v) => updateLoad(i, 'x', v)} />
-                  <ParamSlider label="y" unit="m" value={load.y} min={-50} max={50} step={0.5} onChange={(v) => updateLoad(i, 'y', v)} />
+                  <ParamSlider label="Q" unit="kN" value={load.q} min={0} max={1000} step={10} steppers={false} onChange={(v) => updateLoad(i, 'q', v)} />
+                  <ParamSlider label="x" unit="m" value={load.x} min={-50} max={50} step={0.5} steppers={false} onChange={(v) => updateLoad(i, 'x', v)} />
+                  <ParamSlider label="y" unit="m" value={load.y} min={-50} max={50} step={0.5} steppers={false} onChange={(v) => updateLoad(i, 'y', v)} />
                 </div>
               </div>
             ))}

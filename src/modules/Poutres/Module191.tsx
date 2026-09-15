@@ -18,7 +18,7 @@ export default function Module191() {
   const S = (k: keyof VoileVerifFcInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.ratio > 1 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio > 1 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof VoileVerifFcInputs, label: string, unit: string,
@@ -96,7 +96,7 @@ export default function Module191() {
                     <text x={X(inp.N_ed) + 10} y={Y(inp.M_ed)} fontSize={10} fill="#EF4444">
                       ({inp.N_ed}, {inp.M_ed})
                     </text>
-                    <text x={300} y={312} fontSize={10} fill="#666" textAnchor="middle">N (kN)</text>
+                    <text x={300} y={312} fontSize={10} fill="#94A3B8" textAnchor="middle">N (kN)</text>
                   </>
                 );
               })()}

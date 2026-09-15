@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, StressStrainBlock } from '../../components/drafting';
+import { SectionCanvas, DimensionLine } from '../../components/drafting';
 import { PourcentMiniSectQQInputs, PourcentMiniSectQQOutput } from '../../types/engineering';
 
 export default function Module161() {
@@ -25,7 +25,7 @@ export default function Module161() {
     setInp({ ...inp, trapezes: t });
   };
 
-  const status = !res ? 'computing' : res.as_min_pct >= 0.30 ? 'fail' : res.as_min_pct >= 0.15 ? 'warn' : 'pass';
+  const status = err ? 'fail' : !res ? 'computing' : res.as_min_pct >= 0.30 ? 'fail' : res.as_min_pct >= 0.15 ? 'warn' : 'pass';
 
   const slider = (
     key: keyof PourcentMiniSectQQInputs, label: string, unit: string,
@@ -68,31 +68,48 @@ export default function Module161() {
       }
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <SectionCanvas title="Section — armature minimum" vbW={500} vbH={200}>
+          <SectionCanvas title="Section — armature minimum" vbW={500} vbH={210} scaleLabel="trapèzes empilés">
             {res && (() => {
               const maxB = Math.max(...inp.trapezes.map(t => Math.max(t.b1, t.b2)));
-              const ht = res.ht;
-              const scX = 150 / maxB;
-              const scY = 150 / ht;
-              const ox = 230;
-              const oy = 25;
+              const ht = Math.max(res.ht, 1);
+              const scX = 130 / Math.max(maxB, 1);
+              const scY = 120 / ht;
+              const ox = 235;
+              const oy = 22;
+              const half = maxB * scX;
+              const htPx = ht * scY;
+              const yOf = (yMm: number) => oy + Math.max(0, Math.min(ht, yMm)) * scY;
               const pts = inp.trapezes.map((t, i) => {
                 const y1 = oy + i * t.h * scY;
                 const y2 = oy + (i + 1) * t.h * scY;
                 return `${ox - t.b1 * scX},${y1} ${ox + t.b1 * scX},${y1} ${ox + t.b2 * scX},${y2} ${ox - t.b2 * scX},${y2}`;
               }).join(' ');
-              const leftEdge = ox - maxB * scX;
-              const barY = oy + (res.ht - res.y_bar) * scY;
+              const yBarY = yOf(ht - res.y_bar);
+              const xNaC = Math.max(0, Math.min(ht, res.x_neutral));
+              const naY = yOf(xNaC);
+              const frac = res.area > 0 ? Math.max(0, res.as_min / res.area) : 0;
+              const wAs = Math.min(130, Math.max(22, (frac / 0.02) * 110));
+              const steelY = oy + (ht - 30) * scY;
+              const halo = { paintOrder: 'stroke', stroke: 'rgba(10,14,26,0.85)', strokeWidth: 3 } as const;
               return (
                 <>
-                  <polygon points={pts} fill="#e0e7ff" stroke="#6366F1" strokeWidth={2} />
-                  <StressStrainBlock x={leftEdge} yTop={oy} hPx={ht * scY} xNa={res.x_neutral * scY} wPx={40} />
-                  <line x1={ox - 100} y1={barY} x2={ox + 100} y2={barY} stroke="#22C55E" strokeWidth={1.5} strokeDasharray="4,4" />
-                  <text x={ox + 105} y={barY + 4} fontSize={10} fill="#22C55E">y̅</text>
-                  <rect x={ox - 40} y={oy + (res.ht - 30) * scY} width={80} height={6} fill="#6366F1" rx={2} />
-                  <text x={ox} y={oy + (res.ht - 25) * scY} fontSize={9} fill="#6366F1" textAnchor="middle">As_min</text>
-                  <text x={ox} y={190} fontSize={10} fill="#374151" textAnchor="middle">
-                    {res.as_min.toFixed(0)} mm² ({res.as_min_pct.toFixed(3)}%)
+                  <polygon points={pts} fill="#6366F1" opacity={0.22} stroke="#818CF8" strokeWidth={1.6} />
+                  <line x1={ox - half - 22} y1={naY} x2={ox + half + 22} y2={naY} stroke="#F87171" strokeWidth={1.4} strokeDasharray="5 3" />
+                  <rect x={ox + half + 24} y={naY - 9} width={30} height={15} rx={4} fill="rgba(248,113,113,0.16)" stroke="#F87171" strokeWidth={0.8} />
+                  <text x={ox + half + 39} y={naY + 3} fontSize={9} fill="#F87171" textAnchor="middle" fontWeight="bold">NA</text>
+                  <line x1={ox - half - 22} y1={yBarY} x2={ox + half + 22} y2={yBarY} stroke="#34D399" strokeWidth={1.4} strokeDasharray="4 4" />
+                  <rect x={ox + half + 24} y={yBarY - 9} width={30} height={15} rx={4} fill="rgba(52,211,153,0.14)" stroke="#34D399" strokeWidth={0.8} />
+                  <text x={ox + half + 39} y={yBarY + 3} fontSize={9} fill="#34D399" textAnchor="middle" fontWeight="bold">ȳ</text>
+                  {res.as_min > 0 && (
+                    <>
+                      <rect x={ox - wAs / 2} y={steelY} width={wAs} height={7} rx={3} fill="#6366F1" />
+                      <text x={ox - wAs / 2 - 6} y={steelY + 6} fontSize={9} fill="#A5B4FC" textAnchor="end" style={halo}>As min</text>
+                    </>
+                  )}
+                  <DimensionLine x1={ox - half} y1={oy} x2={ox - half} y2={oy + htPx} offset={22} vertical text={`H = ${ht.toFixed(0)} mm`} />
+                  <DimensionLine x1={ox - half} y1={oy + htPx} x2={ox + half} y2={oy + htPx} offset={20} text={`B = ${maxB.toFixed(0)} mm`} />
+                  <text x={ox} y={196} fontSize={10} fill="#A5B4FC" textAnchor="middle" fontWeight="bold" style={halo}>
+                    {res.as_min.toFixed(0)} mm² ({res.as_min_pct.toFixed(3)} %)
                   </text>
                 </>
               );

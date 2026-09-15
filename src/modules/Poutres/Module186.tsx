@@ -26,7 +26,7 @@ export default function Module186() {
   const S = (k: keyof BoussinesqGrilleInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof BoussinesqGrilleInputs, label: string, unit: string,

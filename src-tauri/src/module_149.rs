@@ -60,10 +60,21 @@ pub fn calculate_n_files_ouvertures_3_149(
     let fyd = p.fyk / p.gs;
     let ecd = p.fck / p.gc;
 
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.gh <= 0.0 || p.h <= 0.0 {
+        return Err("gh et h doivent être > 0".to_string());
+    }
+    if p.e <= 0.0 || p.i1 <= 0.0 || p.i1 + p.i2 + p.i3 == 0.0 {
+        return Err("e, i1 et i1 + i2 + i3 doivent être non nuls".to_string());
+    }
+    // Story count bounds the 0..net sweep.
+    let net = p.net.clamp(1, 500);
     let gh_m = p.gh / 1000.0;
     let h_m = p.h / 1000.0;
     let l_m = p.l / 1000.0;
-    let het = l_m / p.net as f64;
+    let het = l_m / net as f64;
 
     let somi = p.i1 + p.i2 + p.i3;
     let k1 = p.i1 / somi;
@@ -82,8 +93,8 @@ pub fn calculate_n_files_ouvertures_3_149(
     let mut v_max = 0.0;
     let mut f_max = 0.0;
 
-    for j in 0..p.net {
-        let j1 = p.net - j;
+    for j in 0..net {
+        let j1 = net - j;
         let a = j1 as f64 * het;
         let a1 = a + het / 2.0;
         let a2 = a - het / 2.0;

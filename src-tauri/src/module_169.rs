@@ -59,6 +59,9 @@ pub fn calculate_poteau_lambdamin_169(
 ) -> Result<PoteauLambdaminOutput, String> {
     // n_rod = N_ed / (A_c × f_cd)
     // f_cd = fck / γ_c = fck / 1.5
+    if p.fck <= 0.0 || p.h <= 0.0 || p.d_mod <= 0.0 {
+        return Err("fck, h et d_mod doivent être > 0".to_string());
+    }
     let f_cd = p.fck / 1.5;
     let a_c = p.h * p.h; // mm² per m run
     let n_rod = p.N_ed * 1000.0 / (a_c * f_cd / 1000.0); // kN / kN

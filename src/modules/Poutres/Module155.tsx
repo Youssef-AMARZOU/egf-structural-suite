@@ -56,7 +56,7 @@ export default function Module155() {
 
   const maxVal = res ? Math.max(res.vrdc, res.vrds, res.vrd_max, res.vrd_bael, inp.ved) * 1.2 : 100;
 
-  const status = !res ? 'computing'
+  const status = err ? 'fail' : !res ? 'computing'
     : res.ratio_ec2 > 1.0 || res.ratio_bael > 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (

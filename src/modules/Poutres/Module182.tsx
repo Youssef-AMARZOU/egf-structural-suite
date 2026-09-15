@@ -17,7 +17,7 @@ export default function Module182() {
   const S = (k: keyof EviterRotuleEnTraveeXInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof EviterRotuleEnTraveeXInputs, label: string, unit: string,
@@ -59,7 +59,7 @@ export default function Module182() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Section & diagramme contraintes" vbW={500} vbH={180}>
-            <rect x={ox + 100} y={oy} width={sw} height={sh} fill="none" stroke="#333" strokeWidth={1} />
+            <rect x={ox + 100} y={oy} width={sw} height={sh} fill="none" stroke="#64748B" strokeWidth={1} />
             {res && (() => {
               const neutralY = oy + res.y * ySc;
               return (
@@ -70,7 +70,7 @@ export default function Module182() {
                   <RebarGroup bars={[{ x: ox + 100 + sw / 2, y: oy + sh - 5, phi: phiBar }]} pxPerMm={ySc} />
                   <text x={ox + 100 + sw / 2} y={oy + sh + 12} fontSize={7} fill="#6366F1" textAnchor="middle">Ac={inp.Ac}</text>
                   <rect x={ox} y={oy} width={50} height={res.y * ySc} fill="#6366F1" opacity={0.3} />
-                  <text x={ox + 25} y={oy + res.y * ySc / 2} fontSize={7} fill="#333" textAnchor="middle">
+                  <text x={ox + 25} y={oy + res.y * ySc / 2} fontSize={7} fill="#CBD5E1" textAnchor="middle">
                     Fc={res.Fc.toFixed(0)} kN
                   </text>
                   <text x={ox + 140 + sw / 2} y={oy + sh + 25} fontSize={8} fill="#6366F1" textAnchor="middle">

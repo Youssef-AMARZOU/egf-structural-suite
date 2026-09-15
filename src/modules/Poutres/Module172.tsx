@@ -23,7 +23,7 @@ export default function Module172() {
     setInp({ ...inp, [field]: arr });
   };
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof RetraitGeneV2Ph2Inputs, label: string, unit: string,
@@ -82,8 +82,8 @@ export default function Module172() {
                     return (
                       <g key={i}>
                         <rect x={x} y={y} width={barW} height={bh} fill="#6366F1" rx={2} />
-                        <text x={x + barW / 2} y={oy + h + 12} fontSize={8} fill="#666" textAnchor="middle">S{i + 1}</text>
-                        <text x={x + barW / 2} y={f >= 0 ? y - 3 : y + bh + 10} fontSize={8} fill="#333" textAnchor="middle">
+                        <text x={x + barW / 2} y={oy + h + 12} fontSize={8} fill="#94A3B8" textAnchor="middle">S{i + 1}</text>
+                        <text x={x + barW / 2} y={f >= 0 ? y - 3 : y + bh + 10} fontSize={8} fill="#CBD5E1" textAnchor="middle">
                           {f.toFixed(1)}
                         </text>
                       </g>

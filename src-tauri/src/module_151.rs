@@ -54,6 +54,9 @@ pub fn calculate_centre_torsion_general_151(
     } else {
         2.12 * ((fcm - 8.0) / 10.0).ln()
     };
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
     let fctd = fctm / p.gc;
     let fyd = p.fyk / p.gs;
 
@@ -89,6 +92,9 @@ pub fn calculate_centre_torsion_general_151(
         zipxyi += ixygi;
     }
 
+    if za <= 0.0 {
+        return Err("section vide (aire nulle) — vérifier les dimensions".to_string());
+    }
     let xg = six / za;
     let yg = siy / za;
 

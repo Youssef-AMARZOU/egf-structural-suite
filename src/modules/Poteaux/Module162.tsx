@@ -42,7 +42,7 @@ export default function Module162() {
   const S = (k: keyof FlexdevV3Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof FlexdevV3Inputs, label: string, unit: string,
@@ -126,9 +126,9 @@ export default function Module162() {
                       ));
                       return <DiagramOverlay key={ci} type="moment" points={pts} color={colors[ci % colors.length]} strokeWidth={1.5} />;
                     })}
-                    <text x={ox + 5} y={oy + 10} fontSize={9} fill="#999">{res.n_max_global.toFixed(0)} kN</text>
-                    <text x={ox + 5} y={oy + h - 5} fontSize={9} fill="#999">{(res.interaction_curves[0]?.[0]?.[0] ?? 0).toFixed(0)} kN</text>
-                    <text x={ox + w / 2 - 10} y={oy + h + 15} fontSize={9} fill="#999">M (kN·m)</text>
+                    <text x={ox + 5} y={oy + 10} fontSize={9} fill="#94A3B8">{res.n_max_global.toFixed(0)} kN</text>
+                    <text x={ox + 5} y={oy + h - 5} fontSize={9} fill="#94A3B8">{(res.interaction_curves[0]?.[0]?.[0] ?? 0).toFixed(0)} kN</text>
+                    <text x={ox + w / 2 - 10} y={oy + h + 15} fontSize={9} fill="#94A3B8">M (kN·m)</text>
                   </>
                 );
               })()}

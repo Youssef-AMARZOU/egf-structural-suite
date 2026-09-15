@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { RotPlastoptimBInputs, RotPlastoptimBOutput } from '../../types/engineering';
 
 export default function Module175() {
@@ -19,7 +19,7 @@ export default function Module175() {
   const S = (k: keyof RotPlastoptimBInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof RotPlastoptimBInputs, label: string, unit: string,
@@ -77,6 +77,13 @@ export default function Module175() {
               const sc = h / maxM;
               const nSpans = inp.na - 1;
               const spanW = w / nSpans;
+              const totalL = inp.L.reduce((a, b) => a + b, 0);
+              const xVals = inp.L.reduce<number[]>((acc, l) => [...acc, acc[acc.length - 1] + l], [0]);
+              const allMoments = [...res.moments_appuis, ...res.moments_travee];
+              const yMin = Math.min(...allMoments);
+              const yMax = Math.max(...allMoments);
+              const yVals = [...new Set([yMin, 0, yMax])].sort((a, b) => a - b)
+                .filter((v, i, a) => i === 0 || Math.abs((v * sc) - (a[i - 1] * sc)) >= 15);
               return (
                 <>
                   <line x1={ox} y1={oy} x2={ox + w} y2={oy} stroke="#94A3B8" strokeWidth={2} />
@@ -84,7 +91,7 @@ export default function Module175() {
                     <g key={`s${i}`}>
                       <circle cx={ox + i * spanW} cy={oy + m * sc} r={4} fill="#EF4444" />
                       <text x={ox + i * spanW} y={oy + m * sc + (m < 0 ? -8 : 14)}
-                        fontSize={8} fill="#333" textAnchor="middle">{m.toFixed(1)}</text>
+                        fontSize={8} fill="#CBD5E1" textAnchor="middle">{m.toFixed(1)}</text>
                     </g>
                   ))}
                   {Array.from({ length: nSpans }).map((_, si) => {
@@ -93,7 +100,24 @@ export default function Module175() {
                     ));
                     return <DiagramOverlay key={`sp${si}`} type="moment" points={pts} />;
                   })}
-                  <text x={ox + w / 2} y={oy + h + 20} fontSize={10} fill="#666" textAnchor="middle">x (m)</text>
+                  <AxisTicks
+                    origin={[ox, oy + h]}
+                    end={[ox + w, oy + h]}
+                    values={xVals}
+                    map={(v) => [ox + (v / totalL) * w, oy + h]}
+                    unit="m"
+                    side="below"
+                    decimals={1}
+                  />
+                  <AxisTicks
+                    origin={[ox, oy]}
+                    end={[ox, oy + h]}
+                    values={yVals}
+                    map={(v) => [ox, oy + v * sc]}
+                    unit="kN·m"
+                    side="left"
+                    decimals={1}
+                  />
                 </>
               );
             })()}

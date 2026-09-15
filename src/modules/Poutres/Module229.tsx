@@ -27,7 +27,7 @@ export default function Module229() {
     'calculate_courbes_points_229', payload,
   );
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   // ---- interpolated curve (px in 400x220 canvas) ----
   const curve = (() => {

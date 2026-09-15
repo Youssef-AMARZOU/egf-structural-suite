@@ -18,7 +18,7 @@ export default function Module176() {
   const S = (k: keyof DalldiffinInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof DalldiffinInputs, label: string, unit: string,
@@ -81,7 +81,7 @@ export default function Module176() {
                       );
                     })
                   )}
-                  <text x={ox + 200} y={oy + n * sz + 20} fontSize={10} fill="#666" textAnchor="middle">
+                  <text x={ox + 200} y={oy + n * sz + 20} fontSize={10} fill="#94A3B8" textAnchor="middle">
                     δ_max = {(res.max_deflection * 1000).toFixed(2)} mm
                   </text>
                 </>

@@ -18,7 +18,7 @@ export default function Module177() {
   const S = (k: keyof BalconsInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.fleche > inp.L * 1000 / 150 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.fleche > inp.L * 1000 / 150 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof BalconsInputs, label: string, unit: string,
@@ -59,8 +59,8 @@ export default function Module177() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Profil balcon" vbW={500} vbH={120}>
-            <rect x={ox - sw} y={oy - 10} width={sw} height={bh + 20} fill="#94A3B8" stroke="#333" strokeWidth={1} />
-            <text x={ox - sw / 2} y={oy + bh + 30} fontSize={8} fill="#666" textAnchor="middle">Mur</text>
+            <rect x={ox - sw} y={oy - 10} width={sw} height={bh + 20} fill="#94A3B8" stroke="#64748B" strokeWidth={1} />
+            <text x={ox - sw / 2} y={oy + bh + 30} fontSize={8} fill="#94A3B8" textAnchor="middle">Mur</text>
             {res && (() => {
               const maxD = res.fleche * 1000 || 1;
               const sc = 60 / maxD;

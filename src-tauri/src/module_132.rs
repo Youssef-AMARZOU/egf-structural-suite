@@ -97,6 +97,12 @@ fn asw_for_shear(v: f64, fyd: f64, z: f64, cot_theta: f64, cot_alpha: f64, sina:
 pub fn calculate_eff_tr_charg_pres_appui_132(
     p: EffTrChargPresAppuiInputs,
 ) -> Result<EffTrChargPresAppuiOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.d <= 0.0 || p.l <= 0.0 {
+        return Err("d et l doivent être > 0".to_string());
+    }
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
     let z = 0.9 * p.d;

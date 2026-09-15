@@ -146,11 +146,21 @@ pub struct DalldiffinOutput {
 pub fn calculate_dalldiffin_176(
     p: DalldiffinInputs,
 ) -> Result<DalldiffinOutput, String> {
-    let (z, cas) = fzz(&p.p, p.h, p.k_val, p.GD, p.nu, p.n, p.kn, p.kw, p.ke, p.ks, p.niter);
+    if p.p.is_empty() || p.p.iter().any(|r| r.is_empty()) {
+        return Err("matrice de charges p vide".to_string());
+    }
+    // Grid indices reach n+1: the load matrix must cover them.
+    let dim = p.p.len().min(p.p.iter().map(|r| r.len()).max().unwrap_or(0));
+    if dim < 4 {
+        return Err("matrice de charges trop petite (min 4x4)".to_string());
+    }
+    let n = p.n.clamp(2, 80).min(dim - 2);
+    let niter = p.niter.clamp(1, 5000);
+    let (z, cas) = fzz(&p.p, p.h, p.k_val, p.GD, p.nu, n, p.kn, p.kw, p.ke, p.ks, niter);
 
     let mut max_def = 0.0_f64;
-    for i in 2..p.n + 2 {
-        for j in 2..p.n + 2 {
+    for i in 2..n + 2 {
+        for j in 2..n + 2 {
             if z[i][j].abs() > max_def { max_def = z[i][j].abs(); }
         }
     }
@@ -159,14 +169,14 @@ pub fn calculate_dalldiffin_176(
     let cas_name = cas_names.get(cas).unwrap_or(&"inconnu");
 
     let mut diag = Vec::new();
-    diag.push(format!("n = {}, h = {:.2} m, k = {:.2} m", p.n, p.h, p.k_val));
-    diag.push(format!("GD = {:.0} kN·m, ν = {:.2}, itérations = {}", p.GD, p.nu, p.niter));
+    diag.push(format!("n = {}, h = {:.2} m, k = {:.2} m", n, p.h, p.k_val));
+    diag.push(format!("GD = {:.0} kN·m, ν = {:.2}, itérations = {}", p.GD, p.nu, niter));
     diag.push(format!("Cas {}: {}", cas, cas_name));
     diag.push(format!("δ_max = {:.4} m = {:.2} mm", max_def, max_def * 1000.0));
 
     let verdict = format!(
         "Cas {}: δ_max = {:.2} mm (n = {}, GD = {:.0} kN·m)",
-        cas, max_def * 1000.0, p.n, p.GD
+        cas, max_def * 1000.0, n, p.GD
     );
 
     Ok(DalldiffinOutput {

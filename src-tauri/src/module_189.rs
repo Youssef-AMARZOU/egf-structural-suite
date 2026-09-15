@@ -124,6 +124,12 @@ pub fn calculate_raft_rot_plast_189(
             return Err(format!("Travee {}: portee > 0 requise", i + 1));
         }
     }
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent etre > 0".into());
+    }
+    if p.b <= 0.0 || p.d <= 0.0 {
+        return Err("b et d doivent etre > 0".into());
+    }
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
     let ecu = 0.0035_f64;

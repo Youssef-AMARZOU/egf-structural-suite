@@ -5,3 +5,4 @@ export type { RebarPos } from './RebarGroup';
 export { StressStrainBlock } from './StressStrainBlock';
 export { DiagramOverlay, toPath } from './DiagramOverlay';
 export type { DiagramKind } from './DiagramOverlay';
+export { AxisTicks, InlineLegend } from './AxisTicks';

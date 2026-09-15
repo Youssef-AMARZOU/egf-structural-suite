@@ -77,6 +77,12 @@ fn l0_min_calc(alpha_6: f64, lb_rqd: f64, phi: f64) -> f64 {
 pub fn calculate_ancrage_ts_136(
     p: AncrageTsInputs,
 ) -> Result<AncrageTsOutput, String> {
+    if p.gs <= 0.0 {
+        return Err("gs doit être > 0".to_string());
+    }
+    if p.pitch <= 0.0 {
+        return Err("pitch doit être > 0".to_string());
+    }
     let fctd = fctd_calc(p.fck, p.alpha_ct);
     let (eta1, eta2) = if p.bond_condition == "mauvais" {
         (0.7, 1.0)
@@ -99,7 +105,7 @@ pub fn calculate_ancrage_ts_136(
     let l0_min = l0_min_calc(alpha_6, lb_rqd, p.phi);
     let l0_final = l0.max(l0_min);
 
-    let n_welded_min = ((l0_final / p.pitch).ceil() as usize).max(3);
+    let n_welded_min = ((l0_final / p.pitch).ceil().clamp(0.0, 10000.0) as usize).max(3);
     let ratio = p.sigma_sd / (p.fyk / p.gs);
 
     let mut diag = Vec::new();

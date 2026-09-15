@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas } from '../../components/drafting';
+import { RatioGauge } from '../../components/common/RatioGauge';
 import { PoteauLambdaminInputs, PoteauLambdaminOutput } from '../../types/engineering';
 
 export default function Module169() {
@@ -16,7 +16,7 @@ export default function Module169() {
   const S = (k: keyof PoteauLambdaminInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.is_second_order_x || res.is_second_order_y ? 'warn' : 'pass';
+  const status = err ? 'fail' : !res ? 'computing' : res.is_second_order_x || res.is_second_order_y ? 'warn' : 'pass';
 
   const slider = (
     key: keyof PoteauLambdaminInputs, label: string, unit: string,
@@ -45,25 +45,35 @@ export default function Module169() {
         </>
       }
       sketch={
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <SectionCanvas title="Slenderness" vbW={500} vbH={70}>
-            {res && (() => {
-              const maxVal = Math.max(res.lambda_x * 1.3, res.lambda_min_x * 1.5, 30);
-              const bx = 80, bw = 380;
-              const sc = bw / maxVal;
-              return (
-                <>
-                  <text x={bx - 5} y={20} fontSize={10} fill="#333" textAnchor="end">λ = {res.lambda_x.toFixed(1)}</text>
-                  <rect x={bx} y={10} width={Math.min(res.lambda_x * sc, bw)} height={16} fill="#6366F1" rx={3} />
-                  <text x={bx - 5} y={50} fontSize={10} fill="#333" textAnchor="end">λ_min = {res.lambda_min_x.toFixed(1)}</text>
-                  <rect x={bx} y={40} width={Math.min(res.lambda_min_x * sc, bw)} height={16}
-                    fill={res.is_second_order_x ? '#FBBF24' : '#22C55E'} rx={3} />
-                  <line x1={bx + res.lambda_min_x * sc} y1={8} x2={bx + res.lambda_min_x * sc} y2={60}
-                    stroke="#333" strokeWidth={2} strokeDasharray="4,3" />
-                </>
-              );
-            })()}
-          </SectionCanvas>
+        <div className="glass rounded-2xl p-5">
+          <div className="text-[15px] font-semibold mb-4">Élancement contre limite</div>
+          {res ? (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[11px] text-slate-500 mb-1 text-center">Axe X</div>
+                  <RatioGauge eta={res.lambda_min_x > 0 ? res.lambda_x / res.lambda_min_x : 0} size={140} />
+                  <div className="text-center mt-1">
+                    <span className="font-mono text-[13px]">{res.lambda_x.toFixed(1)}</span>
+                    <span className="text-slate-500 text-[11px]"> / {res.lambda_min_x.toFixed(1)}</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] text-slate-500 mb-1 text-center">Axe Y</div>
+                  <RatioGauge eta={res.lambda_min_y > 0 ? res.lambda_y / res.lambda_min_y : 0} size={140} />
+                  <div className="text-center mt-1">
+                    <span className="font-mono text-[13px]">{res.lambda_y.toFixed(1)}</span>
+                    <span className="text-slate-500 text-[11px]"> / {res.lambda_min_y.toFixed(1)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-[11px] text-center text-slate-400 mt-2">
+                λ / λ<sub>min</sub> — seuil second ordre = 1.0
+              </div>
+            </>
+          ) : (
+            <div className="skel rounded-lg" style={{ height: 200 }} />
+          )}
         </div>
       }
       results={

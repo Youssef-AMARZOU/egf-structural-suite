@@ -20,7 +20,7 @@ export default function Module106() {
     'calculate_mandrin_renard_106', inp,
   );
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   return (
     <Workstation

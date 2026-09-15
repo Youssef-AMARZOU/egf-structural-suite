@@ -103,7 +103,7 @@ export function FrameSolver({ text, result }: {
       ))}
       {nx.map((x, i) => (
         <g key={i}>
-          <circle cx={X(x)} cy={Y(ny[i])} r={5} fill="#333" />
+          <circle cx={X(x)} cy={Y(ny[i])} r={5} fill="#CBD5E1" />
           <text x={X(x) + 7} y={Y(ny[i])} fontSize={9} fill="#94a3b8">{i + 1}</text>
         </g>
       ))}
@@ -138,7 +138,7 @@ export default function Module243() {
     'calculate_portique_noeuds_fixes_243', payload,
   );
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
   const nNodes = parsePairs(text.nodes)[0].length;
 
   return (

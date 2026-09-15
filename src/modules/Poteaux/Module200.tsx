@@ -19,7 +19,7 @@ export default function Module200() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : verdictStatus(res.verdict);
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
   return (
     <Workstation
       title="Module 200 — Voile + Portique RDC (I équivalente)"
@@ -65,14 +65,14 @@ export default function Module200() {
       if (!result) return (<text x={400 / 2} y={340 / 2} textAnchor="middle" fontSize={12} fill="#94a3b8">computing…</text>);
       return (<>
               <rect x={190 - wW / 2} y={320 - inputs.h * sc} width={wW} height={inputs.h * sc} fill="#DBEAFE" stroke="#1D4ED8" strokeWidth={2} />
-              <line x1={60} y1={320} x2={340} y2={320} stroke="#333" strokeWidth={3} />
+              <line x1={60} y1={320} x2={340} y2={320} stroke="#64748B" strokeWidth={3} />
               <line x1={30} y1={320 - inputs.h * sc} x2={30} y2={320} stroke="#EF4444" strokeWidth={2} markerEnd="url(#a200)" />
               <text x={14} y={320 - (inputs.h * sc) / 2} fontSize={10} fill="#EF4444">qh</text>
               <line x1={190 - wW / 2 - 40} y1={320 - inputs.h * sc} x2={190 - wW / 2} y2={320 - inputs.h * sc} stroke="#F59E0B" strokeWidth={2} markerEnd="url(#a200)" />
               <text x={90} y={310 - inputs.h * sc} fontSize={10} fill="#F59E0B">Q={inputs.q_top}</text>
               <text x={190} y={332} fontSize={10} fill="#1D4ED8" textAnchor="middle">Iéq={result.i_eq.toFixed(3)} m⁴</text>
               <DimensionLine x1={190 - wW / 2} y1={320 - inputs.h * sc} x2={190 - wW / 2} y2={320} offset={-28} text={`H = ${inputs.h} m`} />
-              <defs><marker id="a200" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#333" /></marker></defs>
+              <defs><marker id="a200" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#64748B" /></marker></defs>
             </>);
     })()}
   </SectionCanvas>
@@ -81,18 +81,18 @@ export default function Module200() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 text-green-800' : status === 'fail' ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : status === 'fail' ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'I gross', value: res.i_gross.toFixed(3), unit: 'm⁴', color: 'bg-blue-50' },
-              { label: 'I éq', value: res.i_eq.toFixed(3), unit: 'm⁴', color: 'bg-purple-50' },
-              { label: 'δ réf', value: res.delta_ref.toFixed(1), unit: 'mm', color: 'bg-orange-50' },
-              { label: 'M base', value: res.m_base.toFixed(0), unit: 'kN·m', color: 'bg-gray-50' },
+              { label: 'I gross', value: res.i_gross.toFixed(3), unit: 'm⁴', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'I éq', value: res.i_eq.toFixed(3), unit: 'm⁴', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'δ réf', value: res.delta_ref.toFixed(1), unit: 'mm', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'M base', value: res.m_base.toFixed(0), unit: 'kN·m', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -111,7 +111,7 @@ export default function Module200() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

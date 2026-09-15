@@ -27,7 +27,7 @@ export default function Module109() {
   const S = (k: keyof BaelFaesselInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof BaelFaesselInputs, label: string, unit: string,

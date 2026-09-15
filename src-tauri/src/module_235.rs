@@ -70,6 +70,9 @@ pub fn calculate_dalle_alveolee_235(
     let bw = p.b - p.n_vides as f64 * 2.0 * r_v;
     if bw <= 0.0 { return Err("âme résiduelle nulle au niveau des vides".to_string()); }
     let s_na = p.b * p.h * p.h / 8.0 - p.n_vides as f64 * (a_vide / 2.0) * (4.0 * r_v / (3.0 * pi));
+    if s_na <= 0.0 {
+        return Err("moment statique nul au niveau des vides (revoir la géométrie)".to_string());
+    }
     let fctm = 0.3 * p.fck.powf(2.0 / 3.0);
     let fctd = 0.7 * fctm / 1.5;
     let sig_cp = p_inf * 1000.0 / aire;

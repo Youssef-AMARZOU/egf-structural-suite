@@ -7,9 +7,15 @@ import { SectionCanvas, DimensionLine, RebarGroup } from '../../components/draft
 import { CisaiSectionQQEnFCInputs, CisaiSectionQQEnFCOutput } from '../../types/engineering';
 
 export default function Module179() {
+  const n = 6;
+  const R0 = 0.3;
   const [inp, setInp] = useState<CisaiSectionQQEnFCInputs>({
-    NEd: 500, MEd: 200, R: 0.3, na: 6, Ac: 3.14e-4,
-    tabs: [[6, 3.14e-4, 0.25]],
+    NEd: 500, MEd: 200, R: R0, na: 6, Ac: 3.14e-4,
+    tabs: [
+      Array(n).fill(1),
+      Array(n).fill(3.14e-4),
+      Array.from({ length: n }, (_, i) => +(R0 - R0 * Math.cos(2 * Math.PI * i / n)).toFixed(4)),
+    ],
     fyk: 500, gs: 1.15, k: 1.05, euk: 0.025,
     fcd: 17.0, ec1: 0.00175, ecu1: 0.0035, typ: 1, itour: 20,
   });
@@ -19,7 +25,7 @@ export default function Module179() {
   const S = (k: keyof CisaiSectionQQEnFCInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.ratio < 1.0 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio < 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof CisaiSectionQQEnFCInputs, label: string, unit: string,

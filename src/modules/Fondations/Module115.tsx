@@ -23,7 +23,7 @@ export default function Module115() {
   const S = (k: keyof ExcentrPieuInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof ExcentrPieuInputs, label: string, unit: string,

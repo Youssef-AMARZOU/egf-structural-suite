@@ -24,7 +24,7 @@ export default function Module198() {
   const S = (k: keyof AncrageCrochetMandrinInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.needs_hook ? 'warn' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.needs_hook ? 'warn' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof AncrageCrochetMandrinInputs, label: string, unit: string,
@@ -71,8 +71,8 @@ export default function Module198() {
               const lbdW = Math.min(res.Lbd * sc, 560);
               return (
                 <>
-                  <rect x={20} y={20} width={tW} height={120} fill="#E2E8F0" stroke="#333" strokeWidth={1} />
-                  <text x={20 + tW / 2} y={155} fontSize={9} fill="#333" textAnchor="middle">appui t={inp.t}</text>
+                  <rect x={20} y={20} width={tW} height={120} fill="#E2E8F0" stroke="#64748B" strokeWidth={1} />
+                  <text x={20 + tW / 2} y={155} fontSize={9} fill="#CBD5E1" textAnchor="middle">appui t={inp.t}</text>
                   <line x1={20 + tW} y1={60} x2={20 + tW + lbdW} y2={60} stroke="#6366F1" strokeWidth={4} />
                   <DimensionLine x1={20 + tW} y1={60} x2={20 + tW + lbdW} y2={60} offset={-20} text={`Lbd = ${res.Lbd.toFixed(0)}`} />
                   {res.needs_hook && (

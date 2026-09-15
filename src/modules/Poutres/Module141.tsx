@@ -26,7 +26,7 @@ export default function Module141() {
   const S = (k: keyof Ec1VentInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof Ec1VentInputs, label: string, unit: string,

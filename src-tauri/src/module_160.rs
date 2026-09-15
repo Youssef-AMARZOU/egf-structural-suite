@@ -270,6 +270,14 @@ pub struct InteracSectQQv2Output {
 pub fn calculate_interac_sect_qq_v2_160(
     p: InteracSectQQv2Inputs,
 ) -> Result<InteracSectQQv2Output, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.trapezes.len() > 1000 || p.steel_layers.len() > 1000 {
+        return Err("trop de trapèzes ou lits d'acier (1000 max)".to_string());
+    }
+    // Sweep points bound the 0..=n_pts interaction curve.
+    let n_points = p.n_points.clamp(2, 2000);
     let fcd = p.fck / p.gc;
     let ec2 = 2.0 / 1000.0;
     let ec1 = 3.5 / 1000.0;
@@ -281,9 +289,12 @@ pub fn calculate_interac_sect_qq_v2_160(
     let ht: f64 = p.trapezes.iter().map(|t| t.h).sum();
     let trapezes: Vec<(f64, f64, f64)> = p.trapezes.iter().map(|t| (t.b1, t.b2, t.h)).collect();
     let steel: Vec<(f64, f64)> = p.steel_layers.iter().map(|s| (s.area, s.position)).collect();
+    if ht <= 0.0 {
+        return Err("hauteur totale nulle — vérifier les trapèzes".to_string());
+    }
 
     let curve = interaction_curve(
-        &trapezes, &steel, ht, p.concrete_model, ec1, ec2, kc, n, fcd, p.fyk, p.gs, euk, ks, p.n_points,
+        &trapezes, &steel, ht, p.concrete_model, ec1, ec2, kc, n, fcd, p.fyk, p.gs, euk, ks, n_points,
     );
 
     let n_max = curve.iter().map(|c| c.0).fold(f64::NEG_INFINITY, f64::max);

@@ -28,7 +28,7 @@ export default function Module140() {
   const S = (k: keyof CisaiCircInputs) => (v: number | number[]) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio_v <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio_v <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof CisaiCircInputs, label: string, unit: string,

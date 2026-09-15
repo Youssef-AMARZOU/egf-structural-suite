@@ -26,7 +26,7 @@ export default function Module133() {
     (v: number | boolean) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.eta_v <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.eta_v <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof VerificationDallesPoinconnementInputs, label: string, unit: string,

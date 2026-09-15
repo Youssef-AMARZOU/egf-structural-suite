@@ -27,7 +27,7 @@ export default function Module167() {
     setInp({ ...inp, loads: l });
   };
 
-  const status = !res ? 'computing' : res.ratio > 1.0 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio > 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof BaelBaBpFlecheDalleContinueInputs, label: string, unit: string,
@@ -95,7 +95,7 @@ export default function Module167() {
                 <text x={455} y={50 + res.fleche_admis * (80 / (res.max_deflection || 1)) + 4} fontSize={9} fill="#EF4444">
                   δ_adm = {res.fleche_admis.toFixed(1)} mm
                 </text>
-                <text x={250} y={145} fontSize={10} fill="#999" textAnchor="middle">
+                <text x={250} y={145} fontSize={10} fill="#94A3B8" textAnchor="middle">
                   x (m) — δ_max = {res.max_deflection.toFixed(2)} mm
                 </text>
               </>

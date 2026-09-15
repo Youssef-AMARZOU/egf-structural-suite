@@ -16,7 +16,7 @@ export default function Module196() {
   const S = (k: keyof PotCirculaireFlamblEC2V2Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.ratio > 1.0 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio > 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PotCirculaireFlamblEC2V2Inputs, label: string, unit: string,
@@ -65,7 +65,7 @@ export default function Module196() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Section & M2(Lo)" vbW={600} vbH={220} scaleLabel={`1 px ≈ ${(1 / pxPerMm).toFixed(1)} mm`}>
-            <circle cx={cx} cy={cy} r={R} fill="none" stroke="#333" strokeWidth={1.5} />
+            <circle cx={cx} cy={cy} r={R} fill="none" stroke="#64748B" strokeWidth={1.5} />
             <circle cx={cx} cy={cy} r={R - 14} fill="none" stroke="#6366F1" strokeWidth={1} strokeDasharray="4,2" />
             <RebarGroup bars={bars} pxPerMm={pxPerMm} />
             <DimensionLine x1={cx - R} y1={cy + R + 18} x2={cx + R} y2={cy + R + 18} offset={10} text={`D = ${inp.D}`} />

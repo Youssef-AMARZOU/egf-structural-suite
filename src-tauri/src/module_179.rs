@@ -214,10 +214,42 @@ pub fn calculate_cisai_section_qq_en_fc_179(
     p: CisaiSectionQQEnFCInputs,
 ) -> Result<CisaiSectionQQEnFCOutput, String> {
     let classe = "D";
-    let (e1, e2, nrd, mrd) = mn_bisect(
-        p.NEd, p.MEd, p.R, p.na, p.Ac, &p.tabs, p.fyk, p.gs, p.k, p.euk,
-        p.fcd, p.ec1, p.ecu1, p.typ, p.itour, classe, 1.0, 0, &vec![],
-    );
+    // Bar count is clamped to the tabs dimensions (ns_steel indexes tabs[0..2][i]).
+    let tab_n = p.tabs.get(0).map_or(0, |r| r.len())
+        .min(p.tabs.get(1).map_or(0, |r| r.len()))
+        .min(p.tabs.get(2).map_or(0, |r| r.len()));
+    if tab_n == 0 {
+        return Err("tabs : 3 lignes non vides de même longueur requises".to_string());
+    }
+    let na = p.na.clamp(0, 200).min(tab_n);
+    // Bisection depth is O(itour² · na) : cap like module 129.
+    let itour = p.itour.clamp(1, 20);
+    if p.gs <= 0.0 {
+        return Err("gs doit être > 0".to_string());
+    }
+    if p.R <= 0.0 || p.euk <= 0.0 {
+        return Err("R et euk doivent être > 0".to_string());
+    }
+    let (e1, e2, nrd, mrd) = {
+        // Discretize circular section into horizontal strips for concrete contribution.
+        let nt = 10usize;
+        let h = 2.0 * p.R;
+        let dy = h / nt as f64;
+        let mut ttz: Vec<Vec<f64>> = vec![Vec::new(), Vec::new(), Vec::new()];
+        for i in 0..nt {
+            let y1 = i as f64 * dy;
+            let y2 = (i + 1) as f64 * dy;
+            let b1 = 2.0 * (p.R * p.R - (y1 - p.R).powi(2)).max(0.0).sqrt();
+            let b2 = 2.0 * (p.R * p.R - (y2 - p.R).powi(2)).max(0.0).sqrt();
+            ttz[0].push(b1);
+            ttz[1].push(b2);
+            ttz[2].push(dy);
+        }
+        mn_bisect(
+            p.NEd, p.MEd, p.R, na, p.Ac, &p.tabs, p.fyk, p.gs, p.k, p.euk,
+            p.fcd, p.ec1, p.ecu1, p.typ, itour, classe, 1.0, nt, &ttz,
+        )
+    };
 
     let ratio = if p.MEd.abs() > 1e-10 {
         mrd / p.MEd

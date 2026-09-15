@@ -114,6 +114,12 @@ pub struct DalleBpArmPassivEc2Output {
 pub fn calculate_dalle_bp_arm_passiv_ec2_166(
     p: DalleBpArmPassivEc2Inputs,
 ) -> Result<DalleBpArmPassivEc2Output, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.b <= 0.0 || p.h <= 0.0 || p.d <= 0.0 || p.Ap <= 0.0 {
+        return Err("b, h, d et Ap doivent être > 0".to_string());
+    }
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
 

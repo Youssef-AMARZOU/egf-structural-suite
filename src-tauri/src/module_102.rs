@@ -69,6 +69,9 @@ pub fn calculate_poteau_flambement_rect_102(
     if p.NEd < 0.0 {
         return Err("NEd doit être >= 0".to_string());
     }
+    if p.fck <= 0.0 || p.fyk <= 0.0 {
+        return Err("fck et fyk doivent être > 0".to_string());
+    }
 
     let fcd = p.fck / 1.5;
     let fyd = p.fyk / 1.15;

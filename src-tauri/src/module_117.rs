@@ -44,15 +44,21 @@ pub struct VouteDechargeOutput {
 #[tauri::command]
 pub fn calculate_voute_decharge_117(p: VouteDechargeInputs) -> Result<VouteDechargeOutput, String> {
     if p.l <= 0.0 || p.b <= 0.0 { return Err("Span and width must be > 0".into()); }
+    if p.d <= 0.0 || p.leff <= 0.0 { return Err("d and leff must be > 0".into()); }
+    if p.fyd == 0.0 { return Err("fyd must be non-zero".into()); }
 
     let mut l2_found = p.a;
     let mut cot_a = 0.0_f64;
     let mut s_n = 0.0_f64;
     let mut s_b = 0.0_f64;
 
+    // Step 0.01 m bounded: worst case l=1e6 m would hang; cap iterations.
     let mut l2 = p.a + 0.01;
-    while l2 < p.l / 2.0 - p.a {
+    let l2_end = (p.l / 2.0 - p.a).min(p.a + 10000.0 * 0.01);
+    for _ in 0..10000 {
+        if !(l2 < l2_end) { break; }
         s_n = p.p * p.l / (2.0 * p.b * l2);
+        if s_n.abs() < 1e-12 { break; }
         cot_a = p.mu + p.c * p.fctd / s_n;
         s_b = s_n * (1.0 + cot_a * cot_a);
         if s_b < p.sbl {
@@ -79,7 +85,7 @@ pub fn calculate_voute_decharge_117(p: VouteDechargeInputs) -> Result<VouteDecha
 
     let rho_back = p.rhoa / 1000.0;
     let l3 = l2_found;
-    let v2 = p.gg * rho_back * p.b * l3.powi(2) / (12.0 * cot_a);
+    let v2 = if cot_a.abs() > 1e-12 { p.gg * rho_back * p.b * l3.powi(2) / (12.0 * cot_a) } else { 0.0 };
     let v3 = 0.5 * p.gg * rho_back * p.b * p.h * p.l5;
     let v_ed = v1 + v2 + v3;
     let asw_req = v_ed / (0.9 * p.d * p.fyd);

@@ -64,6 +64,12 @@ pub struct MrdDesTsOutput {
 pub fn calculate_mrd_des_ts_171(
     p: MrdDesTsInputs,
 ) -> Result<MrdDesTsOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.d <= 0.0 || p.Ac <= 0.0 {
+        return Err("d et Ac doivent être > 0".to_string());
+    }
     let (mr, ss, x, z, es) = compute_mr(p.d, p.fck, p.gc, p.Ac, p.fyk, p.gs, p.euk, p.k);
 
     let mut diag = Vec::new();

@@ -40,7 +40,7 @@ export default function Module130() {
 
   const caseLabel = CASES.find((c) => c.val === inp.cas)?.label || '?';
 
-  const status = !res ? 'computing' : res.ratio_v <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio_v <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof PlancherDallePoinconnementInputs, label: string, unit: string,

@@ -20,7 +20,7 @@ export default function Module201() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : verdictStatus(res.verdict);
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
   return (
     <Workstation
       title="Module 201 — Portique à traverses rigides"
@@ -73,7 +73,7 @@ export default function Module201() {
                   <text x={x0 + W / 2 + 62} y={283 - (i + 0.5) * hs} fontSize={9} fill="#EF4444">Fo</text>
                 </g>
               ))}
-              <text x={x0} y={295} fontSize={10} fill="#333" textAnchor="middle">Iéq={result.i_eq.toFixed(4)} m⁴</text>
+              <text x={x0} y={295} fontSize={10} fill="#CBD5E1" textAnchor="middle">Iéq={result.i_eq.toFixed(4)} m⁴</text>
               <DimensionLine x1={x0 - W / 2} y1={280 - H} x2={x0 - W / 2} y2={280} offset={-24} text={`H = ${inputs.h} m`} />
             </>);
     })()}
@@ -83,18 +83,18 @@ export default function Module201() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 text-green-800' : status === 'fail' ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : status === 'fail' ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'I éq', value: res.i_eq.toFixed(4), unit: 'm⁴', color: 'bg-blue-50' },
-              { label: 'Niveau opti', value: String(res.best_level), unit: '', color: 'bg-purple-50' },
-              { label: 'fpo tête', value: res.fpo_top.toFixed(1), unit: 'mm', color: 'bg-orange-50' },
-              { label: 'DFM min', value: res.dfm_min.toFixed(1), unit: '', color: 'bg-gray-50' },
+              { label: 'I éq', value: res.i_eq.toFixed(4), unit: 'm⁴', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'Niveau opti', value: String(res.best_level), unit: '', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'fpo tête', value: res.fpo_top.toFixed(1), unit: 'mm', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'DFM min', value: res.dfm_min.toFixed(1), unit: '', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -113,7 +113,7 @@ export default function Module201() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

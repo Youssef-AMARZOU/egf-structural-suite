@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { DalleBpEvasionNPotInputs, DalleBpEvasionNPotOutput } from '../../types/engineering';
 
 export default function Module165() {
@@ -23,7 +23,7 @@ export default function Module165() {
   const addSpan = () => setInp({ ...inp, spans: [...inp.spans, 6.0], loads: [...inp.loads, 0.015] });
   const removeSpan = (i: number) => setInp({ ...inp, spans: inp.spans.filter((_, j) => j !== i), loads: inp.loads.filter((_, j) => j !== i) });
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof DalleBpEvasionNPotInputs, label: string, unit: string,
@@ -81,41 +81,94 @@ export default function Module165() {
         <>
           <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
             <SectionCanvas title="Déflections aux appuis" vbW={500} vbH={150}>
-              <line x1={60} y1={75} x2={60 + totalL * scX} y2={75} stroke="#94A3B8" strokeWidth={3} />
-              {supports.map((sx, i) => (
-                <polygon key={i} points={`${60 + sx * scX},80 ${60 + sx * scX - 6},93 ${60 + sx * scX + 6},93`}
-                  fill="#6366F1" />
-              ))}
-              {res && res.deflections.length > 1 && (
-                <DiagramOverlay type="deflection" points={deflPts} />
-              )}
-              {res && res.deflections.map((d, i) => (
-                <text key={i} x={60 + supports[i] * scX} y={65}
-                  fontSize={9} fill="#374151" textAnchor="middle">
-                  {(d * 1000).toFixed(2)}
-                </text>
-              ))}
-              <text x={60 + totalL * scX / 2} y={140} fontSize={10} fill="#999" textAnchor="middle">
-                Déflections en mm
-              </text>
+              {(() => {
+                const deflScale = 50 / (res?.max_deflection || 1);
+                const deflValsMM = res ? res.deflections.map(d => d * 1000) : [];
+                const deflMin = deflValsMM.length > 0 ? Math.min(...deflValsMM) : 0;
+                const deflMax = deflValsMM.length > 0 ? Math.max(...deflValsMM) : 1;
+                const yDeflVals = [...new Set([deflMin, 0, deflMax])].sort((a, b) => a - b)
+                  .filter((v, i, a) => i === 0 || Math.abs((a[i - 1] * deflScale) - (v * deflScale)) >= 20);
+                return (
+                  <>
+                    <line x1={60} y1={75} x2={60 + totalL * scX} y2={75} stroke="#94A3B8" strokeWidth={3} />
+                    {supports.map((sx, i) => (
+                      <polygon key={i} points={`${60 + sx * scX},80 ${60 + sx * scX - 6},93 ${60 + sx * scX + 6},93`}
+                        fill="#6366F1" />
+                    ))}
+                    {res && res.deflections.length > 1 && (
+                      <DiagramOverlay type="deflection" points={deflPts} />
+                    )}
+                    {res && res.deflections.map((d, i) => (
+                      <text key={i} x={60 + supports[i] * scX} y={65}
+                        fontSize={9} fill="#374151" textAnchor="middle">
+                        {(d * 1000).toFixed(2)}
+                      </text>
+                    ))}
+                    <AxisTicks
+                      origin={[60, 75]}
+                      end={[60 + totalL * scX, 75]}
+                      values={supports}
+                      map={(v) => [60 + v * scX, 75]}
+                      unit="m"
+                      side="below"
+                      decimals={1}
+                    />
+                    <AxisTicks
+                      origin={[60, 25]}
+                      end={[60, 125]}
+                      values={yDeflVals}
+                      map={(v) => [60, 75 + v * deflScale]}
+                      unit="mm"
+                      side="left"
+                      decimals={2}
+                    />
+                  </>
+                );
+              })()}
             </SectionCanvas>
           </div>
 
           <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
             <SectionCanvas title="Moments fléchissants" vbW={500} vbH={150}>
-              <line x1={60} y1={75} x2={60 + totalL * scX} y2={75} stroke="#94A3B8" strokeWidth={1} />
-              {res && res.moments.length > 0 && (
-                <DiagramOverlay type="moment" points={momPts} />
-              )}
-              {res && res.moments.map((m, i) => (
-                <text key={i} x={60 + supports[i] * scX} y={m >= 0 ? 67 : 93}
-                  fontSize={9} fill="#374151" textAnchor="middle">
-                  {m.toFixed(1)}
-                </text>
-              ))}
-              <text x={60 + totalL * scX / 2} y={140} fontSize={10} fill="#999" textAnchor="middle">
-                Moments en kN·m
-              </text>
+              {(() => {
+                const momScale = 50 / (res?.max_moment || 1);
+                const momMin = res ? Math.min(...res.moments) : 0;
+                const momMax = res ? Math.max(...res.moments) : 1;
+                const yMomVals = [...new Set([momMin, 0, momMax])].sort((a, b) => a - b)
+                  .filter((v, i, a) => i === 0 || Math.abs((a[i - 1] * momScale) - (v * momScale)) >= 20);
+                return (
+                  <>
+                    <line x1={60} y1={75} x2={60 + totalL * scX} y2={75} stroke="#94A3B8" strokeWidth={1} />
+                    {res && res.moments.length > 0 && (
+                      <DiagramOverlay type="moment" points={momPts} />
+                    )}
+                    {res && res.moments.map((m, i) => (
+                      <text key={i} x={60 + supports[i] * scX} y={m >= 0 ? 67 : 93}
+                        fontSize={9} fill="#374151" textAnchor="middle">
+                        {m.toFixed(1)}
+                      </text>
+                    ))}
+                    <AxisTicks
+                      origin={[60, 75]}
+                      end={[60 + totalL * scX, 75]}
+                      values={supports}
+                      map={(v) => [60 + v * scX, 75]}
+                      unit="m"
+                      side="below"
+                      decimals={1}
+                    />
+                    <AxisTicks
+                      origin={[60, 25]}
+                      end={[60, 125]}
+                      values={yMomVals}
+                      map={(v) => [60, 75 + v * momScale]}
+                      unit="kN·m"
+                      side="left"
+                      decimals={1}
+                    />
+                  </>
+                );
+              })()}
             </SectionCanvas>
           </div>
         </>

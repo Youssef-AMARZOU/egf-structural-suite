@@ -2341,7 +2341,7 @@ export interface CisaiSectionQQEnFCInputs {
   R: number;
   na: number;
   Ac: number;
-  tabs: Array<[number, number, number]>;
+  tabs: [number[], number[], number[]];
   fyk: number;
   gs: number;
   k: number;

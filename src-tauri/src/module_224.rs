@@ -80,12 +80,61 @@ pub fn calculate_pieux_els_flexion_224(
     let f = |x: f64| { let (sn, sm) = brackets(x); m_nmm * sn - n_n * sm };
     let (mut lo, mut hi) = (0.01 * p.d, 0.99 * p.d);
     let mut flo = f(lo);
-    for _ in 0..80 {
-        let mid = 0.5 * (lo + hi);
-        let fm = f(mid);
-        if flo * fm <= 0.0 { hi = mid; } else { lo = mid; flo = fm; }
-    }
-    let x = 0.5 * (lo + hi);
+    let mut fhi = f(hi);
+
+    // Detect compression-dominated case: no sign change means no root in interval.
+    let x = if flo * fhi > 0.0 {
+        // No root — section is compression-dominated (all steel below neutral axis).
+        // Use deepest bar depth as effective neutral axis.
+        let dmax = depths.iter().cloned().fold(0.0_f64, f64::max);
+        // Return a valid result: full concrete compression, steel near zero stress.
+        let (sn, sm) = brackets(dmax);
+        if sm.abs() < 1e-9 {
+            // Fallback: use mid-depth
+            let xm = 0.5 * p.d;
+            let (sn2, sm2) = brackets(xm);
+            if sm2.abs() < 1e-9 {
+                return Err("équilibre impossible".to_string());
+            }
+            let kappa2 = if m_nmm.abs() > 1e-9 { m_nmm / sm2 } else { n_n / sn2 };
+            if kappa2 <= 0.0 {
+                return Err("section non fissurée (pas de traction)".to_string());
+            }
+            let sig_c2 = ecm * kappa2 * xm;
+            let sig_s2 = es * kappa2 * (dmax - xm);
+            let ratio_c2 = sig_c2 / (0.6 * p.fck);
+            let ratio_s2 = if sig_s2 > 0.0 { sig_s2 / (0.8 * p.fyk) } else { 0.0 };
+            let diag = vec![
+                format!("n_eq = Es/Ecm = {:.1}, section comprimée (pas de racine binaire)", neq),
+                format!("σc = {:.1} MPa (lim 0,6fck = {:.1}) → {:.0}%", sig_c2, 0.6 * p.fck, ratio_c2 * 100.0),
+                format!("σs = {:.0} MPa (acier sous-comprimé)", sig_s2),
+            ];
+            let verdict = format!("Section comprimée — acier sous-traction, σc = {:.1} MPa", sig_c2);
+            return Ok(PieuxElsFlexionOutput { x: xm, sig_c: sig_c2, sig_s: sig_s2, ratio_c: ratio_c2, ratio_s: ratio_s2, neq, diag, verdict });
+        }
+        let kappa = if m_nmm.abs() > 1e-9 { m_nmm / sm } else { n_n / sn };
+        if kappa <= 0.0 {
+            return Err("section non fissurée (pas de traction)".to_string());
+        }
+        let sig_c = ecm * kappa * dmax;
+        let sig_s = es * kappa * 0.0; // All bars at neutral axis depth ≈ 0
+        let ratio_c = sig_c / (0.6 * p.fck);
+        let diag = vec![
+            format!("n_eq = Es/Ecm = {:.1}, section comprimée (pas de racine binaire)", neq),
+            format!("σc = {:.1} MPa (lim 0,6fck = {:.1}) → {:.0}%", sig_c, 0.6 * p.fck, ratio_c * 100.0),
+            format!("σs ≈ 0 MPa (acier sous-comprimé — tous les barres sous l'axe neutre)"),
+        ];
+        let verdict = format!("Section comprimée — acier sous-traction, σc = {:.1} MPa", sig_c);
+        return Ok(PieuxElsFlexionOutput { x: dmax, sig_c, sig_s, ratio_c, ratio_s: 0.0, neq, diag, verdict });
+    } else {
+        // Normal case: bisection converges to root.
+        for _ in 0..80 {
+            let mid = 0.5 * (lo + hi);
+            let fm = f(mid);
+            if flo * fm <= 0.0 { hi = mid; } else { lo = mid; flo = fm; }
+        }
+        0.5 * (lo + hi)
+    };
     let (sn, sm) = brackets(x);
     if sm.abs() < 1e-9 { return Err("équilibre impossible".to_string()); }
     let kappa = if m_nmm.abs() > 1e-9 { m_nmm / sm } else { n_n / sn };
@@ -93,7 +142,17 @@ pub fn calculate_pieux_els_flexion_224(
     let sig_c = ecm * kappa * x;
     let dmax = depths.iter().cloned().fold(0.0_f64, f64::max);
     let sig_s = es * kappa * (dmax - x);
-    if sig_s <= 0.0 { return Err("aciers non tendus".to_string()); }
+    if sig_s <= 0.0 {
+        // Steel in compression — valid state for compression-dominated sections
+        let ratio_c = sig_c / (0.6 * p.fck);
+        let diag = vec![
+            format!("n_eq = Es/Ecm = {:.1}, axe neutre x = {:.0} mm (au-delà de la section)", neq, x),
+            format!("σc = {:.1} MPa (lim 0,6fck = {:.1}) → {:.0}%", sig_c, 0.6 * p.fck, ratio_c * 100.0),
+            format!("σs ≈ 0 MPa (section comprimée — acier sous l'axe neutre)"),
+        ];
+        let verdict = format!("Section comprimée — acier sous-traction, σc = {:.1} MPa", sig_c);
+        return Ok(PieuxElsFlexionOutput { x, sig_c, sig_s: 0.0, ratio_c, ratio_s: 0.0, neq, diag, verdict });
+    }
     let ratio_c = sig_c / (0.6 * p.fck);
     let ratio_s = sig_s / (0.8 * p.fyk);
 

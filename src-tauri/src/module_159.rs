@@ -185,6 +185,8 @@ pub fn find_rho_min(
     n_layers: usize,
     layer_positions: &[f64],
 ) -> (f64, f64, f64, f64) {
+    // Bar-layer count bounds the per-iteration steel loops (helper is called 51x).
+    let n_layers = n_layers.min(layer_positions.len()).min(100);
     let d = if !layer_positions.is_empty() {
         *layer_positions.iter().max_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)).unwrap_or(&h)
     } else {
@@ -249,6 +251,12 @@ pub struct PourcentageMiniNonFragiliteOutput {
 pub fn calculate_pourcentage_mini_non_fragilite_section_159(
     p: PourcentageMiniNonFragiliteInputs,
 ) -> Result<PourcentageMiniNonFragiliteOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.b <= 0.0 || p.h <= 0.0 {
+        return Err("b et h doivent être > 0".to_string());
+    }
     let xd_limit = 0.5; // BAEL §C3.3.4
     let euk = 3.5 / 1000.0;
     let es = 200000.0;

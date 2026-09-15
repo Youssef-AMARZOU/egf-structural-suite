@@ -85,6 +85,9 @@ pub fn calculate_boussinesq_dtu_187(
             return Err(format!("Rectangle {}: a et b doivent etre > 0", i + 1));
         }
     }
+    if p.rects.len() > 10000 {
+        return Err("trop de rectangles (10000 max)".into());
+    }
     let n_depth = p.n_depth.clamp(10, 200);
     let z_ref = (p.z_max / 2.0_f64).max(0.05_f64);
 

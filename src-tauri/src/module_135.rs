@@ -118,6 +118,12 @@ fn generate_moment_envelope(
 pub fn calculate_ecretement_135(
     p: EcretementInputs,
 ) -> Result<EcretementOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.d <= 0.0 {
+        return Err("d doit être > 0".to_string());
+    }
     let fcd = p.fck / p.gc;
     let rho = 0.01;
 

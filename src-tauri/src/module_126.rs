@@ -152,9 +152,25 @@ pub fn calculate_contraintes_section_qq_126(
 ) -> Result<ContraintesSectionQqOutput, String> {
     let fcd = p.fck / 1.5;
     let fyd = p.fyk / p.gs;
+    // Counts synced to the provided vectors; iteration budget capped
+    // (the search is O(itour^4 · n_steel)).
+    let nv = p.widths_top.len().min(p.widths_bot.len()).min(p.heights.len());
+    if nv == 0 {
+        return Err("définir au moins une couche (b1, b2, h > 0)".to_string());
+    }
+    let ns = p.steel_depths.len().min(p.steel_areas.len());
+    if ns == 0 {
+        return Err("définir au moins un lit d'acier".to_string());
+    }
+    let n_layers = p.n_layers.clamp(1, 50).min(nv);
+    let n_steel = p.n_steel.clamp(1, 100).min(ns);
+    let itour = p.itour.clamp(1, 20);
     let g_h: f64 = p.heights.iter().sum();
-    let area = area_section(&p.widths_top, &p.widths_bot, &p.heights, p.n_layers);
-    let centroid = centroid_section(&p.widths_top, &p.widths_bot, &p.heights, p.n_layers);
+    if g_h <= 0.0 {
+        return Err("hauteur totale de section > 0 requise".to_string());
+    }
+    let area = area_section(&p.widths_top, &p.widths_bot, &p.heights, n_layers);
+    let centroid = centroid_section(&p.widths_top, &p.widths_bot, &p.heights, n_layers);
     let esu = 0.9 * p.euk;
     let ec1 = p.ec1;
 
@@ -166,15 +182,15 @@ pub fn calculate_contraintes_section_qq_126(
     let mut n_rd = 0.0;
     let mut m_rd = 0.0;
 
-    for _ in 0..p.itour {
-        let npas1 = if found { 2 } else { 2 * p.itour };
+    for _ in 0..itour {
+        let npas1 = if found { 2 } else { 2 * itour };
         let den1 = (enb - ena) / npas1 as f64;
         for i in 0..=npas1 {
             let en = ena + i as f64 * den1;
             let mut ema = 0.0_f64;
             let mut emb = (p.ecu1 + esu) / 2.0;
-            for _ in 0..p.itour {
-                let npas2 = if found { 2 } else { 2 * p.itour };
+            for _ in 0..itour {
+                let npas2 = if found { 2 } else { 2 * itour };
                 let den2 = (emb - ema) / npas2 as f64;
                 for j in 0..=npas2 {
                     let em = ema + j as f64 * den2;
@@ -186,7 +202,7 @@ pub fn calculate_contraintes_section_qq_126(
 
                     let mut nrds1 = 0.0_f64;
                     let mut mrds1 = 0.0_f64;
-                    for k in 0..p.n_steel {
+                    for k in 0..n_steel {
                         let d1 = p.steel_depths[k];
                         let ac1 = p.steel_areas[k];
                         let es1 = e1 + (e2 - e1) * d1 / g_h;
@@ -199,7 +215,7 @@ pub fn calculate_contraintes_section_qq_126(
                     let (nrd1, mrd1) = if e1 > 0.0 {
                         concrete_force_moment(
                             e1, e2, g_h, g_h,
-                            &p.widths_top, &p.widths_bot, &p.heights, p.n_layers,
+                            &p.widths_top, &p.widths_bot, &p.heights, n_layers,
                             fcd, p.ey, ec1, 0.85, 2.0, 1,
                         )
                     } else {
@@ -219,7 +235,7 @@ pub fn calculate_contraintes_section_qq_126(
 
             let nr = {
                 let mut nrs = 0.0_f64;
-                for k in 0..p.n_steel {
+                for k in 0..n_steel {
                     let d1 = p.steel_depths[k];
                     let ac1 = p.steel_areas[k];
                     let es1 = e1_opt + (e2_opt - e1_opt) * d1 / g_h;
@@ -229,7 +245,7 @@ pub fn calculate_contraintes_section_qq_126(
                 let (nc, _) = if e1_opt > 0.0 {
                     concrete_force_moment(
                         e1_opt, e2_opt, g_h, g_h,
-                        &p.widths_top, &p.widths_bot, &p.heights, p.n_layers,
+                        &p.widths_top, &p.widths_bot, &p.heights, n_layers,
                         fcd, p.ey, ec1, 0.85, 2.0, 1,
                     )
                 } else { (0.0, 0.0) };
@@ -246,9 +262,9 @@ pub fn calculate_contraintes_section_qq_126(
 
     let mut sig_s1 = 0.0;
     let mut sig_s2 = 0.0;
-    if p.n_steel >= 2 {
+    if n_steel >= 2 {
         let es1 = e1_opt + (e2_opt - e1_opt) * p.steel_depths[0] / g_h;
-        let es2 = e1_opt + (e2_opt - e1_opt) * p.steel_depths[p.n_steel - 1] / g_h;
+        let es2 = e1_opt + (e2_opt - e1_opt) * p.steel_depths[n_steel - 1] / g_h;
         sig_s1 = sigma_steel(es1, p.fyk, p.gs, p.euk, p.k);
         sig_s2 = sigma_steel(es2, p.fyk, p.gs, p.euk, p.k);
     }

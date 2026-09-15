@@ -89,20 +89,22 @@ pub fn calculate_torsion_multitub_143(
     let mut cisame = Vec::new();
     let mut cisinf = Vec::new();
 
-    let n_r = p.n_r.min(p.n_v / 2 + 1);
+    // Cell counts bound the 0..n_v / 0..n_r loops and vec sizes.
+    let n_v = p.n_v.clamp(1, 50);
+    let n_r = p.n_r.clamp(0, 25).min(n_v / 2 + 1);
 
     if n_r == 0 {
         let mut omega_total = 0.0;
         let mut k_total = 0.0;
-        for i in 0..p.n_v {
-            let t_i = (bn - 2.0 * e_pm - (p.n_v as f64 - 1.0) * e_pl) / p.n_v as f64;
+        for i in 0..n_v {
+            let t_i = (bn - 2.0 * e_pm - (n_v as f64 - 1.0) * e_pl) / n_v as f64;
             let omega_i = t_i * w;
             let a_ratio = if w > 0.0 { t_i / w } else { 0.5 };
             let k2 = ffk2_calc(a_ratio);
             let k_i = k2 * t_i * w * w * w / 3.0;
             omega.push(omega_i);
             k.push(k_i);
-            t.push(ta / p.n_v as f64);
+            t.push(ta / n_v as f64);
             dse.push(0.0);
             cissup.push(0.0);
             cisame.push(0.0);
@@ -141,7 +143,7 @@ pub fn calculate_torsion_multitub_143(
         let t_i = if i == 0 {
             (bn - e_pm) / n_r as f64
         } else {
-            (bn - 2.0 * e_pm - (p.n_v as f64 - 1.0) * e_pl) / p.n_v as f64
+            (bn - 2.0 * e_pm - (n_v as f64 - 1.0) * e_pl) / n_v as f64
         };
         t_vec.push(t_i);
     }

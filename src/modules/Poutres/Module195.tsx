@@ -30,7 +30,7 @@ export default function Module195() {
   const ySteel = oy + inp.d * k;
   const nBars = res ? Math.max(2, Math.round(res.As_min / BAR_AREA)) : 3;
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PourcentageMiniAgeInputs, label: string, unit: string,

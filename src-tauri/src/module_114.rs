@@ -89,6 +89,8 @@ fn circular_nm(
     gd: f64, e1: f64, e2: f64, fcd: f64, ec1: f64, ecu2: f64, n: f64, typ: u32,
     na: u32, enr: f64, phi: f64, fyd: f64, euk: f64, k: f64, deca: u32,
 ) -> (f64, f64, f64) {
+    // Bar count bounds the 0..na loop and na divisions.
+    let na = na.clamp(4, 200);
     let r = gd / 2.0;
     let r_bar = r - enr / 1000.0;
     let n_int = 48_usize;
@@ -132,6 +134,9 @@ fn circular_nm(
 #[tauri::command]
 pub fn calculate_contraintes_circ_114(p: ContraintesCircInputs) -> Result<ContraintesCircOutput, String> {
     if p.gd <= 0.0 { return Err("Diameter must be > 0".into()); }
+    if p.gc <= 0.0 || p.gs <= 0.0 { return Err("gc and gs must be > 0".into()); }
+    // Bar count synced here; helper also clamps.
+    let na = p.na.clamp(4, 200);
 
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
@@ -159,7 +164,7 @@ pub fn calculate_contraintes_circ_114(p: ContraintesCircInputs) -> Result<Contra
             let e1 = en + em;
             let e2 = en - em;
             let (nr, mr, _) = circular_nm(p.gd, e1, e2, fcd, p.ec1, p.ecu2, p.nx, p.typ,
-                p.na, p.enr, p.phi, fyd, p.euk, p.k, p.deca);
+                na, p.enr, p.phi, fyd, p.euk, p.k, p.deca);
             let err = ((nr - p.ned).abs() / p.ned.max(1e-10) + (mr - p.med).abs() / p.med.max(1e-10)) * 0.5;
             if err < best_err {
                 best_err = err;
@@ -169,12 +174,12 @@ pub fn calculate_contraintes_circ_114(p: ContraintesCircInputs) -> Result<Contra
             if mr < p.med { em_b = em; } else { em_a = em; }
         }
         let (nr, _, _) = circular_nm(p.gd, best_e1, best_e2, fcd, p.ec1, p.ecu2, p.nx, p.typ,
-            p.na, p.enr, p.phi, fyd, p.euk, p.k, p.deca);
+            na, p.enr, p.phi, fyd, p.euk, p.k, p.deca);
         if nr < p.ned { en_b = en; } else { en_a = en; }
     }
 
     let (nrd, mrd, a_steel) = circular_nm(p.gd, best_e1, best_e2, fcd, p.ec1, p.ecu2, p.nx, p.typ,
-        p.na, p.enr, p.phi, fyd, p.euk, p.k, p.deca);
+        na, p.enr, p.phi, fyd, p.euk, p.k, p.deca);
 
     let rho = a_steel / (std::f64::consts::PI * r * r);
     let kd = if (best_e1 - best_e2).abs() > 1e-12 {

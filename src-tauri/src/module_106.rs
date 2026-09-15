@@ -26,6 +26,9 @@ pub fn calculate_mandrin_renard_106(
     if p.series.is_empty() {
         return Err("series ne doit pas être vide".to_string());
     }
+    if p.series.len() > 10000 {
+        return Err("series trop longue (10000 valeurs max)".to_string());
+    }
     // First table value strictly greater than phi; fallback = series[0]
     let mut mandrel = p.series[0];
     let mut index = 0_usize;

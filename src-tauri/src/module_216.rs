@@ -48,6 +48,10 @@ pub fn calculate_travee_toutes_charges_216(
         if a <= 0.0 || a >= p.l { return Err("positions dans (0, L)".to_string()); }
     }
     if p.p_vals.iter().any(|&v| v < 0.0) { return Err("P doivent être >= 0".to_string()); }
+    // Load counts bound the 100-point sweep (each point scans all loads).
+    if p.p_vals.len() > 10000 || p.m_vals.len() > 10000 {
+        return Err("trop de charges (10000 max)".to_string());
+    }
 
     let mut ra = p.q * p.l / 2.0;
     for (&pv, &a) in p.p_vals.iter().zip(p.p_pos.iter()) { ra += pv * (p.l - a) / p.l; }

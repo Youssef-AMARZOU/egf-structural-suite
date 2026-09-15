@@ -34,7 +34,7 @@ export default function Module126() {
   const totalH = inp.heights.reduce((a, b) => a + b, 0);
   const maxW = Math.max(...inp.widths_top, ...inp.widths_bot);
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof ContraintesSectionQqInputs, label: string, unit: string,

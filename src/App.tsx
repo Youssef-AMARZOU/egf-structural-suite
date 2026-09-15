@@ -1,8 +1,9 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { getVersion } from '@tauri-apps/api/app';
 import { useAppUpdater } from './hooks/useAppUpdater';
 import { UpdateDialog } from './components/common/UpdateDialog';
 import { CATEGORY_ACCENT, type CategoryKey } from './components/common/Workstation';
+import { AnnexProvider } from './components/common/AnnexContext';
+import { TitleBar } from './components/common/TitleBar';
 import Module101 from './modules/Poteaux/Module101';
 import Module103 from './modules/Dalles/Module103';
 import Module104 from './modules/Dalles/Module104';
@@ -319,13 +320,12 @@ const GROUP_ICON: Record<string, ReactNode> = {
 export default function App() {
   const [module, setModule] = useState<ModuleKey>('104');
   const [dark, setDark] = useState(true);
-  const [appVersion, setAppVersion] = useState('0.1.1');
+  const [appVersion] = useState(__APP_VERSION__);
   const [updateOpen, setUpdateOpen] = useState(false);
   const updater = useAppUpdater();
 
   // Silent OTA check on startup — surfaces UI only if an update exists.
   useEffect(() => {
-    getVersion().then(setAppVersion).catch(() => undefined);
     updater.checkForUpdates(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -342,9 +342,13 @@ export default function App() {
 
   return (
     <div className={dark ? 'dark' : ''}>
-      <div className="app-canvas flex h-screen text-slate-900 dark:text-slate-100" style={{ '--cat': CATEGORY_ACCENT[cat] } as CSSProperties}>
+      <AnnexProvider>
+      <div className="app-canvas flex flex-col h-screen text-slate-900 dark:text-slate-100" style={{ '--cat': CATEGORY_ACCENT[cat] } as CSSProperties}>
+        <TitleBar />
+        <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
         <aside className={`glass-shell shrink-0 overflow-y-auto rounded-r-2xl transition-all duration-200 ${navCollapsed ? 'w-0 p-0 opacity-0 pointer-events-none border-0' : 'w-[260px] p-4 space-y-3'}`}>
+          <div className="sticky top-0 z-20 -mx-1 px-1 pt-1 pb-2 bg-[#eef2f7]/95 dark:bg-[#0d1424]/90 backdrop-blur-xl space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold tracking-tight">EGF</span>
             <span className="text-[10px] font-mono text-emerald-500 mt-0.5">SUITE</span>
@@ -376,6 +380,7 @@ export default function App() {
               aria-label="Rechercher un module"
             />
             <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">⌕</span>
+          </div>
           </div>
 
           <nav className="space-y-2">
@@ -595,7 +600,9 @@ export default function App() {
           onInstall={() => updater.installUpdate()}
           onCheck={() => updater.checkForUpdates(false)}
         />
+        </div>
       </div>
+      </AnnexProvider>
     </div>
   );
 }

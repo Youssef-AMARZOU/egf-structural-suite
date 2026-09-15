@@ -15,13 +15,13 @@ pub struct VoileVerifFcInputs {
     pub fyk: f64,
     pub gc: f64,
     pub gs: f64,
-    pub n_bars: usize,
+    pub n_bars: f64, // rounded to 2..=400 at use site
     pub phi_dist: f64,
     pub A_end: f64,
     pub cover: f64,
     pub N_ed: f64,
     pub M_ed: f64,
-    pub n_pts: usize,
+    pub n_pts: f64, // rounded to 20..=200 at use site
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -79,7 +79,7 @@ pub fn calculate_voile_verif_fc_191(
 
     // Steel layers along the wall length: distributed bars + 2 end concentrations.
     let mut layers: Vec<(f64, f64)> = Vec::new(); // (position from top, area m²)
-    let n = p.n_bars.max(2);
+    let n = (p.n_bars.round() as usize).clamp(2, 400);
     let a_bar = std::f64::consts::PI * (p.phi_dist / 1000.0_f64).powi(2) / 4.0_f64;
     for i in 0..n {
         let y = p.cover + (p.Lw - 2.0_f64 * p.cover) * i as f64 / (n - 1) as f64;
@@ -92,7 +92,7 @@ pub fn calculate_voile_verif_fc_191(
     }
 
     // Strain-plane sweep: neutral axis c from +inf (uniform ecu) to pure tension.
-    let n_pts = p.n_pts.clamp(20, 200);
+    let n_pts = (p.n_pts.round() as usize).clamp(20, 200);
     let nf = 120_usize; // concrete fibres
     let mut curve_n: Vec<f64> = Vec::new();
     let mut curve_m: Vec<f64> = Vec::new();

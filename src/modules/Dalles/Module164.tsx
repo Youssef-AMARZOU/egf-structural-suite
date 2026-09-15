@@ -26,7 +26,7 @@ export default function Module164() {
     setInp({ ...inp, loads: l });
   };
 
-  const status = !res ? 'computing'
+  const status = err ? 'fail' : !res ? 'computing'
     : /KO|non/i.test(res.verdict) ? 'fail'
     : /OK/i.test(res.verdict) ? 'pass' : verdictStatus(res.verdict);
 
@@ -105,7 +105,7 @@ export default function Module164() {
                 <text x={ox + w / 2} y={oy - 10} fontSize={11} fill="#374151" textAnchor="middle">
                   Mx_max = {res.mx_max.toFixed(2)} kN·m/m
                 </text>
-                <text x={ox + w / 2} y={oy + h + 35} fontSize={10} fill="#999" textAnchor="middle">
+                <text x={ox + w / 2} y={oy + h + 35} fontSize={10} fill="#94A3B8" textAnchor="middle">
                   Asx = {res.asx_els.toFixed(0)} mm²/m, MRDx = {res.mrdu.toFixed(1)} kN·m/m
                 </text>
               </>

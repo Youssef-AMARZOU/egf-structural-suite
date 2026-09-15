@@ -203,20 +203,23 @@ fn solve_linear(a: &mut Vec<Vec<f64>>, b: &mut Vec<f64>) -> Option<Vec<f64>> {
 pub fn calculate_boussinesq_lagrange_125(
     p: BoussinesqLagrangeInputs,
 ) -> Result<BoussinesqLagrangeOutput, String> {
-    let mm = (p.nx as usize + 1) * (p.ny as usize + 1);
+    // Grid dims bound the (nx+1)*(ny+1) allocation and O(nx*ny) sweep.
+    let nx = p.nx.clamp(2, 40);
+    let ny = p.ny.clamp(2, 40);
+    let mm = (nx as usize + 1) * (ny as usize + 1);
 
     let mut w_grid = vec![0.0f64; mm];
 
-    let mut w_max = 0.0f64;
-    let mut w_sum = 0.0f64;
+    let mut w_max = 0.0_f64;
+    let mut w_sum = 0.0_f64;
 
-    for iy in 1..=p.ny + 1 {
-        for ix in 1..=p.nx + 1 {
-            let idx = ((ix - 1) as usize) * (p.ny as usize + 1) + (iy - 1) as usize;
+    for iy in 1..=ny + 1 {
+        for ix in 1..=nx + 1 {
+            let idx = ((ix - 1) as usize) * (ny as usize + 1) + (iy - 1) as usize;
             let w = macro4(
                 ix, iy,
-                (p.nx + 2) / 2, (p.ny + 2) / 2,
-                p.nx, p.dx, p.dy,
+                (nx + 2) / 2, (ny + 2) / 2,
+                nx, p.dx, p.dy,
                 p.ha, p.hb, p.hc,
                 p.ea, p.eb, p.ec,
             );
@@ -232,12 +235,12 @@ pub fn calculate_boussinesq_lagrange_125(
     let w_avg = w_sum / n_cells;
 
     let mut slope_max = 0.0f64;
-    for iy in 2..p.ny as usize {
-        for ix in 2..p.nx as usize {
-            let idx = (ix - 1) * (p.ny as usize + 1) + iy;
-            let idx_right = (ix + 1) * (p.ny as usize + 1) + iy;
-            let idx_up = ix * (p.ny as usize + 1) + (iy + 1);
-            let idx_down = ix * (p.ny as usize + 1) + (iy - 1);
+    for iy in 2..ny as usize {
+        for ix in 2..nx as usize {
+            let idx = (ix - 1) * (ny as usize + 1) + iy;
+            let idx_right = (ix + 1) * (ny as usize + 1) + iy;
+            let idx_up = ix * (ny as usize + 1) + (iy + 1);
+            let idx_down = ix * (ny as usize + 1) + (iy - 1);
             if idx_right < mm && idx - 2 >= 0 {
                 let s1 = (w_grid[idx_right] - w_grid[idx - 2]).abs() / 2.0 / p.dy;
                 if s1 > slope_max { slope_max = s1; }

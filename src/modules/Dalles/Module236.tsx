@@ -16,7 +16,7 @@ export default function Module236() {
   const S = (k: keyof DalleRectTrapInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : inp.m_rd > 0 && res.ratio > 1 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : inp.m_rd > 0 && res.ratio > 1 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof DalleRectTrapInputs, label: string, unit: string,

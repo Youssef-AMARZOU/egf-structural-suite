@@ -185,6 +185,19 @@ pub struct RotPlastoptimBOutput {
 pub fn calculate_rot_plastoptim_b_175(
     p: RotPlastoptimBInputs,
 ) -> Result<RotPlastoptimBOutput, String> {
+    // Support count bounds the na×na system and na-1 underflow risks.
+    if p.na < 2 || p.na > 100 {
+        return Err("na doit être dans [2, 100]".to_string());
+    }
+    if p.L.len() < p.na || p.ine.len() < p.na || p.tg.len() < p.na || p.tq.len() < p.na {
+        return Err("L, ine, tg et tq doivent contenir au moins na valeurs".to_string());
+    }
+    if p.L.iter().any(|&l| l <= 0.0) {
+        return Err("L : portées strictement positives requises".to_string());
+    }
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
     let na = p.na;
     let fcd = p.fck / p.gc;
 

@@ -24,7 +24,7 @@ export default function Module146() {
   const S = (k: keyof PoinconnementTremieInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof PoinconnementTremieInputs, label: string, unit: string,

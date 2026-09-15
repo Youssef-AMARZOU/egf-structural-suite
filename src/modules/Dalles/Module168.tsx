@@ -17,7 +17,7 @@ export default function Module168() {
   const S = (k: keyof FlecheDispenseV5Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.ratio_ld > 1.0 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio_ld > 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof FlecheDispenseV5Inputs, label: string, unit: string,
@@ -53,22 +53,23 @@ export default function Module168() {
       }
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <SectionCanvas title="Vérification L/d" vbW={500} vbH={60}>
+          <SectionCanvas title="Vérification L/d" vbW={500} vbH={70}>
             {res && (() => {
               const maxVal = Math.max(lOverD * 1.3, 80);
               const bx = 50, bw = 400;
               const sc = bw / maxVal;
-              const barH = 18;
+              const barH = 20;
+              const limX = bx + (lOverD / res.ratio_ld) * sc;
+              const ok = res.ratio_ld <= 1.0;
               return (
                 <>
-                  <text x={bx} y={15} fontSize={10} fill="#333">L/d réel = {lOverD.toFixed(1)}</text>
-                  <rect x={bx} y={20} width={Math.min(lOverD * sc, bw)} height={barH}
-                    fill={res.ratio_ld <= 1.0 ? '#22C55E' : '#EF4444'} rx={3} />
-                  <text x={bx + bw + 5} y={34} fontSize={9} fill="#333">{lOverD.toFixed(1)}</text>
-                  <text x={bx} y={55} fontSize={10} fill="#333">Limite = {(lOverD / res.ratio_ld).toFixed(1)}</text>
-                  <line x1={bx + (lOverD / res.ratio_ld) * sc} y1={20}
-                    x2={bx + (lOverD / res.ratio_ld) * sc} y2={38}
-                    stroke="#333" strokeWidth={2} strokeDasharray="4,3" />
+                  <text x={bx} y={14} fontSize={11} fill="#CBD5E1" fontWeight="bold">L/d réel = {lOverD.toFixed(1)}</text>
+                  <rect x={bx} y={18} width={Math.min(lOverD * sc, bw)} height={barH}
+                    fill={ok ? '#34D399' : '#F87171'} rx={4} opacity={0.9} />
+                  <text x={bx + Math.min(lOverD * sc, bw) + 6} y={32} fontSize={10} fill="#CBD5E1" fontWeight="bold">{lOverD.toFixed(1)}</text>
+                  <line x1={limX} y1={16} x2={limX} y2={40}
+                    stroke="#FBBF24" strokeWidth={2.5} strokeDasharray="5 3" />
+                  <text x={limX + 4} y={58} fontSize={10} fill="#FBBF24" fontWeight="bold">Limite = {(lOverD / res.ratio_ld).toFixed(1)}</text>
                 </>
               );
             })()}

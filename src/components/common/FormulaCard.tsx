@@ -49,17 +49,19 @@ export const FormulaCard: React.FC<FormulaCardProps> = ({
       {description && <p className="text-xs text-slate-400 italic mb-3">{description}</p>}
 
       {variables && variables.length > 0 && (
-        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-800/40 text-xs">
+        <div className="mt-2 grid grid-cols-1 gap-1.5 pt-2 border-t border-slate-800/40 text-xs">
           {variables.map((v, idx) => (
-            <div key={idx} className="flex items-center justify-between bg-slate-950/40 px-2.5 py-1.5 rounded-md">
-              <span className="font-mono text-slate-300">
-                <MathBlock math={v.symbol} />
-                <span className="text-slate-500 ml-1.5">— {v.meaning}</span>
-              </span>
-              {v.value !== undefined && (
-                <span className="font-mono font-medium text-amber-400">
-                  {v.value} <span className="text-slate-500 text-[10px]">{v.unit || ''}</span>
+            <div key={idx} className="bg-slate-950/40 px-2.5 py-1.5 rounded-md min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="shrink-0 font-mono text-slate-300">
+                  <MathBlock math={v.symbol} />
                 </span>
+                <span className="text-slate-500 truncate">{v.meaning}</span>
+              </div>
+              {v.value !== undefined && (
+                <div className="font-mono font-medium text-amber-400 text-right text-[13px] mt-0.5 truncate">
+                  {v.value} <span className="text-slate-500 text-[10px]">{v.unit || ''}</span>
+                </div>
               )}
             </div>
           ))}

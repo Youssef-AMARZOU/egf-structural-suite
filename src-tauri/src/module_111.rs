@@ -182,8 +182,13 @@ pub fn calculate_poteau_compar_111(p: PoteauComparInputs) -> Result<PoteauCompar
     if p.bx <= 0.0 || p.by <= 0.0 {
         return Err("Column dimensions must be > 0".into());
     }
-
-    let n_pts = p.n_points.max(10) as usize;
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc and gs must be > 0".into());
+    }
+    // Sweep points bound the n_pts loop + 3×(n_pts) allocations.
+    let n_pts = p.n_points.clamp(10, 500) as usize;
+    // Bars bound the per-point steel loop.
+    let n_bars = p.bars_per_layer.clamp(1, 100);
     let mut n_values = Vec::with_capacity(n_pts);
     let mut m_pos = Vec::with_capacity(n_pts);
     let mut m_neg = Vec::with_capacity(n_pts);
@@ -212,7 +217,7 @@ pub fn calculate_poteau_compar_111(p: PoteauComparInputs) -> Result<PoteauCompar
         let (n_rd, m_rd) = combined_forces(
             bt, ht, p.ec2, ep1, ep2,
             p.fck, p.gc, p.n_parabola,
-            p.fyk, p.gs, p.bars_per_layer, p.phi, p.d1, p.d2,
+            p.fyk, p.gs, n_bars, p.phi, p.d1, p.d2,
             p.k_steel, euk,
         );
 

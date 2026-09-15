@@ -153,9 +153,13 @@ pub struct RetraitGeneV2Ph2Output {
 pub fn calculate_retrait_gene_v2_ph_2_172(
     p: RetraitGeneV2Ph2Inputs,
 ) -> Result<RetraitGeneV2Ph2Output, String> {
-    let n = p.n_sections;
+    // Section count bounds the O(n²) matrix and O(n³) solve.
+    let n = p.n_sections.min(200);
     if n == 0 || p.lengths.len() < n || p.heights.len() < n || p.widths.len() < n {
         return Err("Invalid input dimensions".to_string());
+    }
+    if p.E == 0.0 {
+        return Err("E must be non-zero".to_string());
     }
 
     // Compute section properties

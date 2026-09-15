@@ -18,7 +18,7 @@ export default function Module192() {
   const S = (k: keyof FlecheNuisibleEC2V2DInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.ratio > 1.0 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio > 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof FlecheNuisibleEC2V2DInputs, label: string, unit: string,

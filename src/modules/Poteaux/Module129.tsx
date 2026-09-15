@@ -23,7 +23,7 @@ export default function Module129() {
   const S = (k: keyof NMVTInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio_combined <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio_combined <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof NMVTInputs, label: string, unit: string,

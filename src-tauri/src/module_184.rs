@@ -76,6 +76,12 @@ fn fpx(x: f64, n: usize, tp1: &[f64], tp2: &[f64], ta: &[f64], tb: &[f64]) -> f6
 pub fn calculate_travee_charges_qq_184(
     p: TraveeChargesQQInputs,
 ) -> Result<TraveeChargesQQOutput, String> {
+    if p.L <= 0.0 {
+        return Err("L doit être > 0".to_string());
+    }
+    // Load count bounds the 201-point sweep and indexes 4 parallel vecs.
+    let nc = p.nc.clamp(0, 100)
+        .min(p.tp1.len()).min(p.tp2.len()).min(p.ta.len()).min(p.tb.len());
     let n_pts = 200;
     let mut x_vec = Vec::new();
     let mut m_vec = Vec::new();
@@ -84,8 +90,8 @@ pub fn calculate_travee_charges_qq_184(
 
     for i in 0..=n_pts {
         let x = p.L * i as f64 / n_pts as f64;
-        let (v, m) = fmom(x, p.nc, p.L, &p.tp1, &p.tp2, &p.ta, &p.tb, p.Mg, p.Md);
-        let q = fpx(x, p.nc, &p.tp1, &p.tp2, &p.ta, &p.tb);
+        let (v, m) = fmom(x, nc, p.L, &p.tp1, &p.tp2, &p.ta, &p.tb, p.Mg, p.Md);
+        let q = fpx(x, nc, &p.tp1, &p.tp2, &p.ta, &p.tb);
         x_vec.push(x);
         m_vec.push(m);
         v_vec.push(v);
@@ -97,7 +103,7 @@ pub fn calculate_travee_charges_qq_184(
     let v_abs_max = v_vec.iter().cloned().map(|v| v.abs()).fold(0.0_f64, f64::max);
 
     let mut diag = Vec::new();
-    diag.push(format!("L = {} m, {} charges trapézoïdales", p.L, p.nc));
+    diag.push(format!("L = {} m, {} charges trapézoïdales", p.L, nc));
     diag.push(format!("Mg = {:.1} kN·m, Md = {:.1} kN·m", p.Mg, p.Md));
     diag.push(format!("M_max = {:.1} kN·m, M_min = {:.1} kN·m, |V|_max = {:.1} kN", m_max, m_min, v_abs_max));
 

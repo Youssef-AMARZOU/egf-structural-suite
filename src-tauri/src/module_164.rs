@@ -186,6 +186,19 @@ pub struct Dalle4apBpVoilePignonOutput {
 pub fn calculate_dalle4ap_bp_voile_pignon_164(
     p: Dalle4apBpVoilePignonInputs,
 ) -> Result<Dalle4apBpVoilePignonOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
+    if p.h <= 0.0 || p.E <= 0.0 || p.LA <= 0.0 || p.LB <= 0.0 {
+        return Err("h, E, LA et LB doivent être > 0".to_string());
+    }
+    if p.nu.abs() >= 1.0 {
+        return Err("nu doit être dans (-1, 1)".to_string());
+    }
+    // Load cases bound the 11x11 grid x Navier 16x16 sweep.
+    if p.loads.len() > 200 {
+        return Err("trop de cas de charge (200 max)".to_string());
+    }
     let fcd = p.fck / p.gc;
     let n_mod = 15.0;
     let ss = p.fyk / p.gs;

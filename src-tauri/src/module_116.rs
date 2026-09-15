@@ -96,6 +96,7 @@ fn pile_nm(
 
     let mut ns = 0.0f64;
     let mut ms = 0.0f64;
+    let nac = nac.clamp(4, 200);
     let a_bar = std::f64::consts::PI * phi * phi / 4.0;
     for i in 0..nac {
         let angle = i as f64 / nac as f64 * 2.0 * std::f64::consts::PI;
@@ -114,11 +115,14 @@ fn pile_nm(
 #[tauri::command]
 pub fn calculate_interac_pieu_116(p: InteracPieuInputs) -> Result<InteracPieuOutput, String> {
     if p.gb <= 0.0 { return Err("Pile diameter must be > 0".into()); }
+    if p.gc <= 0.0 || p.gs <= 0.0 { return Err("gc and gs must be > 0".into()); }
+    // Bar count bounds the 0..nac loop; sweep points bound allocs+loop.
+    let nac = p.nac.clamp(4, 200);
+    let n_pts = p.n_pts.clamp(20, 500) as usize;
 
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
     let r = p.gb / 2.0;
-    let n_pts = p.n_pts.max(20) as usize;
 
     let mut n_vals = Vec::new();
     let mut m_pos_vals = Vec::new();
@@ -129,7 +133,7 @@ pub fn calculate_interac_pieu_116(p: InteracPieuInputs) -> Result<InteracPieuOut
         let e1 = p.ecu2 * i as f64 / (n_pts - 1) as f64;
         let e2 = -0.0035;
         let (nr, mr) = pile_nm(p.gb, e1, e2, fcd, p.ec1, p.ecu2, p.nx,
-            p.nac, p.enr, p.phi, fyd, p.euk, p.k_steel);
+            nac, p.enr, p.phi, fyd, p.euk, p.k_steel);
         n_vals.push(nr);
         m_pos_vals.push(mr);
         m_neg_vals.push(-mr);

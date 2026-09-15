@@ -8,11 +8,13 @@ interface DimensionLineProps {
   fontSize?: number;
   /** rotate text along the dimension (for vertical dims) */
   vertical?: boolean;
+  /** 'arrow' (default) or 45° architectural ticks */
+  ticks?: 'arrow' | 'tick45';
 }
 
 /** Civil-engineering dimensioning: extension lines, arrows, centered text. */
 export const DimensionLine: React.FC<DimensionLineProps> = ({
-  x1, y1, x2, y2, offset = 14, text, color = '#94a3b8', fontSize = 10, vertical = false,
+  x1, y1, x2, y2, offset = 14, text, color = '#94a3b8', fontSize = 11, vertical = false, ticks = 'arrow',
 }) => {
   const dx = x2 - x1;
   const dy = y2 - y1;
@@ -37,8 +39,23 @@ export const DimensionLine: React.FC<DimensionLineProps> = ({
       {/* extension lines */}
       <line x1={x1 + nx * ex} y1={y1 + ny * ex} x2={ax1 + nx * ex} y2={ay1 + ny * ex} opacity={0.7} />
       <line x1={x2 + nx * ex} y1={y2 + ny * ex} x2={ax2 + nx * ex} y2={ay2 + ny * ex} opacity={0.7} />
-      {/* dimension line with arrows */}
-      <line x1={ax1} y1={ay1} x2={ax2} y2={ay2} markerStart={`url(#a-${id})`} markerEnd={`url(#a-${id})`} />
+      {/* dimension line with arrows or 45° ticks */}
+      {ticks === 'arrow' ? (
+        <line x1={ax1} y1={ay1} x2={ax2} y2={ay2} markerStart={`url(#a-${id})`} markerEnd={`url(#a-${id})`} />
+      ) : (
+        <g>
+          <line x1={ax1} y1={ay1} x2={ax2} y2={ay2} />
+          {[[ax1, ay1], [ax2, ay2]].map(([px, py], i) => (
+            <line
+              key={i}
+              x1={px - 4 * (dx / len) - 3 * nx}
+              y1={py - 4 * (dy / len) - 3 * ny}
+              x2={px + 4 * (dx / len) + 3 * nx}
+              y2={py + 4 * (dy / len) + 3 * ny}
+            />
+          ))}
+        </g>
+      )}
       <text
         x={mx} y={my} textAnchor="middle" dominantBaseline="central"
         fontSize={fontSize} fill={color} stroke="none"

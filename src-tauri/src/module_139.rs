@@ -141,9 +141,15 @@ fn stirrup_spacing_calc(
 pub fn calculate_cisai_rect_139(
     p: CisaiRectInputs,
 ) -> Result<CisaiRectOutput, String> {
+    if p.gc <= 0.0 || p.gs <= 0.0 {
+        return Err("gc et gs doivent être > 0".to_string());
+    }
     let fcd = p.fck / p.gc;
     let d = p.d.max(p.h * 0.85);
     let bw = p.bw;
+    if d <= 0.0 || bw <= 0.0 {
+        return Err("d et bw doivent être > 0".to_string());
+    }
 
     let k = k_factor_calc(d);
     let rho_min = rho_min_calc(p.fck);

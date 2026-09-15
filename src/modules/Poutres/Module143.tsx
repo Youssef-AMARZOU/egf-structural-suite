@@ -24,7 +24,7 @@ export default function Module143() {
   const S = (k: keyof TorsionMultitubInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio_torsion <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio_torsion <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof TorsionMultitubInputs, label: string, unit: string,

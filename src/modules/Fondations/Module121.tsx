@@ -67,7 +67,7 @@ export default function Module121() {
       ]
     : [];
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof Wall121Inputs, label: string, unit: string,

@@ -24,7 +24,7 @@ export default function Module137() {
   const S = (k: keyof InteracCircInputs) => (v: number | string) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio_nm <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio_nm <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof InteracCircInputs, label: string, unit: string,

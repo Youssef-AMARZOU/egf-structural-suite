@@ -4,7 +4,8 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Segoe UI Variable Text', system-ui, sans-serif;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
   --cat: #4C8DFF;
   --ws-acc: #4C8DFF;
@@ -51,7 +52,7 @@
 .glass-hover:hover { border-color: rgba(15, 23, 42, 0.2); }
 
 /* ---------- technical numerals ---------- */
-.font-mono, code, pre { font-variant-numeric: tabular-nums; }
+.font-mono, code, pre { font-family: 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace; font-variant-numeric: tabular-nums; }
 
 /* ---------- grid children must not force horizontal scroll ---------- */
 .grid-cols-2 > *, .grid-cols-3 > * { min-width: 0; }
@@ -92,15 +93,45 @@ input[type="range"].param-range::-moz-range-track {
 
 /* ---------- recharts polish ---------- */
 .recharts-cartesian-axis-tick text {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
 }
 .recharts-default-tooltip {
   background: rgba(17, 23, 38, 0.94) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 10px !important;
-  font-family: 'IBM Plex Mono', monospace !important;
+  font-family: 'JetBrains Mono', monospace !important;
   font-size: 12px !important;
+}
+
+/* ---------- CAD HUD + kbd ---------- */
+.hud-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(7, 10, 15, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #93A0B8;
+  white-space: nowrap;
+}
+kbd.kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom-width: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #CBD5E1;
+  white-space: nowrap;
+}
+
+/* ---------- print modal ---------- */
+#print-modal-root { display: none; }
+@media print {
+  body.print-modal #root { display: none !important; }
+  body.print-modal #print-modal-root { display: block !important; }
 }
 
 /* ---------- skeleton shimmer (recalc loading) ---------- */
@@ -138,6 +169,19 @@ input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* ---------- legacy pastel metric cards: dark-mode legibility ----------
+   Worker-built modules use light-only bg-*-50 tiles whose values inherit
+   near-white dark-mode text. Force ink values; verdict banners (no .text-lg)
+   are untouched. */
+.dark .bg-blue-50 .text-lg,
+.dark .bg-purple-50 .text-lg,
+.dark .bg-orange-50 .text-lg,
+.dark .bg-amber-50 .text-lg,
+.dark .bg-gray-50 .text-lg,
+.dark .bg-green-50 .text-lg,
+.dark .bg-red-50 .text-lg,
+.dark .bg-slate-50 .text-lg { color: #0f172a !important; }
 
 /* ---------- Note de calcul : printed report ---------- */
 .ws-print-head { display: none; }
