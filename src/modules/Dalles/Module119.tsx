@@ -22,7 +22,7 @@ export default function Module119() {
   const S = (k: keyof PredalleInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PredalleInputs, label: string, unit: string,

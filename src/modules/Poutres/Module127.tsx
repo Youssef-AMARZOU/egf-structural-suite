@@ -25,7 +25,7 @@ export default function Module127() {
   const S = (k: keyof RotplastAbaqueInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof RotplastAbaqueInputs, label: string, unit: string,

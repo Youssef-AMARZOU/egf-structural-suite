@@ -16,7 +16,7 @@ export default function Module178() {
   const S = (k: keyof PoteauPieuV3Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PoteauPieuV3Inputs, label: string, unit: string,
@@ -78,10 +78,10 @@ export default function Module178() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Évolution φ(t,t0)" vbW={500} vbH={120}>
-            <line x1={ox} y1={oy} x2={ox} y2={oy + h} stroke="#333" strokeWidth={1} />
-            <line x1={ox} y1={oy + h} x2={ox + w} y2={oy + h} stroke="#333" strokeWidth={1} />
-            <text x={ox - 5} y={oy + 5} fontSize={8} fill="#666" textAnchor="end">φ</text>
-            <text x={ox + w / 2} y={oy + h + 15} fontSize={8} fill="#666" textAnchor="middle">t (jours)</text>
+            <line x1={ox} y1={oy} x2={ox} y2={oy + h} stroke="#64748B" strokeWidth={1} />
+            <line x1={ox} y1={oy + h} x2={ox + w} y2={oy + h} stroke="#64748B" strokeWidth={1} />
+            <text x={ox - 5} y={oy + 5} fontSize={8} fill="#94A3B8" textAnchor="end">φ</text>
+            <text x={ox + w / 2} y={oy + h + 15} fontSize={8} fill="#94A3B8" textAnchor="middle">t (jours)</text>
             {res && (() => {
               const phiMax = Math.max(res.phi_inf, res.phi_t_t0, 1);
               const sc = h / phiMax;

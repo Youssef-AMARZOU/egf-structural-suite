@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { RatioBar } from '../../components/common/RatioBar';
+import { RatioGauge } from '../../components/common/RatioGauge';
 import { PoteauLambdaminInputs, PoteauLambdaminOutput } from '../../types/engineering';
 
 export default function Module169() {
@@ -16,7 +16,7 @@ export default function Module169() {
   const S = (k: keyof PoteauLambdaminInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.is_second_order_x || res.is_second_order_y ? 'warn' : 'pass';
+  const status = err ? 'fail' : !res ? 'computing' : res.is_second_order_x || res.is_second_order_y ? 'warn' : 'pass';
 
   const slider = (
     key: keyof PoteauLambdaminInputs, label: string, unit: string,
@@ -46,16 +46,31 @@ export default function Module169() {
       }
       sketch={
         <div className="glass rounded-2xl p-5">
-          <div className="text-[15px] font-semibold mb-2">Élancement contre limite</div>
+          <div className="text-[15px] font-semibold mb-4">Élancement contre limite</div>
           {res ? (
-            <RatioBar
-              items={[
-                { name: 'λ', value: res.lambda_x, formula: 'élancement de calcul' },
-              ]}
-              threshold={res.lambda_min_x}
-              height={200}
-              decimals={1}
-            />
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[11px] text-slate-500 mb-1 text-center">Axe X</div>
+                  <RatioGauge eta={res.lambda_min_x > 0 ? res.lambda_x / res.lambda_min_x : 0} size={140} />
+                  <div className="text-center mt-1">
+                    <span className="font-mono text-[13px]">{res.lambda_x.toFixed(1)}</span>
+                    <span className="text-slate-500 text-[11px]"> / {res.lambda_min_x.toFixed(1)}</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] text-slate-500 mb-1 text-center">Axe Y</div>
+                  <RatioGauge eta={res.lambda_min_y > 0 ? res.lambda_y / res.lambda_min_y : 0} size={140} />
+                  <div className="text-center mt-1">
+                    <span className="font-mono text-[13px]">{res.lambda_y.toFixed(1)}</span>
+                    <span className="text-slate-500 text-[11px]"> / {res.lambda_min_y.toFixed(1)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-[11px] text-center text-slate-400 mt-2">
+                λ / λ<sub>min</sub> — seuil second ordre = 1.0
+              </div>
+            </>
           ) : (
             <div className="skel rounded-lg" style={{ height: 200 }} />
           )}

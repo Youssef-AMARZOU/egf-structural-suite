@@ -19,7 +19,7 @@ export default function Module237() {
     setInp((p) => ({ ...p, [k]: v }));
 
   const worst = res ? Math.max(res.ratio_m, res.ratio_v, res.ratio_f) : 0;
-  const status = !res ? 'computing' : worst > 1 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : worst > 1 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PlancherMetalliqueInputs, label: string, unit: string,

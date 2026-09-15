@@ -19,7 +19,7 @@ export default function Module217() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : ok ? 'pass' : 'fail';
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : ok ? 'pass' : 'fail';
   return (
     <Workstation
       title="Module 217 — Poutres au feu (analytique)"
@@ -77,7 +77,7 @@ export default function Module217() {
                 const beffW = Math.max(result.beff * sx, 4);
                 return (
                   <g>
-                    <rect x={x0} y={y0} width={W} height={H} fill="#DBEAFE" stroke="#333" strokeWidth={2} />
+                    <rect x={x0} y={y0} width={W} height={H} fill="#DBEAFE" stroke="#64748B" strokeWidth={2} />
                     <rect x={x0} y={y0 + H - a500y} width={W} height={a500y} fill="#EF4444" opacity={0.4} />
                     {inputs.faces === 3 && (
                       <>
@@ -87,7 +87,7 @@ export default function Module217() {
                     )}
                     <rect x={x0 + (W - beffW) / 2} y={y0} width={beffW} height={H - a500y} fill="none" stroke="#1D4ED8" strokeWidth={2} strokeDasharray="6,3" />
                     <line x1={x0 + 10} y1={y0 + H - inputs.a * sy} x2={x0 + W - 10} y2={y0 + H - inputs.a * sy} stroke="#F59E0B" strokeWidth={3} />
-                    <text x={200} y={y0 + H + 16} fontSize={10} fill="#333" textAnchor="middle">🔥 R{inputs.r} — beff={result.beff.toFixed(0)} mm</text>
+                    <text x={200} y={y0 + H + 16} fontSize={10} fill="#CBD5E1" textAnchor="middle">🔥 R{inputs.r} — beff={result.beff.toFixed(0)} mm</text>
                   </g>
                 );
               })()}
@@ -99,18 +99,18 @@ export default function Module217() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${ok ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'θs', value: res.theta_s.toFixed(0), unit: '°C', color: 'bg-blue-50' },
-              { label: 'ks', value: res.ks.toFixed(2), unit: '', color: 'bg-purple-50' },
-              { label: 'MRd,fi', value: res.m_rd_fi.toFixed(1), unit: 'kN·m', color: 'bg-orange-50' },
-              { label: 'beff', value: res.beff.toFixed(0), unit: 'mm', color: 'bg-gray-50' },
+              { label: 'θs', value: res.theta_s.toFixed(0), unit: '°C', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'ks', value: res.ks.toFixed(2), unit: '', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'MRd,fi', value: res.m_rd_fi.toFixed(1), unit: 'kN·m', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'beff', value: res.beff.toFixed(0), unit: 'mm', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -129,7 +129,7 @@ export default function Module217() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

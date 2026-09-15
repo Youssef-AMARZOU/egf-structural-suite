@@ -18,7 +18,7 @@ export default function Module159() {
   const S = (k: keyof PourcentageMiniNonFragiliteInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.is_ductile ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.is_ductile ? 'pass' : 'fail';
 
   const slider = (
     key: keyof PourcentageMiniNonFragiliteInputs, label: string, unit: string,

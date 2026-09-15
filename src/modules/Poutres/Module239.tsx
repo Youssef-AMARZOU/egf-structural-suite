@@ -19,7 +19,7 @@ export default function Module239() {
     setInp((p) => ({ ...p, [k]: v }));
 
   const worst = res ? Math.max(res.ratio_chord, res.ratio_diag, res.ratio_vert) : 0;
-  const status = !res ? 'computing' : worst > 1 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : worst > 1 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof TreillisVerifInputs, label: string, unit: string,

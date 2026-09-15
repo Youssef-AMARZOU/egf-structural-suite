@@ -1,69 +1,46 @@
 use serde::{Deserialize, Serialize};
 
 // Module 165 — Dalle bp evasion n pot
-// Slab strip analysis with matrix solver (Gaussian elimination)
+// Continuous slab strip: 3-moment equation solver
 // Clean-room reimplementation from EC2/BAEL. No VBA code copied.
 // Original author: Henry Thonier / EGF — copyright preserved.
 
-// ─── Gaussian elimination with partial pivoting ──────────────────
-
-fn gauss_eliminate(a: &mut Vec<Vec<f64>>) -> Result<Vec<f64>, String> {
-    let n = a.len();
+fn solve_tridiagonal(lower: &[f64], diag: &[f64], upper: &[f64], rhs: &[f64]) -> Result<Vec<f64>, String> {
+    let n = diag.len();
     if n == 0 { return Ok(vec![]); }
-    let cols = a[0].len();
-    if cols != n + 1 { return Err("Matrix must be n×(n+1)".into()); }
-
-    for i in 0..n {
-        // find pivot
-        let mut max_val = a[i][i].abs();
-        let mut max_row = i;
-        for k in (i + 1)..n {
-            if a[k][i].abs() > max_val {
-                max_val = a[k][i].abs();
-                max_row = k;
-            }
+    let mut a = diag.to_vec();
+    let mut b = rhs.to_vec();
+    let mut c = upper.to_vec();
+    let mut cp = vec![0.0; n];
+    if n > 0 { cp[0] = c[0] / a[0]; }
+    let mut bp = vec![0.0; n];
+    if n > 0 { bp[0] = b[0] / a[0]; }
+    for i in 1..n {
+        let m = lower[i - 1] / a[i - 1];
+        a[i] -= m * c[i - 1];
+        if a[i].abs() < 1e-14 {
+            a[i] = 1e-10;
         }
-        if max_val < 1e-14 {
-            return Err(format!("Singular matrix at row {}", i));
-        }
-        // swap rows
-        if max_row != i {
-            a.swap(i, max_row);
-        }
-        // eliminate below
-        for k in (i + 1)..n {
-            let factor = a[k][i] / a[i][i];
-            for j in i..cols {
-                a[k][j] -= factor * a[i][j];
-            }
-        }
+        b[i] -= m * b[i - 1];
+        c[i] -= m * c[i - 1];
+        cp[i] = c[i] / a[i];
+        bp[i] = b[i] / a[i];
     }
-
-    // back substitution
     let mut x = vec![0.0; n];
-    for i in (0..n).rev() {
-        x[i] = a[i][n];
-        for j in (i + 1)..n {
-            x[i] -= a[i][j] * x[j];
-        }
-        x[i] /= a[i][i];
+    x[n - 1] = bp[n - 1];
+    for i in (0..n - 1).rev() {
+        x[i] = bp[i] - cp[i] * x[i + 1];
     }
-
     Ok(x)
 }
 
-// ─── slab strip analysis (N-span continuous beam) ────────────────
-
-/// Analyze a continuous slab strip with N spans
-/// Input: span lengths, distributed loads, material/section properties, end moments
-/// Output: deflections, moments, shears, slopes at each support
 fn slab_strip_analysis(
     spans: &[f64],
     loads: &[f64],
     e_mod: f64,
-    h: f64,
+    _h: f64,
     inertia: &[f64],
-    section: &[f64],
+    _section: &[f64],
     pa: f64,
     pb: f64,
 ) -> Result<(Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>), String> {
@@ -71,68 +48,118 @@ fn slab_strip_analysis(
     if n == 0 { return Ok((vec![], vec![], vec![], vec![])); }
     if loads.len() < n { return Err("Need at least N loads".into()); }
     if inertia.len() < n { return Err("Need at least N inertias".into()); }
-    if section.len() < n { return Err("Need at least N sections".into()); }
 
-    // System size: 3N unknowns
-    // x[0..N-1] = deflections at supports
-    // x[N..2N-1] = moments at supports
-    // x[2N..3N-1] = slopes at mid-spans
-    let sz = 3 * n;
-    let mut a = vec![vec![0.0; sz + 1]; sz];
+    let mut moments = vec![0.0; n + 1];
+    moments[0] = pa;
+    moments[n] = pb;
 
-    // Row 1..N: deflection equations: δ_i = -H³/(3·E·I_i) · P_i
-    for i in 0..n {
-        a[i][i] = 1.0;
-        a[i][n + i] = -spans[i].powi(3) / 3.0 / e_mod / inertia[i];
+    if n >= 2 {
+        let sys_n = n - 1;
+        let mut diag = vec![0.0; sys_n];
+        let mut lower = vec![0.0; sys_n];
+        let mut upper = vec![0.0; sys_n];
+        let mut rhs = vec![0.0; sys_n];
+
+        for i in 0..sys_n {
+            let s_left = spans[i];
+            let s_right = spans[i + 1];
+            let ei_left = e_mod * inertia[i];
+            let ei_right = e_mod * inertia[i + 1];
+
+            diag[i] = 2.0 * (s_left / ei_left + s_right / ei_right);
+            if i > 0 {
+                lower[i - 1] = s_left / ei_left;
+            }
+            if i < sys_n - 1 {
+                upper[i] = s_right / ei_right;
+            }
+
+            let q_left = loads[i];
+            let q_right = loads[i + 1];
+            let mut r = -q_left * s_left.powi(3) / (4.0 * ei_left)
+                - q_right * s_right.powi(3) / (4.0 * ei_right);
+
+            if i == 0 {
+                r -= pa * s_left / ei_left;
+            }
+            if i == sys_n - 1 {
+                r -= pb * s_right / ei_right;
+            }
+            rhs[i] = r;
+        }
+
+        let interior = solve_tridiagonal(&lower, &diag, &upper, &rhs)?;
+        for i in 0..sys_n {
+            moments[i + 1] = interior[i];
+        }
     }
 
-    // Row N+1: boundary at first support
-    a[n][n] = 1.0;
-    a[n][2 * n] = 1.0;
-    a[n][sz] = pa;
-
-    // Row N+2..2N-1: moment equilibrium
-    for i in 1..(n - 1) {
-        a[n + i][n + i] = -1.0;
-        a[n + i][2 * n + i - 1] = 1.0;
-        a[n + i][2 * n + i] = -1.0;
-    }
-
-    // Row 2N: boundary at last support
-    a[2 * n - 1][2 * n - 1] = -1.0;
-    a[2 * n - 1][3 * n - 2] = 1.0;
-    a[2 * n - 1][sz] = pb;
-
-    // Row 2N+1..3N: slope compatibility
-    for i in 0..(n - 1) {
-        a[2 * n + i][i] = -1.0;
-        a[2 * n + i][i + 1] = 1.0;
-        a[2 * n + i][2 * n + i] = spans[i] / e_mod / section[i];
-    }
-
-    let x = gauss_eliminate(&mut a)?;
-
-    let deflections: Vec<f64> = x[0..n].to_vec();
-    let moments: Vec<f64> = x[n..2 * n].to_vec();
-    let slopes: Vec<f64> = x[2 * n..3 * n].to_vec();
-
-    // Compute shears from moments and loads
     let mut shears = Vec::with_capacity(n);
     for i in 0..n {
-        let vi = if i == 0 {
-            loads[i] * spans[i] / 2.0 + (moments[i + 1] - moments[i]) / spans[i]
-        } else if i == n - 1 {
-            -loads[i] * spans[i] / 2.0 + (moments[i] - moments[i - 1]) / spans[i]
+        let vi_left = loads[i] * spans[i] / 2.0 + (moments[i + 1] - moments[i]) / spans[i];
+        shears.push(vi_left);
+    }
+
+    let mut deflections: Vec<f64> = vec![0.0; n + 1];
+    for i in 0..n {
+        let q = loads[i];
+        let l = spans[i];
+        let ei = e_mod * inertia[i];
+        let m_i = moments[i];
+        let m_ip1 = moments[i + 1];
+        let n_pts = 20;
+        for j in 0..=n_pts {
+            let frac = j as f64 / n_pts as f64;
+            let x = frac * l;
+            let y: f64 =
+                q * x * (l * l - x * x) / (24.0 * ei)
+                + m_i * x * (l - x) / (6.0 * ei * l)
+                + m_ip1 * x * (l - x) * (x + l) / (6.0 * ei * l * l);
+            let y_abs: f64 = y.abs();
+            if y_abs > deflections[i].abs() {
+                deflections[i] = y;
+            }
+            if y_abs > deflections[i + 1].abs() {
+                deflections[i + 1] = y;
+            }
+        }
+    }
+
+    let mut slopes = Vec::with_capacity(n + 1);
+    for i in 0..=n {
+        if i == 0 {
+            let l = spans[0];
+            let ei = e_mod * inertia[0];
+            slopes.push(
+                loads[0] * l * l * l / (24.0 * ei)
+                + moments[0] * l / (3.0 * ei)
+                + moments[1] * l / (6.0 * ei)
+            );
+        } else if i == n {
+            let l = spans[n - 1];
+            let ei = e_mod * inertia[n - 1];
+            slopes.push(
+                -(loads[n - 1] * l * l * l / (24.0 * ei)
+                + moments[n] * l / (3.0 * ei)
+                + moments[n - 1] * l / (6.0 * ei))
+            );
         } else {
-            loads[i] * spans[i] / 2.0 + (moments[i + 1] - 2.0 * moments[i] + moments[i - 1]) / spans[i]
-        };
-        shears.push(vi);
+            let l_left = spans[i - 1];
+            let ei_left = e_mod * inertia[i - 1];
+            let l_right = spans[i];
+            let ei_right = e_mod * inertia[i];
+            let sl = -(loads[i - 1] * l_left * l_left / (24.0 * ei_left)
+                + moments[i] * l_left / (3.0 * ei_left)
+                + moments[i - 1] * l_left / (6.0 * ei_left));
+            let sr = loads[i] * l_right * l_right / (24.0 * ei_right)
+                + moments[i] * l_right / (3.0 * ei_right)
+                + moments[i + 1] * l_right / (6.0 * ei_right);
+            slopes.push((sl + sr) / 2.0);
+        }
     }
 
     Ok((deflections, moments, shears, slopes))
 }
-
-// ─── inputs / outputs ────────────────────────────────────────────
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DalleBpEvasionNPotInputs {
@@ -158,8 +185,6 @@ pub struct DalleBpEvasionNPotOutput {
     pub verdict: String,
 }
 
-// ─── command ──────────────────────────────────────────────────────
-
 #[tauri::command]
 pub fn calculate_dalle_bp_evasion_n_pot_165(
     p: DalleBpEvasionNPotInputs,
@@ -167,15 +192,13 @@ pub fn calculate_dalle_bp_evasion_n_pot_165(
     if p.spans.is_empty() {
         return Err("au moins une travée requise".to_string());
     }
-    // Span count bounds the O(n²) system matrix.
-    if p.spans.len() > 500 {
-        return Err("trop de travées (500 max)".to_string());
+    if p.spans.len() > 200 {
+        return Err("trop de travées (200 max)".to_string());
     }
     let n = p.spans.len();
 
-    // Default inertia and section if not provided
     let inertia: Vec<f64> = if p.inertia.is_empty() {
-        (0..n).map(|i| p.H.powi(3) / 12.0 * if i < p.spans.len() { p.spans[i] } else { 1.0 }).collect()
+        (0..n).map(|i| p.H.powi(3) / 12.0 * p.spans[i]).collect()
     } else {
         p.inertia.clone()
     };
@@ -194,15 +217,14 @@ pub fn calculate_dalle_bp_evasion_n_pot_165(
 
     let mut diag = Vec::new();
     diag.push(format!("{} travées, E = {:.0} MPa, h = {:.0} mm", n, p.E, p.H));
-    diag.push(format!("Travées: {}", p.spans.iter().map(|s| format!("{:.1}", s)).collect::<Vec<_>>().join(", ")));
-    diag.push(format!("Charges: {}", p.loads.iter().map(|l| format!("{:.2}", l)).collect::<Vec<_>>().join(", ")));
-    diag.push(format!("Déflection max = {:.4} mm", max_deflection * 1000.0));
+    diag.push(format!("Travées: {}", p.spans.iter().map(|s| format!("{:.1} m", s)).collect::<Vec<_>>().join(", ")));
+    diag.push(format!("Charges: {}", p.loads.iter().map(|l| format!("{:.3} MN/m²", l)).collect::<Vec<_>>().join(", ")));
+    diag.push(format!("Déflection max = {:.4} mm", max_deflection));
     diag.push(format!("Moment max = {:.2} kN·m", max_moment));
-    diag.push(format!("Efforts tranchants: {}", shears.iter().map(|s| format!("{:.1}", s)).collect::<Vec<_>>().join(", ")));
 
     let verdict = format!(
-        "Analyse matrix: {} inconnues, δ_max = {:.2} mm, M_max = {:.1} kN·m",
-        3 * n, max_deflection * 1000.0, max_moment
+        "3-moment: {} travées, δ_max = {:.3} mm, M_max = {:.1} kN·m",
+        n, max_deflection, max_moment
     );
 
     Ok(DalleBpEvasionNPotOutput {

@@ -100,7 +100,7 @@ export const SectionCanvas: React.FC<SectionCanvasProps> = ({
     <div className={`relative ${className}`}>
       {title && (
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs font-semibold text-slate-500">{title}</span>
+          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">{title}</span>
           {probe && (
             <span className="hud-chip">
               x {probe[0].toFixed(1)} · y {probe[1].toFixed(1)}
@@ -119,15 +119,15 @@ export const SectionCanvas: React.FC<SectionCanvasProps> = ({
       >
         <defs>
           <pattern id={`g-${gid}`} width={grid} height={grid} patternUnits="userSpaceOnUse">
-            <path d={`M ${grid} 0 L 0 0 0 ${grid}`} fill="none" stroke="currentColor" strokeWidth={0.7} className="text-slate-400/25 dark:text-white/15" />
+            <path d={`M ${grid} 0 L 0 0 0 ${grid}`} fill="none" stroke="currentColor" strokeWidth={0.8} className="text-slate-300/30 dark:text-white/20" />
           </pattern>
           {gridMinor > 0 && (
             <pattern id={`gm-${gid}`} width={gridMinor} height={gridMinor} patternUnits="userSpaceOnUse">
-              <path d={`M ${gridMinor} 0 L 0 0 0 ${gridMinor}`} fill="none" stroke="currentColor" strokeWidth={0.35} className="text-slate-400/10 dark:text-white/5" />
+              <path d={`M ${gridMinor} 0 L 0 0 0 ${gridMinor}`} fill="none" stroke="currentColor" strokeWidth={0.4} className="text-slate-300/15 dark:text-white/8" />
             </pattern>
           )}
         </defs>
-        <rect x={vb.x} y={vb.y} width={vb.w} height={vb.h} fill="#070A0F" />
+        <rect x={vb.x} y={vb.y} width={vb.w} height={vb.h} fill="#0B1020" />
         {gridMinor > 0 && (
           <rect x={vb.x} y={vb.y} width={vb.w} height={vb.h} fill={`url(#gm-${gid})`} />
         )}

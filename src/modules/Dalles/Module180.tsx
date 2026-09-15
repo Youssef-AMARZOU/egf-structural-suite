@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { DallesRotPlastMethGeneV4Inputs, DallesRotPlastMethGeneV4Output } from '../../types/engineering';
 
 export default function Module180() {
@@ -28,7 +28,7 @@ export default function Module180() {
     'calculate_dalles_rot_plast_meth_gene_v4_180', payload,
   );
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const mom = (() => {
     if (!res || res.moments_appuis.length - 1 <= 0) return null;
@@ -88,31 +88,64 @@ export default function Module180() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Diagramme de moments" vbW={600} vbH={200}>
-            {res && mom ? (
-              <>
-                {res.moments_appuis.map((_, i) => (
-                  <g key={`sup-${i}`}>
-                    <polygon points={`${mom.ox + i * mom.spanW - 6},${mom.zeroY + 8} ${mom.ox + i * mom.spanW + 6},${mom.zeroY + 8} ${mom.ox + i * mom.spanW},${mom.zeroY}`}
-                      fill="#94A3B8" stroke="#333" strokeWidth={0.5} />
-                    <text x={mom.ox + i * mom.spanW} y={mom.zeroY + 20} fontSize={8} fill="#333" textAnchor="middle">A{i + 1}</text>
-                  </g>
-                ))}
-                <line x1={mom.ox} y1={mom.zeroY} x2={mom.ox + mom.w} y2={mom.zeroY} stroke="#ccc" strokeWidth={0.5} />
-                <DiagramOverlay type="moment" points={mom.pts} />
-                {res.moments_appuis.map((m, i) => (
-                  <text key={`mv-${i}`} x={mom.ox + i * mom.spanW} y={mom.zeroY - m * mom.sc - 5}
-                    fontSize={8} fill="#EF4444" textAnchor="middle">{m.toFixed(0)}</text>
-                ))}
-                {res.moments_travee.map((m, i) => (
-                  <text key={`mt-${i}`} x={mom.ox + (i + 0.5) * mom.spanW} y={mom.zeroY - m * mom.sc - 5}
-                    fontSize={8} fill="#22C55E" textAnchor="middle">{m.toFixed(0)}</text>
-                ))}
-                <text x={mom.ox + mom.w / 2} y={mom.oy + mom.h + 30} fontSize={10} fill="#666" textAnchor="middle">
-                  M (kN·m)
-                </text>
-              </>
-            ) : (
-              <text x={300} y={100} fontSize={12} fill="#666" textAnchor="middle">
+            {res && mom ? (() => {
+              const actualLn = pick(parseList(txt.tLn), inp.tLn);
+              const totalL = actualLn.reduce((a: number, b: number) => a + b, 0);
+              const xVals = actualLn.reduce<number[]>((acc, l) => [...acc, acc[acc.length - 1] + l], [0]);
+              const allM = [...res.moments_appuis, ...res.moments_travee];
+              const yMin = Math.min(...allM);
+              const yMax = Math.max(...allM);
+              const yVals = [...new Set([yMin, 0, yMax])].sort((a, b) => a - b)
+                .filter((v, i, a) => i === 0 || Math.abs((a[i - 1] * mom.sc) - (v * mom.sc)) >= 15);
+              return (
+                <>
+                  {res.moments_appuis.map((_, i) => (
+                    <g key={`sup-${i}`}>
+                      <polygon points={`${mom.ox + i * mom.spanW - 6},${mom.zeroY + 8} ${mom.ox + i * mom.spanW + 6},${mom.zeroY + 8} ${mom.ox + i * mom.spanW},${mom.zeroY}`}
+                        fill="#94A3B8" stroke="#64748B" strokeWidth={0.5} />
+                      <text x={mom.ox + i * mom.spanW} y={mom.zeroY + 20} fontSize={8} fill="#CBD5E1" textAnchor="middle">A{i + 1}</text>
+                    </g>
+                  ))}
+                  <line x1={mom.ox} y1={mom.zeroY} x2={mom.ox + mom.w} y2={mom.zeroY} stroke="#ccc" strokeWidth={0.5} />
+                  <DiagramOverlay type="moment" points={mom.pts} />
+                  {res.moments_appuis.map((m, i) => (
+                    <text key={`mv-${i}`} x={mom.ox + i * mom.spanW} y={mom.zeroY - m * mom.sc - 5}
+                      fontSize={8} fill="#EF4444" textAnchor="middle">{m.toFixed(0)}</text>
+                  ))}
+                  {res.moments_travee.map((m, i) => (
+                    <text key={`mt-${i}`} x={mom.ox + (i + 0.5) * mom.spanW} y={mom.zeroY - m * mom.sc - 5}
+                      fontSize={8} fill="#22C55E" textAnchor="middle">{m.toFixed(0)}</text>
+                  ))}
+                  <AxisTicks
+                    origin={[mom.ox, mom.zeroY + 30]}
+                    end={[mom.ox + mom.w, mom.zeroY + 30]}
+                    values={xVals}
+                    map={(v) => [mom.ox + (v / totalL) * mom.w, mom.zeroY + 30]}
+                    unit="m"
+                    side="below"
+                    decimals={1}
+                  />
+                  <AxisTicks
+                    origin={[mom.ox, mom.zeroY - mom.h * 0.7]}
+                    end={[mom.ox, mom.zeroY + mom.h * 0.3]}
+                    values={yVals}
+                    map={(v) => [mom.ox, mom.zeroY - v * mom.sc]}
+                    unit="kN·m"
+                    side="left"
+                    decimals={0}
+                  />
+                  <InlineLegend
+                    items={[
+                      { label: 'Moments appuis', color: '#EF4444' },
+                      { label: 'Moments travée', color: '#22C55E' },
+                    ]}
+                    x={mom.ox + mom.w - 140}
+                    y={mom.zeroY - mom.h * 0.7}
+                  />
+                </>
+              );
+            })() : (
+              <text x={300} y={100} fontSize={12} fill="#94A3B8" textAnchor="middle">
                 {res ? 'Données insuffisantes' : 'computing…'}
               </text>
             )}

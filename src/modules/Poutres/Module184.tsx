@@ -28,7 +28,7 @@ export default function Module184() {
   const S = (k: keyof TraveeChargesQQInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof TraveeChargesQQInputs, label: string, unit: string,

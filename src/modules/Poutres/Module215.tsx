@@ -17,7 +17,7 @@ export default function Module215() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : verdictStatus(res.verdict);
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
   return (
     <Workstation
       title="Module 215 — Poutres croisées"
@@ -67,9 +67,9 @@ export default function Module215() {
               <text x={200} y={112} fontSize={10} fill="#fff" textAnchor="middle">Q</text>
               <text x={110} y={110} fontSize={11} fill="#1D4ED8">QA={result.qa_pt.toFixed(0)}</text>
               <text x={215} y={70} fontSize={11} fill="#7C3AED">QB={result.qb_pt.toFixed(0)}</text>
-              <text x={40} y={140} fontSize={10} fill="#333">La={inputs.la} m</text>
-              <text x={300} y={225} fontSize={10} fill="#333">Lb={inputs.lb} m</text>
-              <text x={200} y={228} fontSize={10} fill="#333" textAnchor="middle">y={result.y.toFixed(1)} mm</text>
+              <text x={40} y={140} fontSize={10} fill="#CBD5E1">La={inputs.la} m</text>
+              <text x={300} y={225} fontSize={10} fill="#CBD5E1">Lb={inputs.lb} m</text>
+              <text x={200} y={228} fontSize={10} fill="#CBD5E1" textAnchor="middle">y={result.y.toFixed(1)} mm</text>
             </>);
     })()}
   </SectionCanvas>
@@ -78,18 +78,18 @@ export default function Module215() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 text-green-800' : status === 'fail' ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : status === 'fail' ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'QA', value: res.qa_pt.toFixed(1), unit: 'kN', color: 'bg-blue-50' },
-              { label: 'QB', value: res.qb_pt.toFixed(1), unit: 'kN', color: 'bg-purple-50' },
-              { label: 'MA / MB', value: `${res.m_a.toFixed(0)} / ${res.m_b.toFixed(0)}`, unit: 'kN·m', color: 'bg-orange-50' },
-              { label: 'y', value: res.y.toFixed(1), unit: 'mm', color: 'bg-gray-50' },
+              { label: 'QA', value: res.qa_pt.toFixed(1), unit: 'kN', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'QB', value: res.qb_pt.toFixed(1), unit: 'kN', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'MA / MB', value: `${res.m_a.toFixed(0)} / ${res.m_b.toFixed(0)}`, unit: 'kN·m', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'y', value: res.y.toFixed(1), unit: 'mm', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default function Module215() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

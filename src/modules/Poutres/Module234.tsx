@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DimensionLine, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DimensionLine, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { PoutreContinue2travInputs, PoutreContinue2travOutput } from '../../types/engineering';
 
 export default function Module234() {
@@ -16,7 +16,7 @@ export default function Module234() {
   const S = (k: keyof PoutreContinue2travInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PoutreContinue2travInputs, label: string, unit: string,
@@ -100,6 +100,24 @@ export default function Module234() {
                 </text>
                 <DimensionLine x1={env.X(0)} y1={70} x2={env.X(inp.l1)} y2={70} offset={-46} text={`L1=${inp.l1}`} />
                 <DimensionLine x1={env.X(inp.l1)} y1={70} x2={env.X(L)} y2={70} offset={-46} text={`L2=${inp.l2}`} />
+                {(() => {
+                  const mMax = Math.max(res.m_trav1, res.m_trav2, -res.m_appui, 1);
+                  const mapX = (v: number) => [30 + (v / L) * 340, 0] as [number, number];
+                  const mapY = (v: number) => [0, 70 + (v / mMax) * 80] as [number, number];
+                  const xValues = [0, inp.l1 / 2, inp.l1, inp.l1 + inp.l2 / 2, L];
+                  const yRange = mMax;
+                  const rawStep = yRange / 3;
+                  const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+                  const step = Math.ceil(rawStep / mag) * mag;
+                  const yValues: number[] = [];
+                  for (let v = -Math.ceil(yRange / step) * step; v <= yRange + step * 0.01; v += step) yValues.push(+v.toFixed(1));
+                  return (
+                    <>
+                      <AxisTicks values={xValues} map={mapX} unit="m" side="below" decimals={1} />
+                      <AxisTicks values={yValues} map={mapY} unit="kN·m" side="left" decimals={0} />
+                    </>
+                  );
+                })()}
               </>
             ) : (
               <text x={200} y={100} fontSize={11} fill="#94a3b8" textAnchor="middle">

@@ -14,7 +14,7 @@ interface DimensionLineProps {
 
 /** Civil-engineering dimensioning: extension lines, arrows, centered text. */
 export const DimensionLine: React.FC<DimensionLineProps> = ({
-  x1, y1, x2, y2, offset = 14, text, color = '#94a3b8', fontSize = 10, vertical = false, ticks = 'arrow',
+  x1, y1, x2, y2, offset = 14, text, color = '#94a3b8', fontSize = 11, vertical = false, ticks = 'arrow',
 }) => {
   const dx = x2 - x1;
   const dy = y2 - y1;

@@ -30,7 +30,7 @@ export default function Module158() {
   const maxPhi = res ? res.phi_0 * 1.2 || 1 : 1;
   const markerX = 100 + Math.max(0, Math.min(1, (Math.log10(inp.t) / Math.log10(100000) - 0.07) / 0.93)) * 400;
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof FluageRetraitInputs, label: string, unit: string,

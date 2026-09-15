@@ -4,7 +4,7 @@ import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
 import {
-  SectionCanvas, DimensionLine, RebarGroup, DiagramOverlay,
+  SectionCanvas, DimensionLine, RebarGroup, DiagramOverlay, AxisTicks, InlineLegend,
 } from '../../components/drafting';
 import { InteractionMFeuCircInputs, InteractionMFeuCircOutput } from '../../types/engineering';
 
@@ -19,7 +19,7 @@ export default function Module220() {
   const S = (k: keyof InteractionMFeuCircInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.ratio > 1 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio > 1 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof InteractionMFeuCircInputs, label: string, unit: string,
@@ -82,9 +82,41 @@ export default function Module220() {
             <SectionCanvas title="Courbe d'interaction N-M" vbW={200} vbH={260}>
               {curve ? (
                 <>
+                  <line x1={30} y1={15} x2={30} y2={235} stroke="#64748B" strokeWidth={1} />
+                  <line x1={30} y1={235} x2={180} y2={235} stroke="#64748B" strokeWidth={1} />
                   <DiagramOverlay type="moment" points={curve.pts} />
                   <circle cx={curve.ox} cy={curve.oy} r={5} fill={status === 'fail' ? '#EF4444' : '#22C55E'} />
+                  <text x={3} y={125} fontSize={9} fill="#94a3b8" textAnchor="middle" transform="rotate(-90 3 125)">N (kN)</text>
+                  {(() => {
+                    const mMax = Math.max(...res!.curve_m, inp.m_ed_fi, 1);
+                    const nMax = Math.max(...res!.curve_n, inp.n_ed_fi, 1);
+                    const nMin = Math.min(...res!.curve_n, 0);
+                    return (
+                      <>
+                        <AxisTicks
+                          values={[0, mMax / 2, mMax]}
+                          map={(v) => [30 + (v / mMax) * 150, 235]}
+                          unit="kN·m"
+                          side="below"
+                        />
+                        <AxisTicks
+                          values={[nMin, 0, nMax]}
+                          map={(v) => [30, 15 + (1 - (v - nMin) / (nMax - nMin)) * 220]}
+                          unit="kN"
+                          side="left"
+                        />
+                      </>
+                    );
+                  })()}
                   <text x={10} y={250} fontSize={9} fill="#94a3b8">M→</text>
+                  <InlineLegend
+                    items={[
+                      { label: 'Courbe N-M', color: '#3B82F6' },
+                      { label: '(MEd, NEd)', color: status === 'fail' ? '#EF4444' : '#22C55E' },
+                    ]}
+                    x={75}
+                    y={5}
+                  />
                 </>
               ) : (
                 <text x={100} y={130} fontSize={10} fill="#94a3b8" textAnchor="middle">computing…</text>
@@ -99,9 +131,6 @@ export default function Module220() {
                   <circle cx={RCX} cy={RCY} r={rResPx} fill="#DBEAFE" opacity={0.5} stroke="#1D4ED8" strokeWidth={2} />
                   <RebarGroup bars={bars} pxPerMm={pxPerMm} />
                   <DimensionLine x1={RCX} y1={RCY} x2={RCX + rResPx} y2={RCY} offset={-14} text={`D rés.=${res.d_res.toFixed(0)}`} />
-                  <text x={RCX} y={RCY + RR + 14} fontSize={9} fill="#94a3b8" textAnchor="middle">
-                    D rés.={res.d_res.toFixed(0)} mm
-                  </text>
                 </>
               )}
             </SectionCanvas>

@@ -25,7 +25,7 @@ export default function Module128() {
   const S = (k: keyof EffTrReprBetonInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof EffTrReprBetonInputs, label: string, unit: string,

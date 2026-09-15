@@ -105,7 +105,7 @@ export default function Module107() {
       ]
     : [];
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof Slab107Inputs, label: string, unit: string,

@@ -16,7 +16,7 @@ export default function Module194() {
   const S = (k: keyof CarottesEN13791Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof CarottesEN13791Inputs, label: string, unit: string,

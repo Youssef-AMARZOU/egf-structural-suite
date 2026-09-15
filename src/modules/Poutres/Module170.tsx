@@ -17,7 +17,7 @@ export default function Module170() {
   const S = (k: keyof DescDeChargesInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof DescDeChargesInputs, label: string, unit: string,
@@ -70,8 +70,8 @@ export default function Module170() {
                     return (
                       <g key={i}>
                         <rect x={x} y={oy + h - bh} width={barW} height={bh} fill={b.color} rx={3} />
-                        <text x={x + barW / 2} y={oy + h + 14} fontSize={9} fill="#666" textAnchor="middle">{b.label}</text>
-                        <text x={x + barW / 2} y={oy + h - bh - 5} fontSize={9} fill="#333" textAnchor="middle">
+                        <text x={x + barW / 2} y={oy + h + 14} fontSize={9} fill="#94A3B8" textAnchor="middle">{b.label}</text>
+                        <text x={x + barW / 2} y={oy + h - bh - 5} fontSize={9} fill="#CBD5E1" textAnchor="middle">
                           {b.val.toFixed(2)}
                         </text>
                       </g>

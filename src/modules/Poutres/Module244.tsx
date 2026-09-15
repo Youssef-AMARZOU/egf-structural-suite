@@ -19,7 +19,7 @@ export default function Module244() {
     'calculate_portique_cross_244', payload,
   );
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
   const nNodes = parsePairs(text.nodes)[0].length;
 
   return (

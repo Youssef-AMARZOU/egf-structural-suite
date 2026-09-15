@@ -27,7 +27,7 @@ export default function Module149() {
   const S = (k: keyof NFilesOuvertures3Inputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio_s <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio_s <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof NFilesOuvertures3Inputs, label: string, unit: string,

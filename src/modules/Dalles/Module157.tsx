@@ -29,7 +29,7 @@ export default function Module157() {
   })() : [];
   const steelX = 100 + (inp.d * 1000 / (inp.h * 1000)) * 400;
 
-  const status = !res ? 'computing'
+  const status = err ? 'fail' : !res ? 'computing'
     : res.ratio_inf > 1.0 || res.ratio_sup > 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
@@ -90,13 +90,13 @@ export default function Module157() {
             {[0, 200, 400, 600, 800, 1000, 1200].map((t, i) => (
               <g key={i}>
                 <line x1={95} y1={190 - (t / 1200) * 180} x2={100} y2={190 - (t / 1200) * 180} stroke="#ccc" />
-                <text x={90} y={194 - (t / 1200) * 180} fontSize={9} fill="#999" textAnchor="end">{t}</text>
+                <text x={90} y={194 - (t / 1200) * 180} fontSize={9} fill="#94A3B8" textAnchor="end">{t}</text>
               </g>
             ))}
             {[0, 50, 100, 150, 200].map((d, i) => (
               <g key={i}>
                 <line x1={100 + (d / (inp.h * 1000)) * 400} y1={190} x2={100 + (d / (inp.h * 1000)) * 400} y2={195} stroke="#ccc" />
-                <text x={100 + (d / (inp.h * 1000)) * 400} y={208} fontSize={9} fill="#999" textAnchor="middle">{d}</text>
+                <text x={100 + (d / (inp.h * 1000)) * 400} y={208} fontSize={9} fill="#94A3B8" textAnchor="middle">{d}</text>
               </g>
             ))}
           </SectionCanvas>

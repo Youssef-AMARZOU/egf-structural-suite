@@ -3,9 +3,9 @@ import React from 'react';
 export type DiagramKind = 'moment' | 'shear' | 'deflection';
 
 const COLORS: Record<DiagramKind, string> = {
-  moment: '#3b82f6',
-  shear: '#f59e0b',
-  deflection: '#8b5cf6',
+  moment: '#60A5FA',
+  shear: '#FBBF24',
+  deflection: '#A78BFA',
 };
 
 interface DiagramOverlayProps {
@@ -39,7 +39,7 @@ export function toPath(pts: [number, number][]): string {
 
 /** Smooth spline overlay for moment / shear / deflection diagrams. */
 export const DiagramOverlay: React.FC<DiagramOverlayProps> = ({
-  type, points, strokeWidth = 2, fill = false, color, zeroY, closeX,
+  type, points, strokeWidth = 2.5, fill = false, color, zeroY, closeX,
 }) => {
   const c = color ?? COLORS[type];
   const d = toPath(points);
@@ -50,8 +50,8 @@ export const DiagramOverlay: React.FC<DiagramOverlayProps> = ({
       : null;
   return (
     <g>
-      {closed && <path d={closed} fill={c} opacity={0.15} stroke="none" />}
-      <path d={d} fill="none" stroke={c} strokeWidth={strokeWidth} strokeLinejoin="round" />
+      {closed && <path d={closed} fill={c} opacity={0.2} stroke="none" />}
+      <path d={d} fill="none" stroke={c} strokeWidth={strokeWidth} strokeLinejoin="round" strokeLinecap="round" />
     </g>
   );
 };

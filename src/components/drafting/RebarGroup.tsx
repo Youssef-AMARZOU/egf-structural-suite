@@ -13,19 +13,19 @@ interface RebarGroupProps {
 
 /** High-visibility rebar cross-sections with diameter tooltips. */
 export const RebarGroup: React.FC<RebarGroupProps> = ({
-  bars, pxPerMm, fill = '#22c55e', stroke = '#15803d', showLabels = false,
+  bars, pxPerMm, fill = '#34D399', stroke = '#059669', showLabels = false,
 }) => (
   <g>
     {bars.map((b, i) => {
-      const r = Math.max(2, (b.phi / 2) * pxPerMm);
+      const r = Math.max(3, (b.phi / 2) * pxPerMm);
       return (
         <g key={i}>
-          <circle cx={b.x} cy={b.y} r={r} fill={fill} stroke={stroke} strokeWidth={1}>
+          <circle cx={b.x} cy={b.y} r={r} fill={fill} stroke={stroke} strokeWidth={1.2}>
             <title>{`φ${b.phi} mm`}</title>
           </circle>
-          <circle cx={b.x - r * 0.25} cy={b.y - r * 0.25} r={r * 0.28} fill="#ffffff" opacity={0.55} />
+          <circle cx={b.x - r * 0.25} cy={b.y - r * 0.25} r={r * 0.3} fill="#ffffff" opacity={0.45} />
           {showLabels && (
-            <text x={b.x + r + 2} y={b.y + 3} fontSize={8} fill={fill}>
+            <text x={b.x + r + 3} y={b.y + 3} fontSize={9} fill={fill} fontWeight="bold">
               {`φ${b.phi}`}
             </text>
           )}

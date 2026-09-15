@@ -53,7 +53,7 @@ export default function Module101() {
   const nBot = Math.max(2, Math.round((inp.asc * 100) / BAR_AREA));
   const nTop = Math.max(2, Math.round((inp.ast * 100) / BAR_AREA));
 
-  const status = !res ? 'computing' : res.length > 0 ? 'pass' : 'computing';
+  const status = err ? 'fail' : !res ? 'computing' : res.length > 0 ? 'pass' : 'computing';
 
   return (
     <Workstation

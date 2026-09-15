@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DimensionLine } from '../../components/drafting';
+import { SectionCanvas, DimensionLine, InlineLegend } from '../../components/drafting';
 import { DalleBpArmPassivEc2Inputs, DalleBpArmPassivEc2Output } from '../../types/engineering';
 
 export default function Module166() {
@@ -18,7 +18,7 @@ export default function Module166() {
   const S = (k: keyof DalleBpArmPassivEc2Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing'
+  const status = err ? 'fail' : !res ? 'computing'
     : /KO|non/i.test(res.verdict) ? 'fail'
     : /OK/i.test(res.verdict) ? 'pass' : verdictStatus(res.verdict);
 
@@ -29,12 +29,11 @@ export default function Module166() {
     <ParamSlider label={label} unit={unit} value={inp[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
 
-  const sc = 0.08;
-  const ox = 100, oy = 10;
+  const sc = 0.18;
+  const ox = 60, oy = 15;
   const bw = inp.b * sc;
-  const bh = inp.h * sc;
+  const bh = Math.max(40, inp.h * sc);
   const dY = inp.d * sc;
-  const e0Y = inp.e0 * sc;
 
   return (
     <Workstation
@@ -68,29 +67,38 @@ export default function Module166() {
       }
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <SectionCanvas title="Section — aciers" vbW={400} vbH={134} scaleLabel="dalle précontrainte">
-            <rect x={ox} y={oy} width={bw} height={bh} fill="#6366F1" opacity={0.22} stroke="#818CF8" strokeWidth={1.4} />
-            <line x1={ox} y1={oy + bh / 2} x2={ox + bw} y2={oy + bh / 2} stroke="#64748B" strokeWidth={0.7} strokeDasharray="2,2" />
-            <text x={ox - 8} y={oy + bh / 2 + 3} fontSize={8} fill="#64748B" textAnchor="end">axe</text>
-            <line x1={ox} y1={oy + dY} x2={ox + bw} y2={oy + dY} stroke="#22C55E" strokeWidth={1.2} strokeDasharray="4,4" />
-            <text x={ox - 8} y={oy + dY + 3} fontSize={9} fill="#22C55E" fontWeight="bold" textAnchor="end">d</text>
+          <SectionCanvas title="Section — aciers" vbW={420} vbH={180} scaleLabel="dalle précontrainte">
+            <rect x={ox} y={oy} width={bw} height={bh} fill="#E2E8F0" stroke="#64748B" strokeWidth={1.5} rx={2} />
+            <line x1={ox} y1={oy + bh / 2} x2={ox + bw} y2={oy + bh / 2} stroke="#475569" strokeWidth={0.6} strokeDasharray="3 2" />
+            <text x={ox - 6} y={oy + bh / 2 + 3} fontSize={8} fill="#94A3B8" textAnchor="end">NA</text>
+            <line x1={ox} y1={oy + dY} x2={ox + bw} y2={oy + dY} stroke="#22C55E" strokeWidth={1.2} strokeDasharray="5 3" />
+            <text x={ox - 6} y={oy + dY + 3} fontSize={9} fill="#22C55E" fontWeight="bold" textAnchor="end">d</text>
+            {res && res.as2 > 0 && (
+              <rect x={ox + 8} y={oy + dY - 3} width={Math.max(12, bw - 16)} height={5} fill="#EF4444" rx={2} />
+            )}
             {Math.abs(inp.e0) >= 5 && (
               <>
-                <line x1={ox + bw + 18} y1={oy + bh / 2} x2={ox + bw + 18} y2={oy + bh / 2 + e0Y} stroke="#F59E0B" strokeWidth={1.6} />
-                <circle cx={ox + bw + 18} cy={oy + bh / 2 + e0Y} r={4} fill="#F59E0B" />
-                <text x={ox + bw + 26} y={oy + bh / 2 + e0Y + 3} fontSize={9} fill="#F59E0B">e0 = {inp.e0} mm</text>
+                <line x1={ox + bw + 14} y1={oy + bh / 2} x2={ox + bw + 14} y2={oy + bh / 2 + inp.e0 * sc} stroke="#F59E0B" strokeWidth={1.4} />
+                <circle cx={ox + bw + 14} cy={oy + bh / 2 + inp.e0 * sc} r={3.5} fill="#F59E0B" />
+                <text x={ox + bw + 22} y={oy + bh / 2 + inp.e0 * sc + 3} fontSize={9} fill="#F59E0B">e₀ = {inp.e0} mm</text>
               </>
             )}
-            <text x={ox + bw + 8} y={oy + dY - 6} fontSize={9} fill="#F59E0B">Ap</text>
-            {res && res.as2 > 0 && (
-              <rect x={ox + 10} y={oy + dY - 4} width={Math.max(8, bw - 20)} height={6} fill="#EF4444" rx={2} opacity={0.9} />
-            )}
-            <DimensionLine x1={ox} y1={oy + bh} x2={ox + bw} y2={oy + bh} offset={14} text={`h = ${inp.h} mm, d = ${inp.d} mm`} />
+            <DimensionLine x1={ox} y1={oy + bh} x2={ox + bw} y2={oy + bh} offset={16} text={`h = ${inp.h} mm`} />
+            <DimensionLine x1={ox} y1={oy + bh + 24} x2={ox + bw} y2={oy + bh + 24} offset={0} text={`d = ${inp.d} mm`} />
             {res && (
-              <text x={ox + bw / 2} y={oy + bh + 32} fontSize={10} fill="#FCA5A5" textAnchor="middle" fontWeight="bold">
-                As2 = {res.as2.toFixed(0)} mm²/m
+              <text x={ox + bw / 2} y={oy + bh + 50} fontSize={11} fill="#FCA5A5" textAnchor="middle" fontWeight="bold">
+                As₂ = {res.as2.toFixed(0)} mm²/m
               </text>
             )}
+            <InlineLegend
+              items={[
+                { label: `h = ${inp.h} mm`, color: '#64748B' },
+                { label: `d = ${inp.d} mm`, color: '#22C55E' },
+                { label: `As₂ = ${res ? res.as2.toFixed(0) : '—'} mm²/m`, color: '#EF4444' },
+              ]}
+              x={ox + bw + 40}
+              y={oy}
+            />
           </SectionCanvas>
         </div>
       }

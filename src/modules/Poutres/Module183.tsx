@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { PoutreContinueQtesV2Inputs, PoutreContinueQtesV2Output } from '../../types/engineering';
 
 export default function Module183() {
@@ -37,7 +37,7 @@ export default function Module183() {
   const S = (k: keyof PoutreContinueQtesV2Inputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PoutreContinueQtesV2Inputs, label: string, unit: string,
@@ -85,7 +85,7 @@ export default function Module183() {
           <SectionCanvas title="Moments & Cisaillement" vbW={600} vbH={250}>
             {res && (() => {
               const nSpans = res.moments_appuis.length - 1;
-              if (nSpans <= 0) return <text x={300} y={125} fontSize={12} fill="#666" textAnchor="middle">Données insuffisantes</text>;
+              if (nSpans <= 0) return <text x={300} y={125} fontSize={12} fill="#94A3B8" textAnchor="middle">Données insuffisantes</text>;
               const spanW = w / nSpans;
               const allM = [...res.moments_appuis, ...res.moments_travee];
               const maxM = Math.max(...allM.map(m => Math.abs(m)), 1);
@@ -100,13 +100,21 @@ export default function Module183() {
                 mPts.push([ox + (i + 0.5) * spanW, zeroYm - res.moments_travee[i] * scM]);
                 mPts.push([ox + (i + 1) * spanW, zeroYm - res.moments_appuis[i + 1] * scM]);
               }
+              const actualLn = pick(parseList(txt.tLn), inp.tLn);
+              const totalL = actualLn.reduce((a: number, b: number) => a + b, 0);
+              const xVals = actualLn.reduce<number[]>((acc, l) => [...acc, acc[acc.length - 1] + l], [0]);
+              const yMinM = Math.min(...allM);
+              const yMaxM = Math.max(...allM);
+              const yMVals = [...new Set([yMinM, 0, yMaxM])].sort((a, b) => a - b)
+                .filter((v, i, a) => i === 0 || Math.abs((a[i - 1] * scM) - (v * scM)) >= 15);
+              const yVVals = [0, maxV];
               return (
                 <>
                   <text x={ox - 5} y={oy + hm / 2} fontSize={8} fill="#6366F1" textAnchor="end" transform={`rotate(-90, ${ox - 5}, ${oy + hm / 2})`}>M (kN·m)</text>
                   <line x1={ox} y1={zeroYm} x2={ox + w} y2={zeroYm} stroke="#ccc" strokeWidth={0.5} />
                   {res.moments_appuis.map((_, i) => (
                     <polygon key={`s-${i}`} points={`${ox + i * spanW - 5},${zeroYm + 6} ${ox + i * spanW + 5},${zeroYm + 6} ${ox + i * spanW},${zeroYm}`}
-                      fill="#94A3B8" stroke="#333" strokeWidth={0.5} />
+                      fill="#94A3B8" stroke="#64748B" strokeWidth={0.5} />
                   ))}
                   <DiagramOverlay type="moment" points={mPts} />
                   {res.moments_appuis.map((m, i) => (
@@ -115,6 +123,24 @@ export default function Module183() {
                   {res.moments_travee.map((m, i) => (
                     <text key={`mt-${i}`} x={ox + (i + 0.5) * spanW} y={zeroYm - m * scM - 4} fontSize={7} fill="#22C55E" textAnchor="middle">{m.toFixed(0)}</text>
                   ))}
+                  <AxisTicks
+                    origin={[ox, zeroYm + 15]}
+                    end={[ox + w, zeroYm + 15]}
+                    values={xVals}
+                    map={(v) => [ox + (v / totalL) * w, zeroYm + 15]}
+                    unit="m"
+                    side="below"
+                    decimals={1}
+                  />
+                  <AxisTicks
+                    origin={[ox, oy]}
+                    end={[ox, oy + hm]}
+                    values={yMVals}
+                    map={(v) => [ox, zeroYm - v * scM]}
+                    unit="kN·m"
+                    side="left"
+                    decimals={0}
+                  />
                   <text x={ox - 5} y={zeroYv + hv / 2} fontSize={8} fill="#F59E0B" textAnchor="end" transform={`rotate(-90, ${ox - 5}, ${zeroYv + hv / 2})`}>V (kN)</text>
                   <line x1={ox} y1={zeroYv} x2={ox + w} y2={zeroYv} stroke="#ccc" strokeWidth={0.5} />
                   {res.Vmax.map((v, i) => (
@@ -124,11 +150,28 @@ export default function Module183() {
                   {res.Vmax.map((v, i) => (
                     <text key={`vv-${i}`} x={ox + (i + 0.5) * spanW} y={zeroYv - v * scV - 4} fontSize={7} fill="#F59E0B" textAnchor="middle">{v.toFixed(0)}</text>
                   ))}
+                  <AxisTicks
+                    origin={[ox, zeroYv]}
+                    end={[ox, zeroYv + hv]}
+                    values={yVVals}
+                    map={(v) => [ox, zeroYv - v * scV]}
+                    unit="kN"
+                    side="left"
+                    decimals={0}
+                  />
                   {res.Asw.map((a, i) => (
                     <text key={`aw-${i}`} x={ox + (i + 0.5) * spanW} y={zeroYv + hv + 15} fontSize={7} fill="#8B5CF6" textAnchor="middle">
                       Asw={a.toFixed(0)} mm²/m
                     </text>
                   ))}
+                  <InlineLegend
+                    items={[
+                      { label: 'Moments', color: '#6366F1' },
+                      { label: 'Cisaillement', color: '#F59E0B' },
+                    ]}
+                    x={ox + w - 130}
+                    y={oy + 5}
+                  />
                 </>
               );
             })()}

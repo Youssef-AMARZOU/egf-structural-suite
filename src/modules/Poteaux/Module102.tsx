@@ -4,7 +4,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 
 const DEFAULT: PoteauFlambementRectInputs = {
   b: 300, h: 500, L0: 4.5, e0: 25, NEd: 1500, fck: 30, fyk: 500, As: 2000, cover: 30, phi: 2.0,
@@ -26,7 +26,7 @@ export default function Module102() {
   );
 
   const ok = res ? res.ratio <= 1.0 : false;
-  const status = !res ? 'computing' : res.ratio <= 1.0 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio <= 1.0 ? 'pass' : 'fail';
 
   // ---- N-M curve points mapped to px ----
   const curve = (() => {
@@ -73,18 +73,46 @@ export default function Module102() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Courbe d'interaction N-M" vbW={600} vbH={240}>
-            <line x1={60} y1={10} x2={60} y2={220} stroke="#999" strokeWidth={0.5} />
-            <line x1={60} y1={220} x2={560} y2={220} stroke="#999" strokeWidth={0.5} />
+            <line x1={60} y1={10} x2={60} y2={220} stroke="#64748B" strokeWidth={1} />
+            <line x1={60} y1={220} x2={560} y2={220} stroke="#64748B" strokeWidth={1} />
+            <text x={14} y={120} fontSize={9} fill="#94A3B8" textAnchor="middle" transform="rotate(-90 14 120)">N (kN)</text>
             {curve ? (
               <>
                 <DiagramOverlay type="moment" points={curve.pts} color="#6366F1" />
                 <circle cx={curve.edX} cy={curve.edY} r={6} fill={ok ? '#22C55E' : '#EF4444'} />
-                <text x={curve.edX + 10} y={curve.edY} fontSize={9} fill="#333">(MEd, NEd)</text>
               </>
             ) : (
-              <text x={300} y={120} fontSize={12} fill="#666" textAnchor="middle">Pas de courbe</text>
+              <text x={300} y={120} fontSize={12} fill="#94A3B8" textAnchor="middle">Pas de courbe</text>
             )}
-            <text x={310} y={235} fontSize={9} fill="#666" textAnchor="middle">M (kN·m)</text>
+            {(() => {
+              const maxN = res ? Math.max(...res.N_curve, 1) : 1;
+              const maxM = res ? Math.max(...res.M_curve, 1) : 1;
+              return (
+                <>
+                  <AxisTicks
+                    values={[0, maxM / 2, maxM]}
+                    map={(v) => [60 + (v / maxM) * 460, 220]}
+                    unit="kN·m"
+                    side="below"
+                  />
+                  <AxisTicks
+                    values={[0, maxN / 2, maxN]}
+                    map={(v) => [60, 220 - (v / maxN) * 190]}
+                    unit="kN"
+                    side="left"
+                  />
+                </>
+              );
+            })()}
+            <text x={310} y={235} fontSize={9} fill="#94A3B8" textAnchor="middle">M (kN·m)</text>
+            <InlineLegend
+              items={[
+                { label: 'Courbe N-M', color: '#6366F1' },
+                { label: '(MEd, NEd)', color: ok ? '#22C55E' : '#EF4444' },
+              ]}
+              x={440}
+              y={15}
+            />
           </SectionCanvas>
         </div>
       }

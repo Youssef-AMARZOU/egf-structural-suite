@@ -67,7 +67,7 @@ export default function Module154() {
   const rectX = 150 - bwPx / 2;
   const xNaPx = res ? Math.max(0, Math.min(hPx, (res.x_na / beamH) * hPx)) : hPx / 2;
 
-  const status = !res ? 'computing' : res.utilisation > 1.0 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.utilisation > 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof InputState, label: string, unit: string,

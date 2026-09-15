@@ -23,7 +23,7 @@ export default function Module231() {
     'calculate_integration_num_231', payload,
   );
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   // ---- area sketch (400x200 canvas) ----
   const area = (() => {

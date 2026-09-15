@@ -40,7 +40,7 @@ export default function Module111() {
       }))
     : [];
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PoteauComparInputs, label: string, unit: string,

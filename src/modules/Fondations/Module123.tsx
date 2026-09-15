@@ -23,7 +23,7 @@ export default function Module123() {
   const S = (k: keyof OuverPoutInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof OuverPoutInputs, label: string, unit: string,

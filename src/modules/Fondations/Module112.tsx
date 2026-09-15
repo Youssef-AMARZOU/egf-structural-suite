@@ -24,7 +24,7 @@ export default function Module112() {
   const S = (k: keyof SemelAncrageInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof SemelAncrageInputs, label: string, unit: string,

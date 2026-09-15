@@ -17,7 +17,7 @@ export default function Module188() {
   const S = (k: keyof SemelleCirculaireInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.verdict.startsWith('OK') ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.verdict.startsWith('OK') ? 'pass' : 'fail';
 
   const slider = (
     key: keyof SemelleCirculaireInputs, label: string, unit: string,
@@ -65,7 +65,7 @@ export default function Module188() {
               const h2 = 100 * qmin / qmax;
               return (
                 <>
-                  <ellipse cx={300} cy={120} rx={220} ry={18} fill="#E2E8F0" stroke="#333" />
+                  <ellipse cx={300} cy={120} rx={220} ry={18} fill="#E2E8F0" stroke="#64748B" />
                   <polygon points={`80,120 520,120 520,${120 - h1} 80,${120 - h2}`} fill="#6366F1" opacity={0.55} />
                   <DimensionLine x1={80} y1={120} x2={520} y2={120} offset={28} text={`D = ${inp.D} m — contact ${res.contact}`} />
                   <text x={525} y={120 - h1} fontSize={9} fill="#6366F1">qmax={res.q_max.toFixed(0)}</text>

@@ -9,6 +9,7 @@ import { RatioGauge } from '../../components/common/RatioGauge';
 import { Accordion } from '../../components/common/Accordion';
 import {
   SectionCanvas, DimensionLine, RebarGroup, rowBars, StressStrainBlock, DiagramOverlay,
+  AxisTicks, InlineLegend,
 } from '../../components/drafting';
 
 interface InputState {
@@ -43,7 +44,7 @@ export default function Module153() {
 
   const mu = (inp.med * 1e6) / (inp.b * inp.d * inp.d * (inp.fck / 1.5));
   const eta = mu / MU_LIM;
-  const status = !res ? 'computing' : res.is_balanced ? 'warn' : eta > 1 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.is_balanced ? 'warn' : eta > 1 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof InputState, label: string, unit: string,
@@ -180,15 +181,38 @@ export default function Module153() {
               <line x1={60} y1={180} x2={570} y2={180} stroke="#475569" strokeWidth={1} />
               <line x1={70} y1={20} x2={70} y2={180} stroke="#475569" strokeWidth={1} />
               <DiagramOverlay type="moment" points={env.pts} />
-              {res && env.mx > 0 && (
-                <>
-                  <circle cx={70 + (res.xr_max / inp.ln) * 460} cy={180 - (res.mx_max / env.mx) * 140} r={4} fill="#ef4444" />
-                  <text x={76 + (res.xr_max / inp.ln) * 460} y={174 - (res.mx_max / env.mx) * 140} fontSize={11} fill="#ef4444">
-                    M={res.mx_max.toFixed(1)}
-                  </text>
-                </>
-              )}
-              <text x={315} y={208} textAnchor="middle" fontSize={10} fill="#94a3b8">x (m)</text>
+              {res && env.mx > 0 && (() => {
+                const maxY = Math.max(...env.pts.map(([, y]) => y));
+                const minM = (180 - maxY) * env.mx / 140;
+                const yVals = [...new Set([minM, 0, env.mx])].sort((a, b) => a - b)
+                  .filter((v, i, a) => i === 0 || Math.abs(((a[i - 1] / env.mx) * 140) - ((v / env.mx) * 140)) >= 15);
+                return (
+                  <>
+                    <circle cx={70 + (res.xr_max / inp.ln) * 460} cy={180 - (res.mx_max / env.mx) * 140} r={4} fill="#ef4444" />
+                    <text x={76 + (res.xr_max / inp.ln) * 460} y={174 - (res.mx_max / env.mx) * 140} fontSize={11} fill="#ef4444">
+                      M={res.mx_max.toFixed(1)}
+                    </text>
+                    <AxisTicks
+                      origin={[70, 180]}
+                      end={[530, 180]}
+                      values={[0, inp.ln / 2, inp.ln]}
+                      map={(v) => [70 + (v / inp.ln) * 460, 180]}
+                      unit="m"
+                      side="below"
+                      decimals={1}
+                    />
+                    <AxisTicks
+                      origin={[70, 20]}
+                      end={[70, 180]}
+                      values={yVals}
+                      map={(v) => [70, 180 - (v / env.mx) * 140]}
+                      unit="kN·m"
+                      side="left"
+                      decimals={0}
+                    />
+                  </>
+                );
+              })()}
             </SectionCanvas>
           </div>
         </>

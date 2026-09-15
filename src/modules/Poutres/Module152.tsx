@@ -82,7 +82,7 @@ export default function Module152() {
     return { pts, yEnd: 100 - (res.phi / phiMax) * 90 };
   })() : null;
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof InputState, label: string, unit: string,

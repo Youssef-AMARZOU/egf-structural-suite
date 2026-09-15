@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { RaftRotPlastInputs, RaftRotPlastOutput } from '../../types/engineering';
 
 export default function Module189() {
@@ -24,7 +24,7 @@ export default function Module189() {
   const S = (k: keyof RaftRotPlastInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.rotation_ok ? verdictStatus(res.verdict) : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.rotation_ok ? verdictStatus(res.verdict) : 'fail';
 
   const slider = (
     key: keyof RaftRotPlastInputs, label: string, unit: string,
@@ -77,12 +77,35 @@ export default function Module189() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Enveloppe des moments (min bleu / max orange)" vbW={600} vbH={200}>
-            {res && (
-              <>
-                <DiagramOverlay type="moment" points={envPts(res.envelope_min)} />
-                <DiagramOverlay type="moment" points={envPts(res.envelope_max)} color="#F59E0B" />
-              </>
-            )}
+            {res && (() => {
+              const all = [...res.envelope_min, ...res.envelope_max];
+              const ymin = Math.min(...all);
+              const ymax = Math.max(...all, ymin + 1e-9);
+              const xmax = Math.max(...res.envelope_x, 1e-9);
+              const mapX = (v: number) => [30 + (v / xmax) * 540, 0] as [number, number];
+              const mapY = (v: number) => [0, 170 - ((v - ymin) / (ymax - ymin)) * 140] as [number, number];
+              // Nice tick counts
+              const xTicks = 5;
+              const yTicks = 4;
+              const xStep = xmax / xTicks;
+              const xValues = Array.from({ length: xTicks + 1 }, (_, i) => +(i * xStep).toFixed(2));
+              const yRange = ymax - ymin;
+              const rawYStep = yRange / yTicks;
+              const mag = Math.pow(10, Math.floor(Math.log10(rawYStep)));
+              const yStep = Math.ceil(rawYStep / mag) * mag;
+              const yStart = Math.ceil(ymin / yStep) * yStep;
+              const yValues: number[] = [];
+              for (let v = yStart; v <= ymax + yStep * 0.01; v += yStep) yValues.push(+v.toFixed(2));
+              return (
+                <>
+                  <DiagramOverlay type="moment" points={envPts(res.envelope_min)} />
+                  <DiagramOverlay type="moment" points={envPts(res.envelope_max)} color="#F59E0B" />
+                  <AxisTicks values={xValues} map={mapX} unit="m" side="below" decimals={1} />
+                  <AxisTicks values={yValues} map={mapY} unit="kN·m" side="left" decimals={0} />
+                  <InlineLegend items={[{ label: 'Moment min', color: '#3B82F6' }, { label: 'Moment max', color: '#F59E0B' }]} x={420} y={5} />
+                </>
+              );
+            })()}
           </SectionCanvas>
         </div>
       }

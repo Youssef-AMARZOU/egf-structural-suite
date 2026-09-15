@@ -28,7 +28,7 @@ export default function Module145() {
   const S = (k: keyof ReservoirCirculaireInputs) => (v: number | string) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof ReservoirCirculaireInputs, label: string, unit: string,

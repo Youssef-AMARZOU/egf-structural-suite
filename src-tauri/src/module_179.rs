@@ -230,10 +230,26 @@ pub fn calculate_cisai_section_qq_en_fc_179(
     if p.R <= 0.0 || p.euk <= 0.0 {
         return Err("R et euk doivent être > 0".to_string());
     }
-    let (e1, e2, nrd, mrd) = mn_bisect(
-        p.NEd, p.MEd, p.R, na, p.Ac, &p.tabs, p.fyk, p.gs, p.k, p.euk,
-        p.fcd, p.ec1, p.ecu1, p.typ, itour, classe, 1.0, 0, &vec![],
-    );
+    let (e1, e2, nrd, mrd) = {
+        // Discretize circular section into horizontal strips for concrete contribution.
+        let nt = 10usize;
+        let h = 2.0 * p.R;
+        let dy = h / nt as f64;
+        let mut ttz: Vec<Vec<f64>> = vec![Vec::new(), Vec::new(), Vec::new()];
+        for i in 0..nt {
+            let y1 = i as f64 * dy;
+            let y2 = (i + 1) as f64 * dy;
+            let b1 = 2.0 * (p.R * p.R - (y1 - p.R).powi(2)).max(0.0).sqrt();
+            let b2 = 2.0 * (p.R * p.R - (y2 - p.R).powi(2)).max(0.0).sqrt();
+            ttz[0].push(b1);
+            ttz[1].push(b2);
+            ttz[2].push(dy);
+        }
+        mn_bisect(
+            p.NEd, p.MEd, p.R, na, p.Ac, &p.tabs, p.fyk, p.gs, p.k, p.euk,
+            p.fcd, p.ec1, p.ecu1, p.typ, itour, classe, 1.0, nt, &ttz,
+        )
+    };
 
     let ratio = if p.MEd.abs() > 1e-10 {
         mrd / p.MEd

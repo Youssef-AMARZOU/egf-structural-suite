@@ -19,7 +19,7 @@ export default function Module203() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : verdictStatus(res.verdict);
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
   return (
     <Workstation
       title="Module 203 — Classes d'exposition"
@@ -64,7 +64,7 @@ export default function Module203() {
       const result = res;
       if (!result) return (<text x={400 / 2} y={140 / 2} textAnchor="middle" fontSize={12} fill="#94a3b8">computing…</text>);
       return (<>
-              <rect x={60} y={20} width={280} height={100} fill="#E2E8F0" stroke="#333" strokeWidth={2} />
+              <rect x={60} y={20} width={280} height={100} fill="#E2E8F0" stroke="#64748B" strokeWidth={2} />
               <rect x={60 + result.cnom * 1.2} y={20 + result.cnom * 0.5} width={280 - result.cnom * 2.4} height={100 - result.cnom} fill="#BFDBFE" stroke="#1D4ED8" strokeDasharray="5,3" />
               <line x1={60} y1={130} x2={60 + result.cnom * 1.2} y2={130} stroke="#EF4444" strokeWidth={2} />
               <text x={60} y={142} fontSize={10} fill="#EF4444">cnom={result.cnom.toFixed(0)} mm</text>
@@ -77,18 +77,18 @@ export default function Module203() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 text-green-800' : status === 'fail' ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : status === 'fail' ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'Classe struct.', value: `S${res.s_class}`, unit: '', color: 'bg-blue-50' },
-              { label: 'cmin,dur', value: res.cmin_dur.toFixed(0), unit: 'mm', color: 'bg-purple-50' },
-              { label: 'cnom', value: res.cnom.toFixed(0), unit: 'mm', color: 'bg-orange-50' },
-              { label: 'fck mini', value: `C${res.fck_min.toFixed(0)}`, unit: '', color: 'bg-gray-50' },
+              { label: 'Classe struct.', value: `S${res.s_class}`, unit: '', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'cmin,dur', value: res.cmin_dur.toFixed(0), unit: 'mm', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'cnom', value: res.cnom.toFixed(0), unit: 'mm', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'fck mini', value: `C${res.fck_min.toFixed(0)}`, unit: '', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -107,7 +107,7 @@ export default function Module203() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

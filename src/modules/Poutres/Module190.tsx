@@ -17,7 +17,7 @@ export default function Module190() {
   const S = (k: keyof ComparFlechesInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.verdict.startsWith('OK') ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.verdict.startsWith('OK') ? 'pass' : 'fail';
 
   const slider = (
     key: keyof ComparFlechesInputs, label: string, unit: string,
@@ -68,8 +68,8 @@ export default function Module190() {
                       <g key={i}>
                         <rect x={x} y={190 - h} width={bw - 16} height={h}
                           fill={res.ratios[i] > 1 ? '#EF4444' : '#6366F1'} opacity={0.75} rx={2} />
-                        <text x={x + (bw - 16) / 2} y={186 - h} fontSize={9} fill="#333" textAnchor="middle">{f.toFixed(1)}</text>
-                        <text x={x + (bw - 16) / 2} y={203} fontSize={9} fill="#666" textAnchor="middle">M{i + 1}</text>
+                        <text x={x + (bw - 16) / 2} y={186 - h} fontSize={9} fill="#CBD5E1" textAnchor="middle">{f.toFixed(1)}</text>
+                        <text x={x + (bw - 16) / 2} y={203} fontSize={9} fill="#94A3B8" textAnchor="middle">M{i + 1}</text>
                       </g>
                     );
                   })}

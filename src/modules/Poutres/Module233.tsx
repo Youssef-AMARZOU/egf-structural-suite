@@ -18,7 +18,7 @@ export default function Module233() {
   const S = (k: keyof PoutrePrecontrainteInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof PoutrePrecontrainteInputs, label: string, unit: string,

@@ -25,7 +25,7 @@ export default function Module151() {
   const cx = ox + w / 2;
   const cy = oy + h / 2;
 
-  const status = !res ? 'computing' : res.ratio > 1.0 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio > 1.0 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof CentreTorsionGeneralInputs, label: string, unit: string,

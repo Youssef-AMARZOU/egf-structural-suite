@@ -25,7 +25,7 @@ export default function Module163() {
     setInp({ ...inp, trapezes: t });
   };
 
-  const status = !res ? 'computing' : res.is_ductile ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.is_ductile ? 'pass' : 'fail';
 
   const slider = (
     key: keyof PourcentageMiniNonFragiliteSectQQInputs, label: string, unit: string,
@@ -87,8 +87,8 @@ export default function Module163() {
                   <text x={ratioX} y={oy + barH + 18} fontSize={10} fill="#374151" textAnchor="middle">
                     {res.xd_ratio.toFixed(3)}
                   </text>
-                  <text x={ox} y={oy - 8} fontSize={9} fill="#999">0</text>
-                  <text x={ox + barW} y={oy - 8} fontSize={9} fill="#999">1.0</text>
+                  <text x={ox} y={oy - 8} fontSize={9} fill="#94A3B8">0</text>
+                  <text x={ox + barW} y={oy - 8} fontSize={9} fill="#94A3B8">1.0</text>
                 </>
               );
             })()}

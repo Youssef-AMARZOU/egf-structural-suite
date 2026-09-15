@@ -19,7 +19,7 @@ export default function Module221() {
   const S = (k: keyof FeuFlambementInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : res.ratio > 1 ? 'fail' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio > 1 ? 'fail' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof FeuFlambementInputs, label: string, unit: string,

@@ -23,7 +23,7 @@ export default function Module232() {
     'calculate_carac_geo_232', payload,
   );
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const field = (key: keyof typeof text, label: string, placeholder: string) => (
     <div className="mb-1">

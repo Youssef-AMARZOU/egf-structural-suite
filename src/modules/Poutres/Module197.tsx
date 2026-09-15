@@ -25,7 +25,7 @@ export default function Module197() {
   const S = (k: keyof VoilesInertieVarIeqInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof VoilesInertieVarIeqInputs, label: string, unit: string,
@@ -85,7 +85,7 @@ export default function Module197() {
                   <text x={460} y={15} fontSize={9} fill="#F59E0B" textAnchor="middle">|M|</text>
                   {res.z.map((zz, i) => (
                     i % Math.max(1, Math.floor(n / 5)) === 0 || i === n ? (
-                      <text key={i} x={55} y={yOf(i) + 3} fontSize={7} fill="#666" textAnchor="end">{zz.toFixed(1)}m</text>
+                      <text key={i} x={55} y={yOf(i) + 3} fontSize={7} fill="#94A3B8" textAnchor="end">{zz.toFixed(1)}m</text>
                     ) : null
                   ))}
                 </>

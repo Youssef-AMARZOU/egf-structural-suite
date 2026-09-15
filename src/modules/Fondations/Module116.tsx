@@ -30,7 +30,7 @@ export default function Module116() {
     M: res.m_pos[i] ?? 0,
   })) : [];
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof InteracPieuInputs, label: string, unit: string,

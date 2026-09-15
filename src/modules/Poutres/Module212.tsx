@@ -18,7 +18,7 @@ export default function Module212() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : ok ? 'pass' : 'fail';
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : ok ? 'pass' : 'fail';
   return (
     <Workstation
       title="Module 212 — Effort tranchant, section quelconque"
@@ -77,15 +77,15 @@ export default function Module212() {
                 const dx = 60 * inputs.cot_theta;
                 return (
                   <g>
-                    <line x1={20} y1={30} x2={380} y2={30} stroke="#333" strokeWidth={3} />
-                    <line x1={20} y1={150} x2={380} y2={150} stroke="#333" strokeWidth={3} />
+                    <line x1={20} y1={30} x2={380} y2={30} stroke="#64748B" strokeWidth={3} />
+                    <line x1={20} y1={150} x2={380} y2={150} stroke="#64748B" strokeWidth={3} />
                     {[0, 1, 2].map(i => (
                       <g key={i}>
                         <line x1={60 + i * dx} y1={30} x2={60 + i * dx + dx} y2={150} stroke="#3B82F6" strokeWidth={3} />
                         <line x1={60 + i * dx} y1={150} x2={60 + i * dx} y2={30} stroke="#EF4444" strokeWidth={1.5} strokeDasharray="4,3" />
                       </g>
                     ))}
-                    <text x={200} y={172} fontSize={10} fill="#333" textAnchor="middle">θ={(theta * 180 / Math.PI).toFixed(1)}° — cotθ={inputs.cot_theta}</text>
+                    <text x={200} y={172} fontSize={10} fill="#CBD5E1" textAnchor="middle">θ={(theta * 180 / Math.PI).toFixed(1)}° — cotθ={inputs.cot_theta}</text>
                   </g>
                 );
               })()}
@@ -97,18 +97,18 @@ export default function Module212() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${ok ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'VRd,c', value: res.vrd_c.toFixed(0), unit: 'kN', color: 'bg-blue-50' },
-              { label: 'VRd,s', value: res.arm_transv ? res.vrd_s.toFixed(0) : '—', unit: 'kN', color: 'bg-purple-50' },
-              { label: 'VRd,max', value: res.vrd_max.toFixed(0), unit: 'kN', color: 'bg-orange-50' },
-              { label: 'Taux', value: (res.ratio * 100).toFixed(0), unit: '%', color: 'bg-gray-50' },
+              { label: 'VRd,c', value: res.vrd_c.toFixed(0), unit: 'kN', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'VRd,s', value: res.arm_transv ? res.vrd_s.toFixed(0) : '—', unit: 'kN', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'VRd,max', value: res.vrd_max.toFixed(0), unit: 'kN', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'Taux', value: (res.ratio * 100).toFixed(0), unit: '%', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -127,7 +127,7 @@ export default function Module212() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

@@ -19,7 +19,7 @@ export default function Module173() {
   const S = (k: keyof PrefaEtDalleRapporteeInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing'
+  const status = err ? 'fail' : !res ? 'computing'
     : res.is_ok_shear && res.is_ok_nm ? verdictStatus(res.verdict) : 'fail';
 
   const slider = (
@@ -65,9 +65,9 @@ export default function Module173() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Coupe — Dalle préfab + rapportée" vbW={500} vbH={150}>
-            <rect x={ox} y={oy} width={bFlange} height={hPx} fill="#94A3B8" stroke="#333" strokeWidth={1.5} />
-            <text x={ox + bFlange / 2} y={oy + hPx / 2 + 4} fontSize={9} fill="#333" textAnchor="middle">DAP h={inp.h}</text>
-            <rect x={ox + (bFlange - bw) / 2} y={oy + hPx} width={bw} height={h1Px} fill="#6366F1" stroke="#333" strokeWidth={1.5} />
+            <rect x={ox} y={oy} width={bFlange} height={hPx} fill="#94A3B8" stroke="#64748B" strokeWidth={1.5} />
+            <text x={ox + bFlange / 2} y={oy + hPx / 2 + 4} fontSize={9} fill="#CBD5E1" textAnchor="middle">DAP h={inp.h}</text>
+            <rect x={ox + (bFlange - bw) / 2} y={oy + hPx} width={bw} height={h1Px} fill="#6366F1" stroke="#64748B" strokeWidth={1.5} />
             <text x={ox + bFlange / 2} y={oy + hPx + h1Px / 2 + 4} fontSize={9} fill="#fff" textAnchor="middle">DR h1={inp.h1}</text>
             <DimensionLine x1={ox} y1={oy} x2={ox} y2={oy + hPx + h1Px} offset={-24} text={`h+h1 = ${inp.h + inp.h1}`} />
             {res && (

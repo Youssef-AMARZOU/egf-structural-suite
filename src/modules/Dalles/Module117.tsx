@@ -23,7 +23,7 @@ export default function Module117() {
   const S = (k: keyof VouteDechargeInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof VouteDechargeInputs, label: string, unit: string,

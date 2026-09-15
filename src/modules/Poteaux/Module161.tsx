@@ -25,7 +25,7 @@ export default function Module161() {
     setInp({ ...inp, trapezes: t });
   };
 
-  const status = !res ? 'computing' : res.as_min_pct >= 0.30 ? 'fail' : res.as_min_pct >= 0.15 ? 'warn' : 'pass';
+  const status = err ? 'fail' : !res ? 'computing' : res.as_min_pct >= 0.30 ? 'fail' : res.as_min_pct >= 0.15 ? 'warn' : 'pass';
 
   const slider = (
     key: keyof PourcentMiniSectQQInputs, label: string, unit: string,

@@ -16,7 +16,7 @@ export default function Module171() {
   const S = (k: keyof MrdDesTsInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof MrdDesTsInputs, label: string, unit: string,
@@ -53,8 +53,8 @@ export default function Module171() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Section en T" vbW={500} vbH={200}>
-            <rect x={ox} y={oy} width={bw} height={tf} fill="#94A3B8" stroke="#333" strokeWidth={1.5} />
-            <rect x={ox + (bw - tw) / 2} y={oy + tf} width={tw} height={hw - tf} fill="#94A3B8" stroke="#333" strokeWidth={1.5} />
+            <rect x={ox} y={oy} width={bw} height={tf} fill="#94A3B8" stroke="#64748B" strokeWidth={1.5} />
+            <rect x={ox + (bw - tw) / 2} y={oy + tf} width={tw} height={hw - tf} fill="#94A3B8" stroke="#64748B" strokeWidth={1.5} />
             {res && (
               <>
                 <line x1={ox - 10} y1={oy + res.x * 120 / inp.d}
@@ -64,7 +64,7 @@ export default function Module171() {
                   fontSize={9} fill="#EF4444">x = {res.x.toFixed(0)} mm</text>
                 <RebarGroup bars={[{ x: ox + bw / 2, y: oy + hw - 5, phi: 20 }]} pxPerMm={120 / inp.d} />
                 <text x={ox + bw / 2 + 10} y={oy + hw}
-                  fontSize={9} fill="#333">σs = {res.ss.toFixed(0)} MPa</text>
+                  fontSize={9} fill="#CBD5E1">σs = {res.ss.toFixed(0)} MPa</text>
               </>
             )}
             <DimensionLine x1={ox + bw + 20} y1={oy} x2={ox + bw + 20} y2={oy + hw} offset={8} text={`d = ${inp.d} mm`} />

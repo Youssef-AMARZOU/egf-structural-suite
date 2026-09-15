@@ -24,7 +24,7 @@ export default function Module142() {
   const S = (k: keyof SemellePortanteInputs) => (v: number) => setInp((p) => ({ ...p, [k]: v }));
 
 
-  const status = !res ? 'computing' : res.ratio_sigma <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio_sigma <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof SemellePortanteInputs, label: string, unit: string,

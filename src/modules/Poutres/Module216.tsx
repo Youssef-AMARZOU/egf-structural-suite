@@ -29,7 +29,7 @@ export default function Module216() {
   const slider = (key: NumKey, label: string, unit: string, min: number, max: number, step: number) => (
     <ParamSlider label={label} unit={unit} value={inputs[key] as number} min={min} max={max} step={step} onChange={S(key)} />
   );
-  const status: ModuleStatus = !res ? 'computing' : verdictStatus(res.verdict);
+  const status: ModuleStatus = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
   return (
     <Workstation
       title="Module 216 — Travée toutes charges"
@@ -73,8 +73,8 @@ export default function Module216() {
                 const Y = (m: number) => 40 + (m / mMax) * 90;
                 return (
                   <>
-                    <line x1={30} y1={40} x2={370} y2={40} stroke="#333" />
-                    <line x1={30} y1={40} x2={30} y2={170} stroke="#333" />
+                    <line x1={30} y1={40} x2={370} y2={40} stroke="#64748B" />
+                    <line x1={30} y1={40} x2={30} y2={170} stroke="#64748B" />
                     <DiagramOverlay type="moment" points={result.xs.map((x, i) => [X(x), Y(result.ms[i])] as [number, number])} fill zeroY={40} closeX={[X(result.xs[0]), X(result.xs[result.xs.length - 1])]} />
                     <text x={X(result.x_mmax)} y={Y(result.m_max) + 16} fontSize={10} fill="#1D4ED8" textAnchor="middle">Mmax={result.m_max.toFixed(1)}</text>
                   </>
@@ -88,18 +88,18 @@ export default function Module216() {
       results={<>
         {res ? (
         <div className="space-y-4">
-          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 text-green-800' : status === 'fail' ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'}`}>{res.verdict}</div>
+          <div className={`p-3 rounded font-semibold ${status === 'pass' ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : status === 'fail' ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'}`}>{res.verdict}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: 'RA / RB', value: `${res.ra.toFixed(0)} / ${res.rb.toFixed(0)}`, unit: 'kN', color: 'bg-blue-50' },
-              { label: 'Mmax', value: res.m_max.toFixed(1), unit: 'kN·m', color: 'bg-purple-50' },
-              { label: 'Vmax', value: res.v_max.toFixed(0), unit: 'kN', color: 'bg-orange-50' },
-              { label: 'Flèche', value: res.y_max.toFixed(1), unit: 'mm', color: 'bg-gray-50' },
+              { label: 'RA / RB', value: `${res.ra.toFixed(0)} / ${res.rb.toFixed(0)}`, unit: 'kN', color: 'bg-blue-50 dark:bg-blue-900/20' },
+              { label: 'Mmax', value: res.m_max.toFixed(1), unit: 'kN·m', color: 'bg-purple-50 dark:bg-purple-900/20' },
+              { label: 'Vmax', value: res.v_max.toFixed(0), unit: 'kN', color: 'bg-orange-50 dark:bg-orange-900/20' },
+              { label: 'Flèche', value: res.y_max.toFixed(1), unit: 'mm', color: 'bg-slate-100 dark:bg-white/5' },
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
-                <div className="text-xs text-gray-500">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400">{item.unit}</span></div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
+                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
               </div>
             ))}
           </div>
@@ -118,7 +118,7 @@ export default function Module216() {
                 ]}
               />
           {res.diag.length > 0 && (
-            <div className="bg-gray-50 border rounded p-3 text-sm font-mono space-y-1">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-sm font-mono space-y-1 dark:text-slate-300">
               {res.diag.map((line, i) => <div key={i}>{line}</div>)}
             </div>
           )}

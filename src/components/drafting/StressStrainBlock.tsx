@@ -34,15 +34,15 @@ export const StressStrainBlock: React.FC<StressStrainBlockProps> = ({
   const d = `M ${x} ${yNaDraw} Q ${x} ${yRect} ${x - wPx} ${yRect} L ${x - wPx} ${yTop} L ${x} ${yTop} Z`;
   return (
     <g>
-      <path d={d} fill={toneFill} opacity={0.35} stroke={toneFill} strokeWidth={1.2} />
+      <path d={d} fill={toneFill} opacity={0.45} stroke={toneFill} strokeWidth={1.5} />
       {xClamped <= hPx * 1.5 && (
         <>
           <line
             x1={x - wPx - 14} y1={naY} x2={x + 30} y2={naY}
-            stroke="#ef4444" strokeWidth={1.4} strokeDasharray="5 3"
+            stroke="#ef4444" strokeWidth={1.6} strokeDasharray="5 3"
           />
           {showNaLabel && (
-            <text x={x + 34} y={naY + 3} fontSize={9} fill="#ef4444" fontWeight="bold">
+            <text x={x + 34} y={naY + 3} fontSize={10} fill="#f87171" fontWeight="bold">
               {naValue ?? 'NA'}
             </text>
           )}

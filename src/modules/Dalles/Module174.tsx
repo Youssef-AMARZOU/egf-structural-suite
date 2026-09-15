@@ -16,7 +16,7 @@ export default function Module174() {
   const S = (k: keyof DallLignesDeRuptureInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const status = !res ? 'computing' : verdictStatus(res.verdict);
+  const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
   const slider = (
     key: keyof DallLignesDeRuptureInputs, label: string, unit: string,
@@ -49,7 +49,7 @@ export default function Module174() {
       sketch={
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Lignes de rupture" vbW={500} vbH={200}>
-            <rect x={ox} y={oy} width={w} height={h} fill="#F3F4F6" stroke="#333" strokeWidth={2} />
+            <rect x={ox} y={oy} width={w} height={h} fill="#F3F4F6" stroke="#64748B" strokeWidth={2} />
             <line x1={ox} y1={oy} x2={ox + w} y2={oy + h} stroke="#EF4444" strokeWidth={2} strokeDasharray="6,3" />
             <line x1={ox + w} y1={oy} x2={ox} y2={oy + h} stroke="#EF4444" strokeWidth={2} strokeDasharray="6,3" />
             <DimensionLine x1={ox} y1={oy + h} x2={ox + w} y2={oy + h} offset={14} text={`Lx = ${inp.Lx} m`} />

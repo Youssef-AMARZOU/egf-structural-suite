@@ -46,7 +46,7 @@ export default function Module105() {
       ]
     : [];
 
-  const status = !res ? 'computing' : res.ratio0 <= 1 ? 'pass' : 'fail';
+  const status = err ? 'fail' : !res ? 'computing' : res.ratio0 <= 1 ? 'pass' : 'fail';
 
   const slider = (
     key: keyof CircularPunching105Inputs, label: string, unit: string,
