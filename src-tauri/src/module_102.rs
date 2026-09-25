@@ -144,7 +144,7 @@ pub fn calculate_poteau_flambement_rect_102(
         let fs1 = steel_sig(eps_s1.max(-0.01).min(0.01), fyd);
         let fs2 = steel_sig(eps_s2.max(-0.01).min(0.01), fyd);
         let n_tot = (n_c + as1 * fs1 + as1 * fs2) / 1000.0;
-        let m_tot = (m_c.abs() + (as1 * fs1 * (y1 - p.h / 2.0)).abs() + (as1 * fs2 * (y2 - p.h / 2.0)).abs()) / 1e6;
+        let m_tot = (m_c + as1 * fs1 * (y1 - p.h / 2.0) + as1 * fs2 * (y2 - p.h / 2.0)).abs() / 1e6;
         if n_tot > 0.0 {
             n_curve.push(n_tot);
             m_curve.push(m_tot);

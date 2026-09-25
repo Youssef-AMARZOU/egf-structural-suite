@@ -61,7 +61,7 @@ fn v_rdc_calc(fck: f64, gc: f64, rho_l: f64, d: f64, phi: f64) -> f64 {
     let rho_x = (100.0 * rho).powf(1.0 / 3.0).max(0.04);
     let ac = std::f64::consts::PI * phi * phi / 4.0;
     let u1 = std::f64::consts::PI * phi;
-    crdc * k * rho_x * 100.0_f64.powf(1.0 / 3.0) * fck.powf(1.0 / 2.0) * ac / u1
+    crdc * k * rho_x * ac / u1
 }
 
 fn v_rdc_max_calc(fck: f64, gc: f64, phi: f64, d: f64) -> f64 {

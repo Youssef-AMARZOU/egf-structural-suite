@@ -25,6 +25,7 @@ pub struct Ec1VentInputs {
 #[derive(Debug, Serialize)]
 pub struct Ec1VentOutput {
     pub crz: f64,
+    pub crze: f64,
     pub vmz: f64,
     pub vmze: f64,
     pub vmzs: f64,
@@ -230,6 +231,7 @@ pub fn calculate_ec1_vent_141(
 
     Ok(Ec1VentOutput {
         crz,
+        crze,
         vmz,
         vmze,
         vmzs,

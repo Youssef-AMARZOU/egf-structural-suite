@@ -198,7 +198,7 @@ pub fn calculate_dalle_bp_evasion_n_pot_165(
     let n = p.spans.len();
 
     let inertia: Vec<f64> = if p.inertia.is_empty() {
-        (0..n).map(|i| p.H.powi(3) / 12.0 * p.spans[i]).collect()
+        (0..n).map(|_| 1000.0 * p.H.powi(3) / 12.0).collect()
     } else {
         p.inertia.clone()
     };

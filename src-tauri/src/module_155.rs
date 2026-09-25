@@ -13,7 +13,6 @@ pub struct EffTrComparInputs {
     pub asw: f64,
     pub s: f64,
     pub rho_l: f64,
-    pub vrdc_coeff: f64,
     pub cot_theta: f64,
     pub ned: f64,
     pub ved: f64,
@@ -90,7 +89,7 @@ pub fn calculate_eff_tr_compar_ec2_bael_155(
     let fctm = 0.3 * fck.powf(2.0 / 3.0);
     let fctd = fctm / 1.5;
     let crdc = 0.18 / gc;
-    let k = (200.0 / d).powf(0.1).min(2.0);
+    let k = (1.0 + (200.0 / d).sqrt()).min(2.0);
     let rho_l_min = (fctm / fyk).max(0.08);
     let rho_l_eff = rho_l.max(rho_l_min);
 
@@ -108,7 +107,7 @@ pub fn calculate_eff_tr_compar_ec2_bael_155(
 
     // --- EC2 VRd,s (with shear reinforcement) ---
     let z = 0.9 * d;
-    let vrds = (asw / s * z * fyd * (1.0 / cot_theta)).min(f64::MAX) / 1000.0;
+    let vrds = (asw / s * z * fyd * cot_theta).min(f64::MAX) / 1000.0;
 
     diag.push(format!("VRd,s = {:.2} kN", vrds));
 

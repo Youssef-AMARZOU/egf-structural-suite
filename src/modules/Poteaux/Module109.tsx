@@ -71,7 +71,7 @@ export default function Module109() {
         <>
         <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Section</div>
         <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-          {slider('h', 'h', 'mm', 100, 2000, 50)}
+          {slider('h', 'Hauteur h', 'mm', 100, 2000, 50)}
           {slider('bh', 'b/h', '-', 0.3, 3, 0.1)}
           {slider('delta', 'δ enrobage', '-', 0.05, 0.5, 0.01)}
           {slider('rho', 'ρ', '%', 0.1, 10, 0.1)}

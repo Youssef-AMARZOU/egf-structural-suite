@@ -49,10 +49,10 @@ export default function Module129() {
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Section</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('b', 'b', 'mm', 100, 2000, 10)}
-          {slider('h', 'h', 'mm', 100, 2000, 10)}
-          {slider('d', 'd', 'mm', 50, 2000, 5)}
-          {slider('dp', 'dp', 'mm', 20, 200, 5)}
+          {slider('b', 'Largeur b', 'mm', 100, 2000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 2000, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 2000, 5)}
+          {slider('dp', 'Enrobage dp', 'mm', 20, 200, 5)}
           {slider('aci', 'Ac,i', 'cm²', 0, 100, 0.5)}
           {slider('acs', 'Ac,s', 'cm²', 0, 100, 0.5)}
         </div>

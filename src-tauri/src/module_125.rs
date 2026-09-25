@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
 
+fn safe_div(num: f64, den: f64) -> f64 {
+    if den.abs() < 1e-12 { 0.0 } else { num / den }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct BoussinesqLagrangeInputs {
     pub ha: f64,
@@ -242,11 +246,11 @@ pub fn calculate_boussinesq_lagrange_125(
             let idx_up = ix * (ny as usize + 1) + (iy + 1);
             let idx_down = ix * (ny as usize + 1) + (iy - 1);
             if idx_right < mm && idx - 2 >= 0 {
-                let s1 = (w_grid[idx_right] - w_grid[idx - 2]).abs() / 2.0 / p.dy;
+                let s1 = safe_div((w_grid[idx_right] - w_grid[idx - 2]).abs(), 2.0 * p.dy);
                 if s1 > slope_max { slope_max = s1; }
             }
             if idx_up < mm && idx_down < mm {
-                let s2 = (w_grid[idx_up] - w_grid[idx_down]).abs() / 2.0 / p.dx;
+                let s2 = safe_div((w_grid[idx_up] - w_grid[idx_down]).abs(), 2.0 * p.dx);
                 if s2 > slope_max { slope_max = s2; }
             }
         }

@@ -125,7 +125,7 @@ export default function Module223() {
             ].map((item, i) => (
               <div key={i} className={`${item.color} border rounded p-2 text-center`}>
                 <div className="text-xs text-gray-500 dark:text-slate-400">{item.label}</div>
-                <div className="text-lg font-bold">{item.value} <span className="text-xs text-gray-400 dark:text-slate-500">{item.unit}</span></div>
+                <div className="text-lg font-bold dark:text-white">{item.value} <span className="text-xs text-gray-400 dark:text-slate-400">{item.unit}</span></div>
               </div>
             ))}
           </div>

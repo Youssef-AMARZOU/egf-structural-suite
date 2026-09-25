@@ -36,20 +36,20 @@ export default function Module188() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Semelle & charges</div>
-          {slider('D', 'D', 'm', 1, 6, 0.1)}
-          {slider('h', 'h', 'm', 0.2, 2, 0.05)}
-          {slider('d', 'd', 'm', 0.2, 1.8, 0.05)}
-          {slider('c_col', 'c_col (fût)', 'm', 0.2, 1, 0.05)}
-          {slider('N_ed', 'N_ed', 'kN', 0, 5000, 50)}
-          {slider('M_ed', 'M_ed', 'kN.m', 0, 1000, 10)}
-          {slider('V_ed', 'V_ed', 'kN', 0, 500, 10)}
+          {slider('D', 'Diamètre D', 'm', 1, 6, 0.1)}
+          {slider('h', 'Hauteur semelle h', 'm', 0.2, 2, 0.05)}
+          {slider('d', 'Hauteur utile d', 'm', 0.2, 1.8, 0.05)}
+          {slider('c_col', 'Dimension fût c_col', 'm', 0.2, 1, 0.05)}
+          {slider('N_ed', 'Effort axial N_ed', 'kN', 0, 5000, 50)}
+          {slider('M_ed', 'Moment M_ed', 'kN.m', 0, 1000, 10)}
+          {slider('V_ed', 'Tranchant V_ed', 'kN', 0, 500, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Sol & matériaux</div>
-          {slider('Df', 'Df (encastrement)', 'm', 0, 5, 0.1)}
+          {slider('Df', 'Profondeur enracinement Df', 'm', 0, 5, 0.1)}
           {slider('gamma_sol', 'γ_sol', 'kN/m³', 10, 25, 0.5)}
           {slider('c', "c'", 'kPa', 0, 100, 1)}
           {slider('phi_deg', "φ'", '°', 15, 40, 0.5)}
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('gc', 'γc', '', 1, 2, 0.05)}
           {slider('gs', 'γs', '', 1, 2, 0.05)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}

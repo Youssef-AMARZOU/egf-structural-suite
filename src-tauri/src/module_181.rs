@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+fn safe_div(num: f64, den: f64) -> f64 {
+    if den.abs() < 1e-12 { 0.0 } else { num / den }
+}
+
 // Module 181 — Poutres Rot Plast Meth Gene V5
 // Beam plastic analysis: three-moment + plastic hinges + T-sections
 // Clean-room reimplementation from EC2/BAEL. No VBA code copied.
@@ -26,15 +30,15 @@ fn solve_three_moment(nap: usize, tl: &[f64], tei: &[f64], tp: &[f64]) -> Vec<f6
         let ei1 = tei[i - 1];
         let ei2 = tei[i];
 
-        let u1 = l1 / ei1;
-        let u2 = l2 / ei2;
+        let u1 = safe_div(l1, ei1);
+        let u2 = safe_div(l2, ei2);
 
         a[i][i - 1] = u1;
         a[i][i] = 2.0 * (u1 + u2);
         a[i][i + 1] = u2;
 
-        let rhs1 = -l1.powi(3) / (4.0 * ei1);
-        let rhs2 = -l2.powi(3) / (4.0 * ei2);
+        let rhs1 = safe_div(-l1.powi(3), 4.0 * ei1);
+        let rhs2 = safe_div(-l2.powi(3), 4.0 * ei2);
         a[i][n] = tp[i - 1] * rhs1 + tp[i] * rhs2;
     }
 
@@ -84,15 +88,15 @@ fn solve_three_moment_plastic(nap: usize, tl: &[f64], tei: &[f64],
         let ei1 = tei[i - 1];
         let ei2 = tei[i];
 
-        let u1 = l1 / ei1;
-        let u2 = l2 / ei2;
+        let u1 = safe_div(l1, ei1);
+        let u2 = safe_div(l2, ei2);
 
         a[i][i - 1] = u1;
         a[i][i] = 2.0 * (u1 + u2);
         a[i][i + 1] = u2;
 
-        let rhs1 = -l1.powi(3) / (4.0 * ei1);
-        let rhs2 = -l2.powi(3) / (4.0 * ei2);
+        let rhs1 = safe_div(-l1.powi(3), 4.0 * ei1);
+        let rhs2 = safe_div(-l2.powi(3), 4.0 * ei2);
         a[i][n] = tp[i - 1] * rhs1 + tp[i] * rhs2;
     }
 
@@ -183,11 +187,12 @@ pub fn calculate_poutres_rot_plast_meth_gene_v5_181(
     if p.nap < 1 || p.nap > 200 {
         return Err("nap doit être dans [1, 200]".to_string());
     }
-    if p.tLn.len() < p.nap || p.tEI.len() < p.nap || p.tp.len() < p.nap {
-        return Err("tLn, tEI et tp doivent contenir au moins nap valeurs".to_string());
+    let n_spans = if p.nap > 1 { p.nap - 1 } else { 0 };
+    if p.tLn.len() < n_spans || p.tEI.len() < n_spans || p.tp.len() < n_spans {
+        return Err(format!("tLn, tEI, tp doivent contenir {} valeurs ({} travées pour {} appuis)", n_spans, n_spans, p.nap));
     }
-    if p.kkr == 1 && p.tMR.len() < p.nap {
-        return Err("tMR doit contenir au moins nap valeurs (mode plastique)".to_string());
+    if p.kkr == 1 && p.tMR.len() < n_spans {
+        return Err(format!("tMR doit contenir au moins {} valeurs (mode plastique)", n_spans));
     }
     if p.tLn.iter().any(|&l| l <= 0.0) {
         return Err("tLn : portées strictement positives requises".to_string());
@@ -198,7 +203,6 @@ pub fn calculate_poutres_rot_plast_meth_gene_v5_181(
         solve_three_moment(p.nap, &p.tLn, &p.tEI, &p.tp)
     };
 
-    let n_spans = if p.nap > 1 { p.nap - 1 } else { 0 };
     let mut moments_travee = Vec::new();
     let mut moments_max = Vec::new();
 

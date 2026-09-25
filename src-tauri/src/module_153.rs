@@ -166,10 +166,11 @@ pub fn calculate_flexion_as_flech_153(p: FlexionAsFlechInputs) -> Result<Flexion
             let mut x = x_bal;
 
             for _ in 0..10 {
-                let ff = fcd * bw * x;
+                let lam = 0.8; // rectangular stress block depth factor, EC2 §3.1.7
+                let ff = fcd * bw * lam * x;
                 let fa = fcd * (b - bw) * hf;
                 let nc = ff + fa;
-                let mc = ff * (d - x / 3.0) + fa * (d - hf / 2.0);
+                let mc = ff * (d - lam * x / 2.0) + fa * (d - hf / 2.0);
                 let mc_knm = mc / 1e6;
                 if mc_knm > m1 {
                     x -= alpha * (x - hf);
@@ -180,9 +181,10 @@ pub fn calculate_flexion_as_flech_153(p: FlexionAsFlechInputs) -> Result<Flexion
             }
 
             x_na = x.max(hf);
-            let ff = fcd * bw * x_na;
+            let lam = 0.8;
+            let ff = fcd * bw * lam * x_na;
             let fa = fcd * (b - bw) * hf;
-            m_resist = (ff * (d - x_na / 3.0) + fa * (d - hf / 2.0)) / 1e6;
+            m_resist = (ff * (d - lam * x_na / 2.0) + fa * (d - hf / 2.0)) / 1e6;
             acs = (ff + fa) / fyd * 10000.0;
             sigma_s = fyd;
             sigma_c = fcd;

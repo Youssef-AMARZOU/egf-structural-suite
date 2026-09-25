@@ -49,12 +49,12 @@ export default function Module195() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section</div>
-          {slider('b', 'b', 'mm', 100, 1000, 10)}
-          {slider('h', 'h', 'mm', 200, 1200, 10)}
-          {slider('d', 'd', 'mm', 100, 1100, 10)}
+          {slider('b', 'Largeur b', 'mm', 100, 1000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 200, 1200, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 100, 1100, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux & âge</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyd', 'fyd', 'MPa', 400, 500, 0.1)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyd', 'Acier fyd', 'MPa', 400, 500, 0.1)}
           {slider('t0', 't0', 'jours', 1, 365, 1)}
           {slider('RH', 'RH', '%', 40, 100, 1)}
           {slider('classe', 'classe', '-', 1, 3, 1)}

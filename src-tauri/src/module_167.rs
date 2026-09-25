@@ -140,29 +140,28 @@ pub fn calculate_bael_ba_bp_fleche_dalle_continue_167(
     let mut moments = Vec::with_capacity(n_pts);
     let mut deflections = Vec::with_capacity(n_pts);
     let mut curvatures = Vec::with_capacity(n_pts);
+    let dx = p.L / (n_pts - 1) as f64;
 
+    // Pass 1: moments + deflections
     for i in 0..n_pts {
         let x = i as f64 / (n_pts - 1) as f64 * p.L;
-
-        // Sum moments from all load cases
         let mut m_total = 0.0;
         for lc in &p.loads {
             m_total += mom2(x, p.L, lc.p1, lc.p2, lc.a, lc.lb, p.kr);
         }
         moments.push(m_total);
-
-        // Deflection from trapezoidal loads
         let mut f_total = 0.0;
         for lc in &p.loads {
             f_total += deflection_trapezoidal(x, p.L, lc.p1, lc.p2, lc.a, lc.lb, e_i);
         }
-        deflections.push(f_total * 1000.0); // mm
+        deflections.push(f_total * 1000.0);
+    }
 
-        // Curvature (finite difference)
-        let dx = p.L / (n_pts - 1) as f64;
+    // Pass 2: curvature via central finite differences (all moments available now)
+    for i in 0..n_pts {
         let m_prev = if i > 0 { moments[i - 1] } else { moments[i] };
         let m_next = if i < n_pts - 1 { moments[i + 1] } else { moments[i] };
-        let kappa = (m_next - 2.0 * m_total + m_prev) / (dx * dx) / e_i * 1000.0; // 1/m
+        let kappa = (m_next - 2.0 * moments[i] + m_prev) / (dx * dx) / e_i * 1000.0;
         curvatures.push(kappa);
     }
 

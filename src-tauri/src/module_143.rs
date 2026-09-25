@@ -42,7 +42,7 @@ fn ffk1_calc(a: f64) -> f64 {
     let n = 30;
     let mut u2 = 0.0;
     for i in (1..=n).step_by(2) {
-        let u1 = i as f64 * pi / 2.0 / a;
+        let u1 = (i as f64 * pi / 2.0 / a).max(-500.0).min(500.0);
         let cosh = (u1.exp() + (-u1).exp()) / 2.0;
         let sinh = (u1.exp() - (-u1).exp()) / 2.0;
         let tanh = sinh / cosh;
@@ -56,7 +56,7 @@ fn ffk2_calc(a: f64) -> f64 {
     let n = 30;
     let mut u2 = 0.0;
     for i in (1..=n).step_by(2) {
-        let u1 = i as f64 * pi / 2.0 / a;
+        let u1 = (i as f64 * pi / 2.0 / a).max(-500.0).min(500.0);
         let cosh = (u1.exp() + (-u1).exp()) / 2.0;
         u2 += 1.0 / (i as f64).powi(2) / cosh;
     }

@@ -38,8 +38,8 @@ export default function Module168() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('L', 'L', 'm', 1, 15, 0.5)}
-          {slider('d', 'd', 'mm', 50, 500, 5)}
+          {slider('L', 'Portée L', 'm', 1, 15, 0.5)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 500, 5)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
           {slider('sigma_s', 'σs', 'MPa', 100, 400, 5)}
           {slider('sigma_sd', 'σsd', 'MPa', 100, 500, 5)}

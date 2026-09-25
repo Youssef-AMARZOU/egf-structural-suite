@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+fn safe_div(num: f64, den: f64) -> f64 {
+    if den.abs() < 1e-12 { 0.0 } else { num / den }
+}
+
 /// Module 120 — Escalier (staircase design)
 /// D'après EGF N°120 © Henry Thonier — BAEL/EC2
 /// Clean-room reimplementation. No VBA code copied.
@@ -42,25 +46,25 @@ pub struct EscalierOutput {
 
 fn trap_shear(x: f64, l: f64, p1: f64, p2: f64, a: f64, b_len: f64) -> f64 {
     let c = l - a - b_len;
-    let va = b_len * (p1 * (2.0 * b_len + 3.0 * c) + p2 * (b_len + 3.0 * c)) / (6.0 * l);
+    let va = safe_div(b_len * (p1 * (2.0 * b_len + 3.0 * c) + p2 * (b_len + 3.0 * c)), 6.0 * l);
     if x < a { va }
     else if x > a + b_len { va - b_len * (p1 + p2) / 2.0 }
     else {
         let dx = x - a;
-        va - p1 * dx - (p2 - p1) * dx * dx / (2.0 * b_len)
+        va - p1 * dx - safe_div((p2 - p1) * dx * dx, 2.0 * b_len)
     }
 }
 
 fn trap_moment(x: f64, l: f64, p1: f64, p2: f64, a: f64, b_len: f64) -> f64 {
     let c = l - a - b_len;
-    let va = b_len * (p1 * (2.0 * b_len + 3.0 * c) + p2 * (b_len + 3.0 * c)) / (6.0 * l);
+    let va = safe_div(b_len * (p1 * (2.0 * b_len + 3.0 * c) + p2 * (b_len + 3.0 * c)), 6.0 * l);
     if x < a { x * va }
     else if x > a + b_len {
         let vb = -b_len * (p1 + p2) / 2.0 + va;
         (l - x) * (-vb)
     } else {
         let dx = x - a;
-        x * va - p1 * dx * dx / 2.0 - (p2 - p1) * dx * dx * dx / (6.0 * b_len)
+        x * va - p1 * dx * dx / 2.0 - safe_div((p2 - p1) * dx * dx * dx, 6.0 * b_len)
     }
 }
 
@@ -88,19 +92,19 @@ pub fn calculate_escalier_120(p: EscalierInputs) -> Result<EscalierOutput, Strin
         v_total += p.g_si * (p.l / 2.0 - x);
         v_total += p.g_db * (p.l / 2.0 - x);
         v_total += p.q_db * (p.l / 2.0 - x);
-        v_total += (p.md - p.mg) / p.l;
+        v_total += safe_div(p.md - p.mg, p.l);
 
         if m_total > m_max { m_max = m_total; }
         if v_total.abs() > v_max { v_max = v_total.abs(); }
     }
 
-    let mu = m_max / (p.b3 * d.powi(2) * fcd * 1e-3);
+    let mu = safe_div(m_max, p.b3 * d.powi(2) * fcd * 1e-3);
     let z = if mu < 0.5 {
         0.5 * d * (1.0 + (1.0 - 2.0 * mu).sqrt())
     } else { 0.5 * d };
 
     let as_req = if mu < 0.5 && mu > 0.0 {
-        m_max / (z * fyd * 1e-3)
+        safe_div(m_max, z * fyd * 1e-3)
     } else { 0.0 };
 
     let v_rdmax = 0.5 * 0.6 * (1.0 - p.fck / 250.0) * fcd * p.b3 * 0.9 * d * 1e-3;

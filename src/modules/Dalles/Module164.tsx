@@ -51,12 +51,12 @@ export default function Module164() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie dalle</div>
-          {slider('h', 'h', 'mm', 50, 600, 10)}
-          {slider('E', 'E', 'MPa', 10000, 60000, 1000)}
+          {slider('h', 'Hauteur dalle h', 'mm', 50, 600, 10)}
+          {slider('E', 'Module E', 'MPa', 10000, 60000, 1000)}
           {slider('nu', 'ν', '', 0.05, 0.4, 0.01)}
           {slider('LA', 'LA', 'm', 1, 15, 0.5)}
           {slider('LB', 'LB', 'm', 1, 15, 0.5)}
-          {slider('d', 'd', 'mm', 50, 550, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 550, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
           {slider('fck', 'fck', 'MPa', 12, 90, 1)}
           {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}

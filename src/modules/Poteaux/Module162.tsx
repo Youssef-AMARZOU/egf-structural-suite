@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, RebarGroup, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, RebarGroup, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { FlexdevV3Inputs, FlexdevV3Output } from '../../types/engineering';
 
 export default function Module162() {
@@ -31,11 +31,11 @@ export default function Module162() {
 
   const secParsed = parsePoints(sectionStr);
   const steelParsed = parseSteel(steelStr);
-  const payload: FlexdevV3Inputs = {
+  const payload: FlexdevV3Inputs = useMemo(() => ({
     ...inp,
     section_points: secParsed.length > 0 ? secParsed : inp.section_points,
     steel_points: steelParsed.length > 0 ? steelParsed : inp.steel_points,
-  };
+  }), [inp, secParsed, steelParsed]);
   const { data: res, error: err, live } = useModuleCalc<FlexdevV3Inputs, FlexdevV3Output>(
     'calculate_flexdev_v3_162', payload,
   );
@@ -96,8 +96,8 @@ export default function Module162() {
               <option value={2}>Sargin</option>
             </select>
           </div>
-          {slider('n_angle_steps', 'Pas angles', '', 4, 36, 1)}
-          {slider('n_strain_pts', 'Pas déform.', '', 5, 60, 1)}
+          {slider('n_angle_steps', 'Pas d\'angles', '', 4, 36, 1)}
+          {slider('n_strain_pts', 'Pas de déformations', '', 5, 60, 1)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>
       }
@@ -126,6 +126,22 @@ export default function Module162() {
                       ));
                       return <DiagramOverlay key={ci} type="moment" points={pts} color={colors[ci % colors.length]} strokeWidth={1.5} />;
                     })}
+                    <AxisTicks
+                      origin={[ox - w / 2, oy + h]} end={[ox + w / 2, oy + h]}
+                      values={[-res.m_max_global, -res.m_max_global / 2, 0, res.m_max_global / 2, res.m_max_global]}
+                      map={(v) => [ox + v * scaleM, oy + h]}
+                      unit="kN·m" side="below" decimals={0}
+                    />
+                    <AxisTicks
+                      origin={[ox, oy + h]} end={[ox, oy]}
+                      values={[0, res.n_max_global / 2, res.n_max_global]}
+                      map={(v) => [ox, oy + (res.n_max_global - v) * scaleN]}
+                      side="left" decimals={0}
+                    />
+                    <InlineLegend
+                      items={res.interaction_curves.map((_, ci) => ({ label: `Courbe ${ci + 1}`, color: colors[ci % colors.length] }))}
+                      x={ox + w / 2 - 80} y={oy + 5}
+                    />
                     <text x={ox + 5} y={oy + 10} fontSize={9} fill="#94A3B8">{res.n_max_global.toFixed(0)} kN</text>
                     <text x={ox + 5} y={oy + h - 5} fontSize={9} fill="#94A3B8">{(res.interaction_curves[0]?.[0]?.[0] ?? 0).toFixed(0)} kN</text>
                     <text x={ox + w / 2 - 10} y={oy + h + 15} fontSize={9} fill="#94A3B8">M (kN·m)</text>

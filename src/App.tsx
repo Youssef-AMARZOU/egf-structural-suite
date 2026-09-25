@@ -445,7 +445,7 @@ export default function App() {
           </div>
 
           <div className="text-[9px] text-slate-400 leading-tight pt-2">
-            D'après les programmes EGF<br />© Henry Thonier
+            D'après les programmes EGF<br />© Henry Thonier<br />by ©Youssef AMARZOU
           </div>
         </aside>
 

@@ -48,13 +48,13 @@ export default function Module175() {
               tg: Array(n).fill(inp.tg[0] || 10), tq: Array(n).fill(inp.tq[0] || 5),
             });
           }} />
-          {slider('b', 'b', 'mm', 100, 1000, 10)}
-          {slider('h', 'h', 'mm', 100, 1000, 10)}
-          {slider('d', 'd', 'mm', 100, 900, 10)}
-          {slider('hf', 'hf', 'mm', 0, 300, 10)}
+          {slider('b', 'Largeur b', 'mm', 100, 1000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 1000, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 100, 900, 10)}
+          {slider('hf', 'Épaisseur dalle hf', 'mm', 0, 300, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('gc', 'γc', '', 1, 2, 0.05)}
           {slider('gs', 'γs', '', 1, 2, 0.05)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Charges (kN/m/m)</div>

@@ -68,8 +68,8 @@ export default function Module101() {
           {slider('fck', 'fck', 'MPa', 12, 90, 1)}
           {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section</div>
-          {slider('bx', 'bx', 'm', 0.1, 2, 0.05)}
-          {slider('h', 'h', 'm', 0.15, 2, 0.05)}
+          {slider('bx', 'Largeur bx', 'm', 0.1, 2, 0.05)}
+          {slider('h', 'Hauteur h', 'm', 0.15, 2, 0.05)}
           {slider('asc', 'Asc', 'cm²', 0, 100, 0.5)}
           {slider('ast', 'Ast', 'cm²', 0, 100, 0.5)}
           {err && (

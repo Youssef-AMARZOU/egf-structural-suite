@@ -76,23 +76,23 @@ export default function Module155() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Materiau</div>
-          {slider('fck', 'fck', 'MPa', 10, 80, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 10, 80, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('gc', 'gc', '-', 1.0, 2.0, 0.05)}
           {slider('gs', 'gs', '-', 1.0, 2.0, 0.05)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section</div>
-          {slider('b', 'b', 'mm', 100, 2000, 10)}
-          {slider('bw', 'bw', 'mm', 100, 2000, 10)}
-          {slider('h', 'h', 'mm', 100, 2000, 10)}
-          {slider('d', 'd', 'mm', 50, 2000, 5)}
+          {slider('b', 'Largeur b', 'mm', 100, 2000, 10)}
+          {slider('bw', 'Largeur âme bw', 'mm', 100, 2000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 2000, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 2000, 5)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Armatures tranchantes</div>
           {slider('asw', 'Asw', 'mm2', 0, 2000, 10)}
-          {slider('s', 's', 'mm', 50, 500, 10)}
+          {slider('s', 'Espacement s', 'mm', 50, 500, 10)}
           {slider('rho_l', 'rho_l', '-', 0, 0.05, 0.001)}
           {slider('cot_theta', 'cot(theta)', '-', 1.0, 3.0, 0.1)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Sollicitation</div>
-          {slider('ved', 'VEd', 'kN', 0, 500, 5)}
-          {slider('ned', 'NEd', 'kN', -1000, 1000, 10)}
+          {slider('ved', 'Tranchant VEd', 'kN', 0, 500, 5)}
+          {slider('ned', 'Effort axial NEd', 'kN', -1000, 1000, 10)}
           {err && (
             <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>
           )}

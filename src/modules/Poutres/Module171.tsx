@@ -38,15 +38,15 @@ export default function Module171() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('d', 'd', 'mm', 100, 800, 10)}
-          {slider('Ac', 'Ac (ferraillage)', 'mm²/m', 0, 3000, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 100, 800, 10)}
+          {slider('Ac', 'Section Ac (ferraillage)', 'mm²/m', 0, 3000, 10)}
           {slider('k', 'k', '', 0.5, 1.5, 0.05)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('gc', 'γc', '', 1, 2, 0.05)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
-          {slider('gs', 'γs', '', 1, 2, 0.05)}
-          {slider('euk', 'εuk', '', 0.005, 0.05, 0.001)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('gc', 'Coefficient γc', '', 1, 2, 0.05)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
+          {slider('gs', 'Coefficient γs', '', 1, 2, 0.05)}
+          {slider('euk', 'Déform. max εuk', '', 0.005, 0.05, 0.001)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>
       }

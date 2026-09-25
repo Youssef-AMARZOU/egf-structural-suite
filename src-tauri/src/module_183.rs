@@ -125,15 +125,15 @@ pub fn calculate_poutre_continue_qtes_v2_183(
     if p.nap < 1 || p.nap > 200 {
         return Err("nap doit être dans [1, 200]".to_string());
     }
-    if p.tLn.len() < p.nap || p.tEI.len() < p.nap || p.tp.len() < p.nap {
-        return Err("tLn, tEI et tp doivent contenir au moins nap valeurs".to_string());
+    let n_spans = if p.nap > 1 { p.nap - 1 } else { 0 };
+    if p.tLn.len() < n_spans || p.tEI.len() < n_spans || p.tp.len() < n_spans {
+        return Err(format!("tLn, tEI, tp doivent contenir {} valeurs ({} travées pour {} appuis)", n_spans, n_spans, p.nap));
     }
     if p.tLn.iter().any(|&l| l <= 0.0) {
         return Err("tLn : portées strictement positives requises".to_string());
     }
     let m = solve_three_moment(p.nap, &p.tLn, &p.tEI, &p.tp);
 
-    let n_spans = if p.nap > 1 { p.nap - 1 } else { 0 };
     let mut moments_travee = Vec::new();
     let mut vmin_list = Vec::new();
     let mut vmax_list = Vec::new();

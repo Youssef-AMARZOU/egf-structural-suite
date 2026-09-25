@@ -42,8 +42,8 @@ export default function Module123() {
         <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Section</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('b', 'b', 'm', 0.1, 2, 0.05)}
-          {slider('d', 'd', 'm', 0.1, 3, 0.05)}
+          {slider('b', 'Largeur b', 'm', 0.1, 2, 0.05)}
+          {slider('d', 'Hauteur utile d', 'm', 0.1, 3, 0.05)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Efforts</div>
         <div className="grid grid-cols-2 gap-2">

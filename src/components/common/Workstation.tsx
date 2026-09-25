@@ -96,6 +96,7 @@ export const Workstation: React.FC<WorkstationProps> = ({
           {eurocode ? ` · ${eurocode}` : ''} · édité le{' '}
           {new Date().toLocaleDateString('fr-FR')} · Statut : {BADGE[status].label}
         </p>
+        <p className="text-[9px] italic">D'après EGF N°{title.split(' ')[0]} © Henry Thonier — by ©Youssef AMARZOU</p>
       </div>
 
       <div className="glass rounded-2xl px-5 flex flex-wrap items-center gap-x-4 gap-y-2" style={{ minHeight: 52 }}>
@@ -107,6 +108,7 @@ export const Workstation: React.FC<WorkstationProps> = ({
             <span className="font-mono text-slate-200">{title}</span>
           </div>
           {subtitle && <p className="text-[11px] text-slate-500 mt-px truncate">{subtitle}</p>}
+          <p className="text-[9px] text-slate-600 dark:text-slate-500 mt-0.5 italic">D'après EGF N°{title.split(' ')[0]} © Henry Thonier — by ©Youssef AMARZOU</p>
         </div>
 
         {presets && presets.length > 0 && (
@@ -176,11 +178,14 @@ export const Workstation: React.FC<WorkstationProps> = ({
         open={printOpen}
         onClose={() => setPrintOpen(false)}
         title={title}
+        subtitle={subtitle}
         eurocode={eurocode}
         status={status === 'computing' ? 'neutral' : status}
         statusLabel={BADGE[status].label}
         verdict={verdict}
         figures={figures}
+        sketch={sketch}
+        results={results}
         annexLabel={annex.label}
         appVersion={typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : ''}
       />

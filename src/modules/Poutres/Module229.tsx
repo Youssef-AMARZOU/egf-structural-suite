@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { CourbesPointsInputs, CourbesPointsOutput } from '../../types/engineering';
 
 export default function Module229() {
@@ -21,7 +21,7 @@ export default function Module229() {
     return { xs: xs.length > 0 ? xs : inp.xs, ys: ys.length > 0 ? ys : inp.ys };
   };
   const parsed = parsePts(ptsText);
-  const payload: CourbesPointsInputs = { xs: parsed.xs, ys: parsed.ys, x_eval: inp.x_eval };
+  const payload: CourbesPointsInputs = useMemo(() => ({ xs: parsed.xs, ys: parsed.ys, x_eval: inp.x_eval }), [parsed, inp.x_eval]);
 
   const { data: res, error: err, live } = useModuleCalc<CourbesPointsInputs, CourbesPointsOutput>(
     'calculate_courbes_points_229', payload,
@@ -48,7 +48,7 @@ export default function Module229() {
     if (yMax - yMin < 1e-9) { yMax += 1; yMin -= 1; }
     const X = (x: number) => 40 + ((x - x0) / (x1 - x0)) * 330;
     const Y = (y: number) => 20 + (1 - (y - yMin) / (yMax - yMin)) * 170;
-    return { pts: raw.map(([x, y]) => [X(x), Y(y)] as [number, number]), X, Y };
+    return { pts: raw.map(([x, y]) => [X(x), Y(y)] as [number, number]), X, Y, x0, x1, yMin, yMax };
   })();
 
   return (
@@ -89,6 +89,19 @@ export default function Module229() {
             {res && curve ? (
               <>
                 <DiagramOverlay type="moment" points={curve.pts} />
+                <AxisTicks
+                  origin={[40, 190]} end={[370, 190]}
+                  values={[curve.x0, (curve.x0 + curve.x1) / 2, curve.x1]}
+                  map={(v) => [curve.X(v), 190]}
+                  unit="" side="below" decimals={1}
+                />
+                <AxisTicks
+                  origin={[40, 20]} end={[40, 190]}
+                  values={[curve.yMin, (curve.yMin + curve.yMax) / 2, curve.yMax]}
+                  map={(v) => [40, curve.Y(v)]}
+                  side="left" decimals={1}
+                />
+                <InlineLegend items={[{ label: 'P(x)', color: '#6366F1' }]} x={45} y={25} />
                 {payload.xs.map((x, i) => (
                   <circle key={i} cx={curve.X(x)} cy={curve.Y(payload.ys[i])} r={4} fill="#EF4444" />
                 ))}

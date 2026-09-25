@@ -61,15 +61,17 @@ fn iterative_design(
         dep1 = n_eq * sc1 / eyp;
         m2 = melu - p2 * e0;
         mu = m2 / b / d / d / fcd / 1000.0;
+        mu = mu.max(0.0).min(0.45);
         ksi = 1.25 * (1.0 - (1.0 - 2.0 * mu).sqrt());
-        dep2 = ecu2 * (1.0 - ksi) / ksi;
-        ss2 = fyd * (1.0 + 0.05 * (dep2 - ep0) / (25.0 / 1000.0 - ep0));
+        dep2 = if ksi > 1e-10 { ecu2 * (1.0 - ksi) / ksi } else { ecu2 };
+        ss2 = fyd * (1.0 + 0.05 * (dep2 - ep0) / (25.0 / 1000.0 - ep0).max(1e-12));
         ep3 = (ep1 + dep1 + dep2).min(eudp);
-        s3 = fpd * (1.0 + 1.0 / 9.0 * (ep3 - es0p) / (20.0 / 0.9 / 1000.0 - es0p));
+        let den_p = (20.0 / 0.9 / 1000.0 - es0p).max(1e-12);
+        s3 = fpd * (1.0 + 1.0 / 9.0 * (ep3 - es0p) / den_p);
         p2 = ap * s3 / 1_000_000.0;
     }
 
-    let as2 = (0.8 * fcd * ksi * b * d - p2) / ss2 * 10_000.0;
+    let as2 = if ss2.abs() > 1e-12 { (0.8 * fcd * ksi * b * d - p2) / ss2 * 10_000.0 } else { 0.0 };
 
     (p2, s0, ep1, dep1, m2, mu, ksi, as2)
 }

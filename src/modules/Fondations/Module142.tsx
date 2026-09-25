@@ -53,10 +53,10 @@ export default function Module142() {
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('b', 'b', 'm', 0.5, 5, 0.1)}
-          {slider('l', 'l', 'm', 0.5, 5, 0.1)}
-          {slider('d', 'd', 'm', 0.1, 2, 0.05)}
-          {slider('h', 'h', 'm', 0.1, 2, 0.05)}
+          {slider('b', 'Largeur b', 'm', 0.5, 5, 0.1)}
+          {slider('l', 'Longueur l', 'm', 0.5, 5, 0.1)}
+          {slider('d', 'Hauteur utile d', 'm', 0.1, 2, 0.05)}
+          {slider('h', 'Hauteur h', 'm', 0.1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Charges</div>

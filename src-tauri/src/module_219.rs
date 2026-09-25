@@ -89,13 +89,16 @@ pub fn calculate_interaction_mn_feu_rect_219(
         let x = heff * (0.03 + 2.5 * i as f64 / npts as f64); // up to 2.5·heff
         let xc = x.min(heff / 0.8);
         let fc = 0.8 * xc * beff * p.fck; // N
+        let d = p.h - p.a;
         let mut n = fc;
-        let mut m = fc * (p.h / 2.0 - 0.4 * xc);
+        let z_c = (d - 0.4 * xc).min(0.9 * d);
+        let mut m = fc * z_c;
         for (&di, &aa) in [d_top, d_bot].iter().zip([as2, as2].iter()) {
             let eps = ecu * (x - di) / x; // >0 compression
             let sig = (es * eps).clamp(-fs, fs);
             n += aa * sig;
-            m += aa * sig * (p.h / 2.0 - di);
+            let z_si = (d - di).min(0.9 * d);
+            m += aa * sig * z_si;
         }
         curve_m.push(m / 1e6);
         curve_n.push(n / 1000.0);

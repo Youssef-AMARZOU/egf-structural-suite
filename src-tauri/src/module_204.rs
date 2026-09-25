@@ -60,6 +60,9 @@ pub fn calculate_fluage_retrait_204(
     let beta_t0 = 1.0 / (0.1 + t0adj.powf(0.2));
     let phi_0 = phi_rh * beta_fcm * beta_t0;
     let beta_h = (1.5 * (1.0 + (0.012 * p.rh).powi(18)) * h0 + 250.0 * al3).min(1500.0 * al3);
+    if p.t <= t0adj {
+        return Err(format!("t ({:.1} j) doit être > t0 ajusté ciment ({:.1} j)", p.t, t0adj));
+    }
     let beta_c = ((p.t - t0adj) / (beta_h + p.t - t0adj)).powf(0.3);
     let phi_t = phi_0 * beta_c;
 

@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+fn safe_div(num: f64, den: f64) -> f64 {
+    if den.abs() < 1e-12 { 0.0 } else { num / den }
+}
+
 /// Module 122 — Sem2_pieux (pile cap design)
 /// D'après EGF N°122 © Henry Thonier — EC2 strut-and-tie
 /// Clean-room reimplementation. No VBA code copied.
@@ -51,8 +55,8 @@ pub fn calculate_sem2_pieux_122(p: Sem2PieuxInputs) -> Result<Sem2PieuxOutput, S
     let span = p.d1 + p.d2;
     let g = p.go * p.gg;
 
-    let p1 = p.ned / span - 6.0 * med / (span * span);
-    let p2 = p.ned / span + 6.0 * med / (span * span);
+    let p1 = safe_div(p.ned, span) - safe_div(6.0 * med, span * span);
+    let p2 = safe_div(p.ned, span) + safe_div(6.0 * med, span * span);
 
     let c = span - p.b_col;
     let va = p.b_col * (p1 * (2.0 * p.b_col + 3.0 * c) + p2 * (p.b_col + 3.0 * c)) / (6.0 * span);
@@ -66,17 +70,17 @@ pub fn calculate_sem2_pieux_122(p: Sem2PieuxInputs) -> Result<Sem2PieuxOutput, S
 
     let fcd = p.fck / p.gc;
     let fyd = p.fyk / p.gs;
-    let sigma_rdmax = (1.0 - p.fck / 250.0) * fck(p.fck) / p.gc;
+    let sigma_rdmax = 0.5 * 0.6 * (1.0 - p.fck / 250.0) * fck(p.fck) / p.gc;
 
     let ge = p.d1 + p.d2;
     let cot_theta = (ge / 2.0 - p.b_col / 4.0) / p.d_eff;
     let cot_theta = cot_theta.min(2.5).max(1.0);
 
-    let mu = m_max / (p.gb_pc * p.d_eff.powi(2) * fcd * 1e-3);
+    let mu = safe_div(m_max, p.gb_pc * p.d_eff.powi(2) * fcd * 1e-3);
     let z = if mu < 0.5 { 0.5 * p.d_eff * (1.0 + (1.0 - 2.0 * mu).sqrt()) } else { 0.5 * p.d_eff };
-    let as_req = if mu < 0.5 && mu > 0.0 { m_max / (z * fyd * 1e-3) } else { 0.0 };
+    let as_req = if mu < 0.5 && mu > 0.0 { safe_div(m_max, z * fyd * 1e-3) } else { 0.0 };
 
-    let asw_req = v_max / (0.9 * p.d_eff * fyd);
+    let asw_req = safe_div(v_max, 0.9 * p.d_eff * fyd);
 
     let verdict = format!(
         "Med={:.3}MNm | p1={:.3} p2={:.3} MPa | As={:.1}cm² | cotθ={:.2}",

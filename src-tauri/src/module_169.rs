@@ -64,7 +64,7 @@ pub fn calculate_poteau_lambdamin_169(
     }
     let f_cd = p.fck / 1.5;
     let a_c = p.h * p.h; // mm² per m run
-    let n_rod = p.N_ed * 1000.0 / (a_c * f_cd / 1000.0); // kN / kN
+    let n_rod = p.N_ed / (a_c * f_cd / 1000.0); // kN / kN
 
     // Radius of gyration for rectangular section
     let i = p.d_mod / 12.0_f64.sqrt(); // ≈ 0.289 × d_mod

@@ -45,9 +45,9 @@ export default function Module166() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('b', 'b', 'mm', 200, 2000, 10)}
-          {slider('h', 'h', 'mm', 100, 800, 10)}
-          {slider('d', 'd', 'mm', 50, 700, 10)}
+          {slider('b', 'Largeur b', 'mm', 200, 2000, 10)}
+          {slider('h', 'Hauteur dalle h', 'mm', 100, 800, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 700, 10)}
           {slider('e0', 'e0', 'mm', -100, 100, 5)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Charges</div>
           {slider('P', 'P (MN)', 'MN', 0, 2, 0.05)}

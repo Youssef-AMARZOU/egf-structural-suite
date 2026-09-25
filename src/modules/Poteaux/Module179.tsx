@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
@@ -6,21 +6,28 @@ import { FormulaCard } from '../../components/common/FormulaCard';
 import { SectionCanvas, DimensionLine, RebarGroup } from '../../components/drafting';
 import { CisaiSectionQQEnFCInputs, CisaiSectionQQEnFCOutput } from '../../types/engineering';
 
+function buildTabs(na: number, R: number, Ac: number): [number[], number[], number[]] {
+  const n = Math.max(1, Math.round(na));
+  return [
+    Array(n).fill(1),
+    Array(n).fill(Ac),
+    Array.from({ length: n }, (_, i) => +(R - R * Math.cos(2 * Math.PI * i / n)).toFixed(4)),
+  ];
+}
+
 export default function Module179() {
-  const n = 6;
   const R0 = 0.3;
   const [inp, setInp] = useState<CisaiSectionQQEnFCInputs>({
     NEd: 500, MEd: 200, R: R0, na: 6, Ac: 3.14e-4,
-    tabs: [
-      Array(n).fill(1),
-      Array(n).fill(3.14e-4),
-      Array.from({ length: n }, (_, i) => +(R0 - R0 * Math.cos(2 * Math.PI * i / n)).toFixed(4)),
-    ],
+    tabs: buildTabs(6, R0, 3.14e-4),
     fyk: 500, gs: 1.15, k: 1.05, euk: 0.025,
     fcd: 17.0, ec1: 0.00175, ecu1: 0.0035, typ: 1, itour: 20,
   });
+
+  const tabs = useMemo(() => buildTabs(inp.na, inp.R, inp.Ac), [inp.na, inp.R, inp.Ac]);
+  const inpWithTabs = useMemo(() => ({ ...inp, tabs }), [inp, tabs]);
   const { data: res, error: err, live } = useModuleCalc<CisaiSectionQQEnFCInputs, CisaiSectionQQEnFCOutput>(
-    'calculate_cisai_section_qq_en_fc_179', inp,
+    'calculate_cisai_section_qq_en_fc_179', inpWithTabs,
   );
   const S = (k: keyof CisaiSectionQQEnFCInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
@@ -51,9 +58,9 @@ export default function Module179() {
           {slider('NEd', 'NEd', 'kN', 0, 5000, 50)}
           {slider('MEd', 'MEd', 'kN·m', 0, 2000, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('R', 'R (rayon)', 'm', 0.1, 1, 0.05)}
-          {slider('na', 'na (barres)', '', 2, 20, 1)}
-          {slider('Ac', 'Ac (barre)', 'm²', 0, 0.002, 0.00001)}
+          {slider('R', 'Rayon R', 'm', 0.1, 1, 0.05)}
+          {slider('na', 'Nombre de barres na', '', 2, 20, 1)}
+          {slider('Ac', 'Section barre Ac', 'm²', 0, 0.002, 0.00001)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Acier</div>
           {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
           {slider('gs', 'γs', '', 1, 2, 0.05)}

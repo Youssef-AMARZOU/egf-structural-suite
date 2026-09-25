@@ -58,7 +58,7 @@ fn f_as(mm: f64, fck: f64, gc: f64, fyk: f64, gs: f64, b: f64, h: f64,
         (m_pos, dpp, bw_pos)
     };
 
-    let mu = m / bw / dpp / dpp / fcd;
+    let mu = (m / bw / dpp / dpp / fcd).min(0.45);
     let ksi = 1.25 * (1.0 - (1.0 - 2.0 * mu).sqrt());
     let es_val = ecu * (1.0 - ksi) / ksi;
     let es_clamped = es_val.min(eud);

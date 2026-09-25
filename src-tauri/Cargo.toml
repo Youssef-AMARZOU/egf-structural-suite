@@ -3,7 +3,7 @@ name = "egf-structural-suite"
 version = "0.1.4"
 edition = "2021"
 description = "EGF BTP Structural Engineering Suite — Tauri v2"
-authors = ["EGF © Henry Thonier"]
+authors = ["©Youssef AMARZOU", "D'après les programmes EGF © Henry Thonier"]
 
 [lib]
 name = "egf_structural_suite_lib"

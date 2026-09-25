@@ -43,9 +43,9 @@ export default function Module114() {
         <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Section</div>
         <div className="grid grid-cols-3 gap-2">
-          {slider('gd', 'GD', 'm', 0.2, 3, 0.05)}
-          {slider('na', 'na', '-', 4, 60, 2)}
-          {slider('phi', 'φ', 'mm', 6, 40, 2)}
+          {slider('gd', 'Diamètre GD', 'm', 0.2, 3, 0.05)}
+          {slider('na', 'Nombre na', '-', 4, 60, 2)}
+          {slider('phi', 'Diamètre φ', 'mm', 6, 40, 2)}
         </div>
         <div className="grid grid-cols-2 gap-2">
           {slider('enr', 'enr', 'mm', 10, 100, 5)}

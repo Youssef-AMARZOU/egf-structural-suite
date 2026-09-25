@@ -90,7 +90,7 @@ pub fn calculate_desc_de_charges_170(
         env_sls_qp: sls_qp,
         env_sls_qk: sls_qk,
         env_sls_rare: sls_rare,
-        env_sls_qp_rare: sls_rare,
+        env_sls_qp_rare: sls_qp,
         diag,
         verdict,
     })

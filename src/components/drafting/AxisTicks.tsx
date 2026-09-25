@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { PrintLightContext } from './SectionCanvas';
 
 interface AxisTicksProps {
   /** start of axis in px (optional, for reference) */
@@ -68,21 +69,33 @@ interface InlineLegendProps {
 export const InlineLegend: React.FC<InlineLegendProps> = ({
   items, x, y, fontSize = 9,
 }) => {
+  const light = useContext(PrintLightContext);
   const lineH = fontSize + 3;
-  const boxW = Math.max(...items.map((it) => it.label.length * fontSize * 0.55 + 18));
-  const boxH = items.length * lineH + 6;
+  const boxW = Math.max(...items.map((it) => it.label.length * fontSize * 0.55 + 22));
+  const boxH = items.length * lineH + 8;
+
+  const bg = light ? '#ffffff' : '#1E293B';
+  const bgOpacity = light ? 1 : 0.85;
+  const stroke = light ? '#CBD5E1' : '#334155';
+  const textColor = light ? '#1E293B' : '#CBD5E1';
+
   return (
     <g>
-      <rect x={x} y={y} width={boxW} height={boxH} rx={3} fill="#1E293B" fillOpacity={0.85} stroke="#334155" strokeWidth={0.5} />
-      {items.map((it, i) => (
-        <g key={i}>
-          <line x1={x + 5} y1={y + 5 + i * lineH + lineH / 2} x2={x + 17} y2={y + 5 + i * lineH + lineH / 2}
-            stroke={it.color} strokeWidth={2} strokeDasharray={it.dashed ? '3 2' : undefined} />
-          <text x={x + 21} y={y + 5 + i * lineH + lineH / 2 + fontSize / 3} fontSize={fontSize} fill="#CBD5E1">
-            {it.label}
-          </text>
-        </g>
-      ))}
+      <rect x={x} y={y} width={boxW} height={boxH} rx={4}
+        fill={bg} fillOpacity={bgOpacity} stroke={stroke} strokeWidth={light ? 0.8 : 0.5} />
+      {items.map((it, i) => {
+        const cy = y + 6 + i * lineH + lineH / 2;
+        return (
+          <g key={i}>
+            <line x1={x + 6} y1={cy} x2={x + 20} y2={cy}
+              stroke={it.color} strokeWidth={2} strokeLinecap="round"
+              strokeDasharray={it.dashed ? '4 2' : undefined} />
+            <text x={x + 24} y={cy + fontSize / 3} fontSize={fontSize} fontWeight={600} fill={textColor}>
+              {it.label}
+            </text>
+          </g>
+        );
+      })}
     </g>
   );
 };

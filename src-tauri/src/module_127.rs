@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+fn safe_div(num: f64, den: f64) -> f64 {
+    if den.abs() < 1e-12 { 0.0 } else { num / den }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct RotplastAbaqueInputs {
     pub fck: f64,
@@ -91,9 +95,9 @@ fn walraven_curvature(
     let ga = -n * aci_m2 * d - n * acs_m2 * dp;
     let disc = be * be - 4.0 * al * ga;
     if disc < 0.0 { return 0.0; }
-    let mut x = (-be + disc.sqrt()) / 2.0 / al;
+    let mut x = safe_div(-be + disc.sqrt(), 2.0 * al);
     let icr = if hf > 0.0 && x > hf {
-        x = (-be + disc.sqrt()) / 2.0 / bw;
+        x = safe_div(-be + disc.sqrt(), 2.0 * bw);
         b * x * x * x / 3.0 - (b - bw) * (x - hf).powi(3) / 3.0
             + n * aci_m2 * (d - x).powi(2)
             + n * acs_m2 * (x - dp).powi(2)

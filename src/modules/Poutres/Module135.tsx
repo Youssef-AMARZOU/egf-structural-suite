@@ -48,17 +48,17 @@ export default function Module135() {
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('gc', 'γc', '-', 1, 2, 0.05)}
           {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Poutre</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('bw', 'bw', 'mm', 100, 1000, 10)}
-          {slider('h', 'h', 'mm', 100, 1500, 10)}
-          {slider('d', 'd', 'mm', 50, 1400, 5)}
+          {slider('bw', 'Largeur âme bw', 'mm', 100, 1000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 1500, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 1400, 5)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>

@@ -12,7 +12,7 @@ fn simp(t: &[f64], nk: usize, i_end: usize, dx: f64) -> f64 {
     if n < 2 || i_end == 0 { return 0.0; }
 
     let ka = if i_end % 2 == 0 { i_end + 1 } else { i_end };
-    let mut a = t[0] - t[ka.min(n - 1)];
+    let mut a = t[0] + t[ka.min(n - 1)];
 
     let mut k = 2;
     while k <= i_end && k + 1 < n {

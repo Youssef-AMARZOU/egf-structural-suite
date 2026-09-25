@@ -44,9 +44,9 @@ export default function Module112() {
         <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-3 gap-2">
-          {slider('a', 'a', 'mm', 100, 2000, 50)}
-          {slider('b', 'b', 'mm', 100, 2000, 50)}
-          {slider('d', 'd', 'mm', 100, 2000, 10)}
+          {slider('a', 'Longueur a', 'mm', 100, 2000, 50)}
+          {slider('b', 'Largeur b', 'mm', 100, 2000, 50)}
+          {slider('d', 'Hauteur utile d', 'mm', 100, 2000, 10)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">

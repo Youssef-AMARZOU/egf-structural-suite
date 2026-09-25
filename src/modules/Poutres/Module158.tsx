@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { FluageRetraitInputs, FluageRetraitOutput } from '../../types/engineering';
 
 export default function Module158() {
@@ -16,7 +16,7 @@ export default function Module158() {
   const S = (k: keyof FluageRetraitInputs) => (v: number) =>
     setInp((p) => ({ ...p, [k]: v }));
 
-  const creepPts: [number, number][] = res ? (() => {
+  const creepPts: [number, number][] = useMemo(() => res ? (() => {
     const maxPhi = res.phi_0 * 1.2 || 1;
     const pts: [number, number][] = [];
     for (let i = 0; i <= 40; i++) {
@@ -26,7 +26,7 @@ export default function Module158() {
       pts.push([100 + frac * 400, 160 - ((res.phi_0 * betaCt) / maxPhi) * 150]);
     }
     return pts;
-  })() : [];
+  })() : [], [res?.phi_0, res?.bH, inp.t0]);
   const maxPhi = res ? res.phi_0 * 1.2 || 1 : 1;
   const markerX = 100 + Math.max(0, Math.min(1, (Math.log10(inp.t) / Math.log10(100000) - 0.07) / 0.93)) * 400;
 
@@ -82,6 +82,19 @@ export default function Module158() {
             {res && (
               <>
                 <DiagramOverlay type="deflection" points={creepPts} color="#6366F1" />
+                <AxisTicks
+                  origin={[100, 160]} end={[500, 160]}
+                  values={[10, 100, 1000, 10000, 100000]}
+                  map={(v) => [100 + (Math.log10(v) - 1) / 4 * 400, 160]}
+                  unit="j" side="below" decimals={0}
+                />
+                <AxisTicks
+                  origin={[100, 10]} end={[100, 160]}
+                  values={[0, 0.5, 1, 1.5]}
+                  map={(v) => [100, 160 - (v / maxPhi) * 150]}
+                  side="left" decimals={1}
+                />
+                <InlineLegend items={[{ label: 'φ(t,t₀)', color: '#6366F1' }]} x={110} y={15} />
                 <line x1={100} y1={160 - (res.phi_0 / maxPhi) * 150} x2={500} y2={160 - (res.phi_0 / maxPhi) * 150} stroke="#EF4444" strokeDasharray="4,4" strokeWidth={1} />
                 <text x={105} y={160 - (res.phi_0 / maxPhi) * 150 - 5} fontSize={10} fill="#EF4444">φ₀ = {res.phi_0.toFixed(2)}</text>
                 <circle cx={markerX} cy={160 - (res.phi_t / maxPhi) * 150} r={5} fill="#10B981" />

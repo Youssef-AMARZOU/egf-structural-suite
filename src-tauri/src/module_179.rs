@@ -81,7 +81,8 @@ fn ng_concrete(nt: usize, ttz: &Vec<Vec<f64>>, h: f64,
                e1: f64, e2: f64, fcd: f64, ec1: f64, kc: f64,
                typ: usize, code: usize) -> f64 {
     let ecu1 = ec1;
-    let ecu2 = ecu1 * 1.5;
+    let ecu2 = 3.5 / 1000.0;
+    let ec2 = 2.0 / 1000.0;
     let nsi = 50;
     let mut hc = 0.0_f64;
     let mut total = 0.0_f64;
@@ -98,7 +99,7 @@ fn ng_concrete(nt: usize, ttz: &Vec<Vec<f64>>, h: f64,
             let frac = y / h;
             let b = b1 + (b2 - b1) * frac;
             let ec = e1 + (e2 - e1) * frac;
-            let sc = sig(ec.abs(), ecu1, ecu2, ec1, ec1 * 1.5, kc, 0.0, fcd * 1.5, 1.5, typ);
+            let sc = sig(ec.abs(), ecu1, ecu2, ec1, ec2, kc, 0.0, fcd, 1.0, typ);
             let coeff = if j == 0 || j == nsi { 1.0 } else if j % 2 == 1 { 4.0 } else { 2.0 };
             let dfc = b * dy * sc * coeff / 3.0;
             if code == 1 { local_sum += dfc; }
@@ -122,57 +123,67 @@ fn mn_bisect(ned: f64, med: f64, r: f64, na: usize, ac: f64,
     // Pure compression / traction
     if med.abs() < 1e-10 {
         if ned > 0.0 {
-            let ab: f64 = tabs[2].iter().sum();
-            let sc = ned / ab;
-            let ep = ec1 * (1.0 - (1.0 - sc / fcd).sqrt());
-            return (ep, ep, fcd * ab + ac * fyk / gs, 0.0);
+            let as_total: f64 = (0..na).map(|i| tabs[0][i] * tabs[1][i]).sum();
+            return (ecu1, ecu1, fcd * ac + as_total * fyk / gs, 0.0);
         } else {
             return (-fyk / gs / 200.0, -fyk / gs / 200.0, ned.abs(), 0.0);
         }
     }
 
-    let mut ena = (ecu1 - esu) / 2.0;
-    let mut enb = ecu1;
+    let tol_n = if ned.abs() > 1.0 { ned.abs() * 0.01 } else { 0.01 };
+
+    let mut best_e1 = 0.0_f64;
+    let mut best_e2 = 0.0_f64;
+    let mut best_nrd = 0.0_f64;
+    let mut best_mrd = 0.0_f64;
+    let mut best_err = f64::INFINITY;
 
     for _ in 0..itour {
-        let npas = 20;
+        let npas = 40;
+        let mut ena = -esu;
+        let mut enb = ecu1;
         let den = (enb - ena) / npas as f64;
 
         for i in 0..=npas {
             let en = ena + i as f64 * den;
-            let mut ema = 0.0_f64;
-            let mut emb = (ecu1 + esu) / 2.0;
 
-            for _ in 0..itour {
-                let npas2 = 10;
-                let dem = (emb - ema) / npas2 as f64;
+            let npas2 = 20;
+            let ema = -esu;
+            let emb = ecu1;
+            let dem = (emb - ema) / npas2 as f64;
 
-                for j in 0..=npas2 {
-                    let em = ema + j as f64 * dem;
-                    let e1 = (en + em).min(ecu1).max(-esu);
-                    let e2 = (en - em).min(ecu1).max(-esu);
-                    if e1 < e2 { continue; }
+            for j in 0..=npas2 {
+                let em = ema + j as f64 * dem;
+                let e1 = (en + em).min(ecu1).max(-esu);
+                let e2 = (en - em).min(ecu1).max(-esu);
+                if e1 < e2 { continue; }
 
-                    let nrs = ns_steel(e1, e2, na, h, tabs, fyk, gs, euk, k, classe, 1);
-                    let nrc = ng_concrete(nt, ttz, h, e1, e2, fcd, ec1, kc, typ, 1);
-                    let nrd = nrc + nrs;
+                let nrs = ns_steel(e1, e2, na, h, tabs, fyk, gs, euk, k, classe, 1);
+                let nrc = ng_concrete(nt, ttz, h, e1, e2, fcd, ec1, kc, typ, 1);
+                let nrd = nrc + nrs;
 
-                    if (nrd - ned).abs() < 1.0 && nrd >= ned {
-                        let mrs = ns_steel(e1, e2, na, h, tabs, fyk, gs, euk, k, classe, 2);
-                        let mrc = ng_concrete(nt, ttz, h, e1, e2, fcd, ec1, kc, typ, 2);
-                        let mrd = mrc + mrs;
-                        if mrd >= med {
-                            return (e1, e2, nrd, mrd);
-                        }
+                let err_n = (nrd - ned).abs();
+                if err_n < best_err {
+                    let mrs = ns_steel(e1, e2, na, h, tabs, fyk, gs, euk, k, classe, 2);
+                    let mrc = ng_concrete(nt, ttz, h, e1, e2, fcd, ec1, kc, typ, 2);
+                    let mrd = mrc + mrs;
+                    best_err = err_n;
+                    best_e1 = e1;
+                    best_e2 = e2;
+                    best_nrd = nrd;
+                    best_mrd = mrd;
+                    if err_n < tol_n && mrd >= med * 0.99 {
+                        return (e1, e2, nrd, mrd);
                     }
                 }
             }
-            ena = en - den;
         }
-        ena = (ena + enb) / 2.0;
+        if best_err < tol_n && best_mrd >= med * 0.99 {
+            return (best_e1, best_e2, best_nrd, best_mrd);
+        }
     }
 
-    (0.0, 0.0, 0.0, 0.0)
+    (best_e1, best_e2, best_nrd, best_mrd)
 }
 
 // ─── inputs / outputs ────────────────────────────────────────────
