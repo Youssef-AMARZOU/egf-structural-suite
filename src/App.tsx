@@ -345,6 +345,14 @@ export default function App() {
       <AnnexProvider>
       <div className="app-canvas flex flex-col h-screen text-slate-900 dark:text-slate-100" style={{ '--cat': CATEGORY_ACCENT[cat] } as CSSProperties}>
         <TitleBar />
+        {!('__TAURI_INTERNALS__' in window) && (
+          <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-1.5 text-center text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+            📦 Demo mode — calculations require the desktop app.{" "}
+            <a href="https://github.com/Youssef-AMARZOU/egf-structural-suite/releases" target="_blank" rel="noreferrer" className="underline hover:text-amber-700">
+              Download here
+            </a>
+          </div>
+        )}
         <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
         <aside className={`glass-shell shrink-0 overflow-y-auto rounded-r-2xl transition-all duration-200 ${navCollapsed ? 'w-0 p-0 opacity-0 pointer-events-none border-0' : 'w-[260px] p-4 space-y-3'}`}>
