@@ -1,3 +1,13 @@
+---
+title: EGF Structural Suite
+emoji: 🏗️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # EGF Structural Suite
 
 **BTP structural calculation suite — 126 modules migrated from legacy VBA/Excel to Rust + React + Tauri v2**
@@ -53,6 +63,33 @@ npx tauri dev
 # Production build
 npx tauri build
 ```
+
+## Deployment
+
+### Hugging Face Space (Docker)
+
+The `Dockerfile` at repo root builds the full Tauri app and streams it via noVNC:
+
+```bash
+# Create Space at https://huggingface.co/new-space
+# SDK: Docker, Hardware: CPU basic
+# Then push this repo to the Space:
+git remote add hf https://huggingface.co/spaces/Youssef-AMARZOU/egf-structural-suite
+git push hf master
+```
+
+First build takes 15–30 min (Rust compilation). The Space exposes port 7860 with the desktop app in browser.
+
+### GitHub Releases
+
+Tag a release to trigger CI/CD build:
+
+```bash
+git tag v0.1.5
+git push origin v0.1.5
+```
+
+Builds Windows NSIS (.exe) and MSI (.msi) installers automatically.
 
 ## Legacy Source
 
