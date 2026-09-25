@@ -52,8 +52,8 @@ export default function Module165() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie & Matériaux</div>
-          {slider('E', 'E', 'MPa', 10000, 60000, 1000)}
-          {slider('H', 'H', 'mm', 100, 600, 10)}
+          {slider('E', 'Module E', 'MPa', 10000, 60000, 1000)}
+          {slider('H', 'Hauteur dalle H', 'mm', 100, 600, 10)}
           {slider('pa', 'Pa', 'kN·m', -100, 100, 1)}
           {slider('pb', 'Pb', 'kN·m', -100, 100, 1)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Travées & Charges (MN/m²)</div>

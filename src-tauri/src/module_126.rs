@@ -44,7 +44,7 @@ pub struct ContraintesSectionQqOutput {
 fn simpson(t: &[f64], a: f64, b: f64) -> f64 {
     let n = t.len() - 1;
     if n == 0 { return 0.0; }
-    let mut air = t[0] - t[n];
+    let mut air = t[0] + t[n];
     let mut i = 1;
     while i < n {
         air += 4.0 * t[i];

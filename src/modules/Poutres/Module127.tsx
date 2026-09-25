@@ -45,12 +45,12 @@ export default function Module127() {
         <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Section</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('b', 'b', 'mm', 100, 2000, 10)}
-          {slider('h', 'h', 'mm', 100, 2000, 10)}
-          {slider('bw', 'bw', 'mm', 100, 1000, 10)}
-          {slider('hf', 'hf', 'mm', 0, 500, 10)}
-          {slider('d', 'd', 'mm', 50, 2000, 5)}
-          {slider('dp', 'dp', 'mm', 20, 200, 5)}
+          {slider('b', 'Largeur b', 'mm', 100, 2000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 2000, 10)}
+          {slider('bw', 'Largeur âme bw', 'mm', 100, 1000, 10)}
+          {slider('hf', 'Épaisseur dalle hf', 'mm', 0, 500, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 2000, 5)}
+          {slider('dp', 'Enrobage dp', 'mm', 20, 200, 5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Aciers</div>
         <div className="grid grid-cols-2 gap-2">
@@ -59,16 +59,16 @@ export default function Module127() {
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
-          {slider('ecm', 'Ecm', 'MPa', 10000, 50000, 500)}
-          {slider('fctm', 'fctm', 'MPa', 1, 10, 0.1)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
+          {slider('ecm', 'Module Ecm', 'MPa', 10000, 50000, 500)}
+          {slider('fctm', 'Résist. traction fctm', 'MPa', 1, 10, 0.1)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitations</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('m_ed', 'MEd', 'kN·m', 0, 2000, 5)}
-          {slider('n_ed', 'NEd', 'kN', -2000, 2000, 10)}
-          {slider('l_eff', 'Leff', 'm', 1, 20, 0.5)}
+          {slider('m_ed', 'Moment MEd', 'kN·m', 0, 2000, 5)}
+          {slider('n_ed', 'Effort axial NEd', 'kN', -2000, 2000, 10)}
+          {slider('l_eff', 'Longueur effective Leff', 'm', 1, 20, 0.5)}
           {slider('beta', 'β', '-', 0, 1, 0.05)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}

@@ -136,10 +136,7 @@ fn v_rdc_without_reinf(
     let k_max = 2.0;
     let k = k_val.max(k_min).min(k_max);
 
-    let rho_x = (100.0 * rho).powf(1.0 / 3.0);
-    let rho_x = rho_x.max(0.04);
-
-    let v_rdc = crdc * k * rho_x * 100.0_f64.powf(1.0 / 3.0) * fck.powf(1.0 / 2.0);
+    let v_rdc = crdc * k * (100.0 * rho * fck).powf(1.0 / 3.0).max(0.04);
     let v_rdc = v_rdc / 1000.0;
 
     let v_ed_max = v_ed / (u1 * d / 1000.0);
@@ -148,8 +145,7 @@ fn v_rdc_without_reinf(
 }
 
 fn v_rdc_max(fck: f64, gc: f64) -> f64 {
-    let fcd = fck / gc;
-    let v_rdc_max = 0.5 * fck * (1.0 - fck / 250.0) / gc;
+    let v_rdc_max = 0.5 * 0.6 * (1.0 - fck / 250.0) * fck / gc;
     v_rdc_max.max(0.0)
 }
 

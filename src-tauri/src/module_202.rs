@@ -64,7 +64,7 @@ pub fn calculate_auxiliaires_flexion_202(
             let ac = (m_nmm - mlim) / ((p.d - p.dp) * fyd);
             (mu, xlim, ac, "B +aciers comprimés".to_string(), p.d - lam * xlim / 2.0, eta * fcd * p.b * lam * xlim + ac * fyd)
         } else {
-            let x = p.d * (1.0 - (1.0 - 2.0 * mu).max(0.0).sqrt()) / lam;
+            let x = p.d * (1.0 - (1.0 - 2.0 * mu / eta).max(0.0).sqrt()) / lam;
             (mu, x, 0.0, "A".to_string(), p.d - lam * x / 2.0, eta * fcd * p.b * lam * x)
         }
     } else {

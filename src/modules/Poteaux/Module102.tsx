@@ -54,8 +54,8 @@ export default function Module102() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section</div>
-          {slider('b', 'b', 'mm', 100, 1000, 10)}
-          {slider('h', 'h', 'mm', 200, 1200, 10)}
+          {slider('b', 'Largeur b', 'mm', 100, 1000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 200, 1200, 10)}
           {slider('As', 'As (2 lits)', 'mm²', 0, 8000, 50)}
           {slider('cover', 'Enrobage', 'mm', 10, 100, 5)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Sollicitations & matériaux</div>

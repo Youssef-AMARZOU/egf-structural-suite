@@ -52,9 +52,10 @@ fn fmom(x: f64, nc: usize, l: f64, tp1: &[f64], tp2: &[f64], ta: &[f64], tb: &[f
             m += va * x - p1 * (x - a).powi(2) / 2.0 - (p2 - p1) * (x - a).powi(3) / 6.0 / b;
         }
 
-        m += mg * (1.0 - x / l) + md * x / l;
-        v += (md - mg) / l;
     }
+
+    m += mg * (1.0 - x / l) + md * x / l;
+    v += (md - mg) / l;
 
     (v, m)
 }

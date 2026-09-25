@@ -140,8 +140,8 @@ pub fn calculate_prefa_et_dalle_rapportee_173(
     let eh = 3.5; // top strain ‰
     let eb = -1.0; // bottom strain ‰
 
-    let nr = verif_nm(eh, eb, p.h, p.h1, fcd, p.ec1, nc, p.hsup, p.hinf, p.b, p.bw, 1);
-    let mr = verif_nm(eh, eb, p.h, p.h1, fcd, p.ec1, nc, p.hsup, p.hinf, p.b, p.bw, 2);
+    let nr = verif_nm(eh, eb, p.h, p.h1, fcd, ec1, nc, p.hsup, p.hinf, p.b, p.bw, 1);
+    let mr = verif_nm(eh, eb, p.h, p.h1, fcd, ec1, nc, p.hsup, p.hinf, p.b, p.bw, 2);
 
     // Shear/torsion
     let d = p.h - 30.0; // assumed cover

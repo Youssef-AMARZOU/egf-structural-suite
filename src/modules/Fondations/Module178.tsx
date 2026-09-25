@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { PoteauPieuV3Inputs, PoteauPieuV3Output } from '../../types/engineering';
 
 export default function Module178() {
@@ -91,6 +91,19 @@ export default function Module178() {
                     stroke="#22C55E" strokeWidth={1} strokeDasharray="4,3" />
                   <text x={ox + w + 5} y={oy + h - res.phi_inf * sc + 3} fontSize={7} fill="#22C55E">φ∞</text>
                   <DiagramOverlay type="deflection" points={creepPts} color="#6366F1" />
+                  <AxisTicks
+                    origin={[ox, oy + h]} end={[ox + w, oy + h]}
+                    values={[0, 100, 500, 1000, 5000]}
+                    map={(v) => [ox + (Math.log10(Math.max(v, 1)) / Math.log10(5000)) * w, oy + h]}
+                    unit="j" side="below" decimals={0}
+                  />
+                  <AxisTicks
+                    origin={[ox, oy + h]} end={[ox, oy]}
+                    values={[0, phiMax / 2, phiMax]}
+                    map={(v) => [ox, oy + h - v * sc]}
+                    side="left" decimals={1}
+                  />
+                  <InlineLegend items={[{ label: 'φ(t,t₀)', color: '#6366F1' }, { label: 'φ∞', color: '#22C55E', dashed: true }]} x={ox + 5} y={oy + 2} />
                   <circle cx={ox + w * 0.1} cy={oy + h} r={3} fill="#EF4444" />
                   <text x={ox + w * 0.1} y={oy + h + 12} fontSize={7} fill="#EF4444" textAnchor="middle">t0={inp.t0a}j</text>
                 </>

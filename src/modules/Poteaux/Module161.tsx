@@ -61,8 +61,8 @@ export default function Module161() {
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
           {slider('fck', 'fck', 'MPa', 12, 90, 1)}
           {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
-          {slider('gc', 'γc', '', 1, 2, 0.05)}
-          {slider('gs', 'γs', '', 1, 2, 0.05)}
+          {slider('gc', 'Coefficient γc', '', 1, 2, 0.05)}
+          {slider('gs', 'Coefficient γs', '', 1, 2, 0.05)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>
       }

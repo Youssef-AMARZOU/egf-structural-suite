@@ -361,8 +361,7 @@ pub fn calculate_dalle_retrait_ferraillage_156(
     let eca = eps_ca(fcm, p.t);
     let ecs = ecd + eca;
     let phi = phi_creep(p.b, p.h, p.fck, p.t0, p.t, p.rh, &p.classe_ciment);
-    let neq = p.ec2_modulus / (p.ec2_modulus); // n // Es/Ec
-    let neq_val = 15.0; // typical neq for reinforced concrete
+    let neq = if p.ec2_modulus > 0.0 { p.ec2_modulus } else { 15.0 }; // Es/Ec modular ratio
     let scd = p.fck / 1.5 * 0.6; // 60% fcd
     let ssd = -p.fyk / p.gs;
 
@@ -373,7 +372,7 @@ pub fn calculate_dalle_retrait_ferraillage_156(
         p.d,
         p.dp,
         p.m,
-        neq_val,
+        neq,
         p.aci / 10000.0,
         p.acs / 10000.0,
         p.fck,
@@ -392,7 +391,7 @@ pub fn calculate_dalle_retrait_ferraillage_156(
         ssd,
         p.m,
         n_restraint,
-        neq_val,
+        neq,
         p.aci / 10000.0,
         p.acs / 10000.0,
     );
@@ -422,7 +421,7 @@ pub fn calculate_dalle_retrait_ferraillage_156(
         eps_ca: eca,
         eps_cs: ecs,
         phi,
-        neq: neq_val,
+        neq,
         n_restraint,
         em,
         aci_nec,

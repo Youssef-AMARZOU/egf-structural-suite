@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+fn safe_div(num: f64, den: f64) -> f64 {
+    if den.abs() < 1e-12 { 0.0 } else { num / den }
+}
+
 // Module 171 — Mrd des ts
 // T-beam moment resistance with steel stress iteration
 // Clean-room reimplementation from EC2/BAEL. No VBA code copied.
@@ -10,27 +14,27 @@ use serde::{Deserialize, Serialize};
 fn compute_mr(d: f64, fck: f64, gc: f64, ac: f64, fyk: f64, gs: f64, euk: f64, k: f64) -> (f64, f64, f64, f64, f64) {
     let fyd = fyk / gs;
     let fcd = fck / gc;
-    let es0 = fyd / 200.0;
+    let es0 = fyd / 200000.0;
     let mut ss = fyd;
 
     let n = if k == 1.0 { 1 } else { 5 };
 
     for _ in 0..n {
         let fs = ac / 10000.0 * ss;
-        let x = 1.25 * fs / fcd;
-        let mut es = 3.5 * (d - x) / x;
+        let x = safe_div(1.25 * fs, fcd);
+        let mut es = safe_div(3.5 * (d - x), x);
         if es > 0.9 * euk {
             es = 0.9 * euk;
         }
-        ss = fyd * (1.0 + (k - 1.0) * (es - es0) / (euk - es0));
+        ss = fyd * (1.0 + (k - 1.0) * safe_div(es - es0, euk - es0));
     }
 
     let fs = ac / 10000.0 * ss;
-    let x = 1.25 * fs / fcd;
+    let x = safe_div(1.25 * fs, fcd);
     let z = d - 0.4 * x;
     let mr = fs * z * 1000.0;
 
-    (mr, ss, x, z, 3.5 * (d - x) / x)
+    (mr, ss, x, z, safe_div(3.5 * (d - x), x))
 }
 
 // ─── inputs / outputs ────────────────────────────────────────────

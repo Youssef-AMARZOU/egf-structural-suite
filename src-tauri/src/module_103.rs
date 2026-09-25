@@ -73,9 +73,9 @@ pub struct Punching103Output {
     pub verdict: String,
 }
 
-/// k factor: k = 1 + sqrt(0.2/d), capped at 2
+/// k factor: k = 1 + sqrt(200/d), capped at 2
 fn k_factor(d: f64) -> f64 {
-    (1.0 + (0.2 / d).sqrt()).min(2.0)
+    (1.0 + (200.0 / d).sqrt()).min(2.0)
 }
 
 /// vRd,min = 0.035 * k^1.5 * sqrt(fck)

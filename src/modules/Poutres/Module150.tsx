@@ -44,23 +44,23 @@ export default function Module150() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('gc', 'γc', '-', 1, 2, 0.05)}
           {slider('gs', 'γs', '-', 1, 2, 0.05)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Élément 1</div>
-          {slider('b1', 'b1', 'mm', 50, 500, 10)}
-          {slider('h1', 'h1', 'mm', 100, 10000, 100)}
-          {slider('th1', 'θ1', 'rad', -3.14, 3.14, 0.01)}
-          {slider('a1', 'a1', 'mm', 0, 20000, 100)}
+          {slider('b1', 'Largeur b1', 'mm', 50, 500, 10)}
+          {slider('h1', 'Hauteur h1', 'mm', 100, 10000, 100)}
+          {slider('th1', 'Inclinaison θ1', 'rad', -3.14, 3.14, 0.01)}
+          {slider('a1', 'Position a1', 'mm', 0, 20000, 100)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Élément 2</div>
-          {slider('b22', 'b2', 'mm', 50, 500, 10)}
-          {slider('th2', 'θ2', 'rad', -3.14, 3.14, 0.01)}
-          {slider('a2', 'a2', 'mm', 0, 20000, 100)}
+          {slider('b22', 'Largeur b2', 'mm', 50, 500, 10)}
+          {slider('th2', 'Inclinaison θ2', 'rad', -3.14, 3.14, 0.01)}
+          {slider('a2', 'Position a2', 'mm', 0, 20000, 100)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Sollicitations</div>
-          {slider('vx', 'Vx', 'kN', 0, 10000, 10)}
-          {slider('vy', 'Vy', 'kN', 0, 10000, 10)}
-          {slider('mt', 'Mt', 'kN·m', 0, 50000, 100)}
+          {slider('vx', 'Tranchant Vx', 'kN', 0, 10000, 10)}
+          {slider('vy', 'Tranchant Vy', 'kN', 0, 10000, 10)}
+          {slider('mt', 'Moment torsion Mt', 'kN·m', 0, 50000, 100)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>
       }

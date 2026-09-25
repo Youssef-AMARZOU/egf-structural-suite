@@ -50,7 +50,7 @@ pub struct VerificationDallesPoinconnementOutput {
 }
 
 fn fvrdc(asx: f64, asy: f64, d: f64, fck: f64, gc: f64) -> f64 {
-    let k = (1.0 + (0.2 / d).sqrt()).min(2.0);
+    let k = (1.0 + (200.0 / d).sqrt()).min(2.0);
     let rh = (asx * asy).sqrt() / d / 10000.0;
     let u1 = 0.18 / gc * k * (100.0 * rh * fck).powf(1.0 / 3.0);
     let u2 = 0.035 * k.powf(1.5) * fck.sqrt();

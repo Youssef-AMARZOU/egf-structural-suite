@@ -35,9 +35,9 @@ export default function Module169() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('h', 'h', 'mm', 100, 800, 10)}
-          {slider('L0', 'L0', 'm', 0.5, 12, 0.1)}
-          {slider('d_mod', 'd_mod', 'mm', 100, 800, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 800, 10)}
+          {slider('L0', 'Longueur libre L0', 'm', 0.5, 12, 0.1)}
+          {slider('d_mod', 'Hauteur modifiée d_mod', 'mm', 100, 800, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux & Charges</div>
           {slider('N_ed', 'N_ed', 'kN', 0, 5000, 50)}
           {slider('fck', 'fck', 'MPa', 12, 90, 1)}

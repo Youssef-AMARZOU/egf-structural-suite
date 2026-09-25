@@ -43,23 +43,23 @@ export default function Module151() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('gc', 'γc', '-', 1, 2, 0.05)}
           {slider('gs', 'γs', '-', 1, 2, 0.05)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
           {slider('n_voiles', 'Nb voiles', '-', 1, 5, 1)}
-          {slider('h', 'h', 'mm', 50, 500, 10)}
-          {slider('l_totale', 'L_tot', 'mm', 500, 20000, 100)}
-          {slider('e1', 'e1', 'mm', 50, 500, 10)}
-          {slider('h1', 'h1', 'mm', 100, 10000, 100)}
-          {slider('e2', 'e2', 'mm', 50, 500, 10)}
-          {slider('h2', 'h2', 'mm', 100, 10000, 100)}
-          {slider('l12', 'L12', 'mm', 500, 20000, 100)}
+          {slider('h', 'Épaisseur h', 'mm', 50, 500, 10)}
+          {slider('l_totale', 'Longueur totale L_tot', 'mm', 500, 20000, 100)}
+          {slider('e1', 'Épaisseur e1', 'mm', 50, 500, 10)}
+          {slider('h1', 'Hauteur h1', 'mm', 100, 10000, 100)}
+          {slider('e2', 'Épaisseur e2', 'mm', 50, 500, 10)}
+          {slider('h2', 'Hauteur h2', 'mm', 100, 10000, 100)}
+          {slider('l12', 'Distance L12', 'mm', 500, 20000, 100)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Sollicitations</div>
-          {slider('vx', 'Vx', 'kN', 0, 10000, 10)}
-          {slider('vy', 'Vy', 'kN', 0, 10000, 10)}
-          {slider('mt', 'Mt', 'kN·m', 0, 50000, 100)}
+          {slider('vx', 'Tranchant Vx', 'kN', 0, 10000, 10)}
+          {slider('vy', 'Tranchant Vy', 'kN', 0, 10000, 10)}
+          {slider('mt', 'Moment torsion Mt', 'kN·m', 0, 50000, 100)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>
       }

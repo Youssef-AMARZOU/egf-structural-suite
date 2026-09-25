@@ -55,8 +55,8 @@ fn v_rdc_calc(fck: f64, gc: f64, rho_l: f64, d: f64, bw: f64) -> f64 {
     let crdc = 0.18 / gc;
     let k = k_factor_calc(d);
     let rho = rho_l.max(0.002);
-    let rho_x = (100.0 * rho).powf(1.0 / 3.0).max(0.04);
-    crdc * k * rho_x * 100.0_f64.powf(1.0 / 3.0) * fck.powf(1.0 / 2.0)
+    let rho_x = (100.0 * rho * fck).powf(1.0 / 3.0).max(0.04);
+    crdc * k * rho_x * bw * d / 1000.0
 }
 
 fn v_rdc_max_calc(fck: f64, gc: f64, bw: f64, d: f64) -> f64 {

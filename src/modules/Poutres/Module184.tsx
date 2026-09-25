@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { TraveeChargesQQInputs, TraveeChargesQQOutput } from '../../types/engineering';
 
 export default function Module184() {
@@ -14,14 +14,14 @@ export default function Module184() {
 
   const parseList = (s: string) => s.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
   const pick = (parsed: number[], fb: number[]) => parsed.length > 0 ? parsed : fb;
-  const payload: TraveeChargesQQInputs = {
+  const payload: TraveeChargesQQInputs = useMemo(() => ({
     ...inp,
     tp1: pick(parseList(txt.tp1), inp.tp1),
     tp2: pick(parseList(txt.tp2), inp.tp2),
     ta: pick(parseList(txt.ta), inp.ta),
     tb: pick(parseList(txt.tb), inp.tb),
     nc: pick(parseList(txt.tp1), inp.tp1).length,
-  };
+  }), [inp, txt]);
   const { data: res, error: err, live } = useModuleCalc<TraveeChargesQQInputs, TraveeChargesQQOutput>(
     'calculate_travee_charges_qq_184', payload,
   );
@@ -56,9 +56,9 @@ export default function Module184() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('L', 'L (portée)', 'm', 1, 15, 0.5)}
-          {slider('Mg', 'Mg', 'kN·m', -500, 500, 5)}
-          {slider('Md', 'Md', 'kN·m', -500, 500, 5)}
+          {slider('L', 'Portée L', 'm', 1, 15, 0.5)}
+          {slider('Mg', 'Moment permanent Mg', 'kN·m', -500, 500, 5)}
+          {slider('Md', 'Moment total Md', 'kN·m', -500, 500, 5)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Charges (virgule séparé)</div>
           {field('tp1', 'p1 (début)')}
           {field('tp2', 'p2 (fin)')}
@@ -107,6 +107,25 @@ export default function Module184() {
                   <text x={ox - 5} y={oy + hm + 40 + hv + 50 - 15} fontSize={7} fill="#22C55E" textAnchor="end">q(x)</text>
                   <DiagramOverlay type="moment" points={mPts} />
                   <DiagramOverlay type="shear" points={vPts} />
+                  <AxisTicks
+                    origin={[ox, oy + hm + 40 + hv + 50]} end={[ox + w, oy + hm + 40 + hv + 50]}
+                    values={[0, 0.25, 0.5, 0.75, 1].map(f => f * payload.L)}
+                    map={(v) => [ox + (v / payload.L) * w, oy + hm + 40 + hv + 50]}
+                    unit="m" side="below" decimals={1}
+                  />
+                  <AxisTicks
+                    origin={[ox, oy]} end={[ox, oy + hm]}
+                    values={[-maxM, 0, maxM].map(v => v * 0.8)}
+                    map={(v) => [ox, zeroM - v * scM]}
+                    side="left" decimals={0}
+                  />
+                  <AxisTicks
+                    origin={[ox, oy + hm + 40]} end={[ox, oy + hm + 40 + hv]}
+                    values={[-maxV, 0, maxV].map(v => v * 0.8)}
+                    map={(v) => [ox, zeroV - v * scV]}
+                    side="left" decimals={0}
+                  />
+                  <InlineLegend items={[{ label: 'M (kN·m)', color: '#6366F1' }, { label: 'V (kN)', color: '#F59E0B' }]} x={ox + w - 120} y={oy + 5} />
                   <text x={ox + w / 2} y={oy + hm + 20} fontSize={8} fill="#6366F1" textAnchor="middle">
                     M_max = {Math.max(...res.moment).toFixed(1)} kN·m
                   </text>

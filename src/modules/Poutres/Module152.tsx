@@ -101,11 +101,11 @@ export default function Module152() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section</div>
-          {slider('fck', 'fck', 'MPa', 10, 80, 1)}
-          {slider('b', 'b', 'mm', 100, 2000, 10)}
-          {slider('h', 'h', 'mm', 100, 2000, 10)}
-          {slider('bw', 'bw', 'mm', 0, 2000, 10)}
-          {slider('hf', 'hf', 'mm', 0, 500, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 10, 80, 1)}
+          {slider('b', 'Largeur b', 'mm', 100, 2000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 2000, 10)}
+          {slider('bw', 'Largeur âme bw', 'mm', 0, 2000, 10)}
+          {slider('hf', 'Épaisseur dalle hf', 'mm', 0, 500, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériau</div>
           <div className="text-[10px] text-slate-500 mb-1">Ciment</div>
           <div className="flex gap-1 flex-wrap">
@@ -130,13 +130,13 @@ export default function Module152() {
           {slider('t1', 't1', 'j', 1, 99999, 1)}
           {slider('too', 'too', 'j', 1, 9999, 1)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Sollicitation</div>
-          {slider('m', 'M', 'kN.m', 0, 10000, 5)}
-          {slider('n0', 'N0', 'kN', -5000, 5000, 10)}
+          {slider('m', 'Moment M', 'kN.m', 0, 10000, 5)}
+          {slider('n0', 'Effort axial N0', 'kN', -5000, 5000, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Armatures</div>
           {slider('aci', 'As com', 'mm2', 0, 5000, 50)}
           {slider('acs', 'As ten', 'mm2', 0, 5000, 50)}
-          {slider('d', 'd', 'mm', 50, 2000, 5)}
-          {slider('dp', "d'", 'mm', 20, 500, 5)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 2000, 5)}
+          {slider('dp', "Enrobage d'", 'mm', 20, 500, 5)}
           {err && (
             <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>
           )}

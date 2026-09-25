@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DimensionLine, RebarGroup, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DimensionLine, RebarGroup, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { PotCirculaireFlamblEC2V2Inputs, PotCirculaireFlamblEC2V2Output } from '../../types/engineering';
 
 export default function Module196() {
@@ -72,6 +72,19 @@ export default function Module196() {
             {res && (
               <>
                 <DiagramOverlay type="moment" points={m2Pts} color="#F59E0B" />
+                <AxisTicks
+                  origin={[260, 200]} end={[560, 200]}
+                  values={[0, Math.max(...res.lo_curve) / 2, Math.max(...res.lo_curve)]}
+                  map={(v) => [260 + (v / Math.max(...res.lo_curve, 1)) * 300, 200]}
+                  unit="m" side="below" decimals={1}
+                />
+                <AxisTicks
+                  origin={[260, 200]} end={[260, 30]}
+                  values={[0, Math.max(...res.m2_curve) / 2, Math.max(...res.m2_curve)]}
+                  map={(v) => [260, 200 - (v / Math.max(...res.m2_curve, 1)) * 170]}
+                  side="left" decimals={0}
+                />
+                <InlineLegend items={[{ label: 'M2(Lo)', color: '#F59E0B' }]} x={420} y={25} />
                 <text x={410} y={15} fontSize={9} fill="#F59E0B" textAnchor="middle">M2 en fonction de Lo</text>
               </>
             )}

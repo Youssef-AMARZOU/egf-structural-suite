@@ -91,9 +91,9 @@ export default function Module154() {
           {slider('gc', 'gc', '-', 1.0, 2.0, 0.05)}
           {slider('gs', 'gs', '-', 1.0, 2.0, 0.05)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section</div>
-          {slider('b', 'b', 'mm', 100, 2000, 10)}
-          {slider('h', 'h', 'mm', 100, 2000, 10)}
-          {slider('d', 'd', 'mm', 50, 2000, 5)}
+          {slider('b', 'Largeur b', 'mm', 100, 2000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 2000, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 2000, 5)}
           {slider('dp', "d'", 'mm', 20, 500, 5)}
           {slider('aci', 'As com', 'mm2', 0, 5000, 50)}
           {slider('acs', 'As ten', 'mm2', 0, 5000, 50)}

@@ -116,7 +116,7 @@ export default function Module160() {
               <option value={2}>Sargin</option>
             </select>
           </div>
-          {slider('n_points', 'Points courbe', '', 5, 100, 1)}
+          {slider('n_points', 'Nombre de points', '', 5, 100, 1)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>
       }

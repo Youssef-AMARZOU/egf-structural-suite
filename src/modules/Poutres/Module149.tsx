@@ -47,17 +47,17 @@ export default function Module149() {
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('gc', 'γc', '-', 1, 2, 0.05)}
           {slider('gs', 'γs', '-', 1, 2, 0.05)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('gh', 'GH', 'mm', 500, 20000, 100)}
-          {slider('h', 'h', 'mm', 50, 500, 10)}
-          {slider('l', 'L', 'mm', 500, 20000, 100)}
+          {slider('gh', 'Hauteur GH', 'mm', 500, 20000, 100)}
+          {slider('h', 'Épaisseur h', 'mm', 50, 500, 10)}
+          {slider('l', 'Longueur L', 'mm', 500, 20000, 100)}
           {slider('net', 'Net', '-', 1, 20, 1)}
           {slider('nu', 'Nu', '-', 1, 10, 1)}
           {slider('i1', 'I1', 'm⁴', 0.0001, 0.1, 0.001)}
@@ -67,9 +67,9 @@ export default function Module149() {
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitations</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('p1', 'P1', 'kN', 0, 1000, 10)}
-          {slider('p2', 'P2', 'kN', 0, 1000, 10)}
-          {slider('p3', 'P3', 'kN', 0, 1000, 10)}
+          {slider('p1', 'Charge P1', 'kN', 0, 1000, 10)}
+          {slider('p2', 'Charge P2', 'kN', 0, 1000, 10)}
+          {slider('p3', 'Charge P3', 'kN', 0, 1000, 10)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}

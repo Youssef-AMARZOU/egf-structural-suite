@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
 import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { PoutresRotPlastMethGeneV5Inputs, PoutresRotPlastMethGeneV5Output } from '../../types/engineering';
+
+const parseList = (s: string) => s.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+const pick = (parsed: number[], fb: number[]) => parsed.length > 0 ? parsed : fb;
 
 export default function Module181() {
   const [inp, setInp] = useState<PoutresRotPlastMethGeneV5Inputs>({
@@ -15,9 +18,7 @@ export default function Module181() {
     tMR: '150, 150', tb: '300, 300', th: '500, 500', tbw: '200, 200', thf: '150, 150',
   });
 
-  const parseList = (s: string) => s.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-  const pick = (parsed: number[], fb: number[]) => parsed.length > 0 ? parsed : fb;
-  const payload: PoutresRotPlastMethGeneV5Inputs = {
+  const payload: PoutresRotPlastMethGeneV5Inputs = useMemo(() => ({
     ...inp,
     nap: pick(parseList(txt.tLn), inp.tLn).length + 1,
     tLn: pick(parseList(txt.tLn), inp.tLn),
@@ -29,14 +30,16 @@ export default function Module181() {
     th: pick(parseList(txt.th), inp.th),
     tbw: pick(parseList(txt.tbw), inp.tbw),
     thf: pick(parseList(txt.thf), inp.thf),
-  };
+  }), [txt.tLn, txt.tEI, txt.tp, txt.tg, txt.tMR, txt.tb, txt.th, txt.tbw, txt.thf, inp.kkr]);
   const { data: res, error: err, live } = useModuleCalc<PoutresRotPlastMethGeneV5Inputs, PoutresRotPlastMethGeneV5Output>(
     'calculate_poutres_rot_plast_meth_gene_v5_181', payload,
   );
 
   const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
-  const mom = (() => {
+  const actualLn = useMemo(() => pick(parseList(txt.tLn), inp.tLn), [txt.tLn, inp.tLn]);
+
+  const mom = useMemo(() => {
     if (!res || res.moments_appuis.length - 1 <= 0) return null;
     const ox = 60, oy = 40, w = 480, h = 120;
     const nSpans = res.moments_appuis.length - 1;
@@ -52,7 +55,7 @@ export default function Module181() {
       pts.push([ox + (i + 1) * spanW, zeroY - res.moments_appuis[i + 1] * sc]);
     }
     return { pts, spanW, zeroY, sc, nSpans, ox, w };
-  })();
+  }, [res]);
 
   const field = (key: keyof typeof txt, label: string, placeholder: string) => (
     <div className="mb-1">
@@ -98,7 +101,6 @@ export default function Module181() {
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
           <SectionCanvas title="Diagramme de moments" vbW={600} vbH={200}>
             {res && mom ? (() => {
-              const actualLn = pick(parseList(txt.tLn), inp.tLn);
               const totalL = actualLn.reduce((a: number, b: number) => a + b, 0);
               const xVals = actualLn.reduce<number[]>((acc, l) => [...acc, acc[acc.length - 1] + l], [0]);
               const allM = [...res.moments_appuis, ...res.moments_travee];

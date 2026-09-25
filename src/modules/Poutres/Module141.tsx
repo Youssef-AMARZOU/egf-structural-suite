@@ -59,19 +59,19 @@ export default function Module141() {
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('b', 'b', 'm', 1, 100, 0.5)}
-          {slider('d', 'd', 'm', 1, 100, 0.5)}
-          {slider('h', 'h', 'm', 1, 200, 0.5)}
-          {slider('z', 'z', 'm', 0.1, 200, 0.5)}
-          {slider('ze', 'ze', 'm', 0.1, 200, 0.5)}
-          {slider('zs', 'zs', 'm', 0.1, 200, 0.5)}
+          {slider('b', 'Largeur b', 'm', 1, 100, 0.5)}
+          {slider('d', 'Profondeur d', 'm', 1, 100, 0.5)}
+          {slider('h', 'Hauteur h', 'm', 1, 200, 0.5)}
+          {slider('z', 'Altitude z', 'm', 0.1, 200, 0.5)}
+          {slider('ze', 'Altitude ze', 'm', 0.1, 200, 0.5)}
+          {slider('zs', 'Altitude zs', 'm', 0.1, 200, 0.5)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Dynamique</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('n1', 'n1', 'Hz', 0.1, 10, 0.1)}
-          {slider('masseq', 'masse', 't/m', 10, 1000, 10)}
-          {slider('phi', 'φ', '-', 0.01, 1, 0.01)}
+          {slider('n1', 'Fréq. propre n1', 'Hz', 0.1, 10, 0.1)}
+          {slider('masseq', 'Masse linéique', 't/m', 10, 1000, 10)}
+          {slider('phi', 'Coeff. amplification φ', '-', 0.01, 1, 0.01)}
         </div>
 
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}

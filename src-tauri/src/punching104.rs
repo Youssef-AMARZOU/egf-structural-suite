@@ -90,8 +90,8 @@ pub fn calculate_punching_104(p: Punching104Inputs) -> Result<Punching104Output,
     let k = (1.0 + (0.2 / p.d).sqrt()).min(2.0);
     let largx = p.c1 + 6.0 * p.d;
     let largy = p.c2 + 6.0 * p.d;
-    let rx = (p.asx * 1e-4) / (largx * p.d);
-    let ry = (p.asy * 1e-4) / (largy * p.d);
+    let rx = p.asx / (largx * p.d);
+    let ry = p.asy / (largy * p.d);
     let rhol = (rx.max(0.0) * ry.max(0.0)).sqrt();
     let rhol_eff = rhol.min(0.02);
 

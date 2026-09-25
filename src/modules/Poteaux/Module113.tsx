@@ -44,7 +44,7 @@ export default function Module113() {
         <div className="grid grid-cols-3 gap-2">
           {slider('phi', 'φ', 'mm', 6, 40, 2)}
           {slider('phi_t', 'φt', 'mm', 4, 16, 1)}
-          {slider('s', 's', 'mm', 50, 500, 10)}
+          {slider('s', 'Espacement s', 'mm', 50, 500, 10)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">

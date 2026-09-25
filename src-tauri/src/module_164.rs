@@ -100,7 +100,7 @@ fn compute_as_els(m0: f64, d: f64, p: f64, ss: f64, n_mod: f64, e0: f64) -> f64 
     let bet = m / d / d; // kN/m²
     let mut a = 0.3;
     for _ in 0..10 {
-        a = (6.0 * n_mod * bet / ss * (1.0 - a) / (3.0 - a)).sqrt();
+        a = (6.0 * n_mod * bet / ss * (1.0 - a) / (3.0 - a)).abs().sqrt();
     }
     let z = d * (1.0 - a / 3.0);
     let ac = (m / z - p) * 10000.0 / ss; // mm²/m

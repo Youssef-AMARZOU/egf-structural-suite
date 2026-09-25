@@ -61,15 +61,15 @@ export default function Module230() {
               {MODES.map((m, i) => <option key={m} value={i}>{m}</option>)}
             </select>
           </div>
-          {slider('xa', 'xA', '-', -10, 10, 0.1)}
-          {slider('ya', 'yA', '-', -10, 10, 0.1)}
-          {slider('xb', 'xB', '-', -10, 10, 0.1)}
-          {slider('yb', 'yB', '-', -10, 10, 0.1)}
+          {slider('xa', 'Abscisse xA', '-', -10, 10, 0.1)}
+          {slider('ya', 'Ordonnée yA', '-', -10, 10, 0.1)}
+          {slider('xb', 'Abscisse xB', '-', -10, 10, 0.1)}
+          {slider('yb', 'Ordonnée yB', '-', -10, 10, 0.1)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Point C & rayons</div>
-          {slider('xc', 'xC', '-', -10, 10, 0.1)}
-          {slider('yc', 'yC', '-', -10, 10, 0.1)}
-          {slider('ra', 'Ra', '-', 0.1, 10, 0.1)}
-          {slider('rb', 'Rb', '-', 0.1, 10, 0.1)}
+          {slider('xc', 'Abscisse xC', '-', -10, 10, 0.1)}
+          {slider('yc', 'Ordonnée yC', '-', -10, 10, 0.1)}
+          {slider('ra', 'Rayon Ra', '-', 0.1, 10, 0.1)}
+          {slider('rb', 'Rayon Rb', '-', 0.1, 10, 0.1)}
           {err && (
             <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>
           )}

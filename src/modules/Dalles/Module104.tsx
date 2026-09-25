@@ -80,8 +80,8 @@ export default function Module104() {
         <div className="grid grid-cols-2 gap-x-3 gap-y-1">
           {slider('c1', 'c1 (≥ c2)', 'm', 0.1, 3, 0.05)}
           {slider('c2', 'c2', 'm', 0.1, 3, 0.05)}
-          {slider('h', 'h', 'm', 0.1, 1, 0.01)}
-          {slider('d', 'd', 'm', 0.05, 1, 0.01)}
+          {slider('h', 'Hauteur dalle h', 'm', 0.1, 1, 0.01)}
+          {slider('d', 'Hauteur utile d', 'm', 0.05, 1, 0.01)}
         </div>
 
         <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide pt-1">Matériaux</div>

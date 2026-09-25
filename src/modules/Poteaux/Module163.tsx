@@ -65,7 +65,7 @@ export default function Module163() {
           {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
           {slider('gc', 'γc', '', 1, 2, 0.05)}
           {slider('gs', 'γs', '', 1, 2, 0.05)}
-          {slider('xd_limit', 'x/d limite', '', 0.2, 0.8, 0.05)}
+          {slider('xd_limit', 'Limite x/d', '', 0.2, 0.8, 0.05)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>
       }

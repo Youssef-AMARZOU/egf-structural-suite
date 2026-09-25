@@ -42,9 +42,9 @@ export default function Module172() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Paramètres</div>
-          {slider('E', 'E', 'MPa', 10000, 60000, 1000)}
-          {slider('er', 'er (retrait)', '', 0, 0.001, 0.00005)}
-          {slider('tete', 'tête (0=art, 1=enc)', '', 0, 1, 0.1)}
+          {slider('E', 'Module E', 'MPa', 10000, 60000, 1000)}
+          {slider('er', 'Déform. retrait εr', '', 0, 0.001, 0.00005)}
+          {slider('tete', 'Conditions limites (0=art, 1=enc)', '', 0, 1, 0.1)}
           <ParamSlider label="n_sections" unit="" value={inp.n_sections} min={1} max={10} step={1} onChange={v => {
             const n = Math.max(1, Math.min(10, Math.round(v)));
             const l = Array(n).fill(inp.lengths[0] || 2);

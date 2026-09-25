@@ -45,27 +45,27 @@ export default function Module128() {
         <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Section</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('b', 'b', 'mm', 100, 2000, 10)}
-          {slider('bw', 'bw', 'mm', 100, 1000, 10)}
-          {slider('h', 'h', 'mm', 100, 2000, 10)}
-          {slider('hf', 'hf', 'mm', 0, 500, 10)}
-          {slider('d', 'd', 'mm', 50, 2000, 5)}
-          {slider('dp', 'dp', 'mm', 20, 200, 5)}
+          {slider('b', 'Largeur b', 'mm', 100, 2000, 10)}
+          {slider('bw', 'Largeur âme bw', 'mm', 100, 1000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 2000, 10)}
+          {slider('hf', 'Épaisseur dalle hf', 'mm', 0, 500, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 2000, 5)}
+          {slider('dp', 'Enrobage dp', 'mm', 20, 200, 5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
           {slider('gc', 'γc', '-', 1, 2, 0.05)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Sollicitations</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('m_ed', 'MEd', 'kN·m', -500, 2000, 5)}
-          {slider('v_ed', 'VEd', 'kN', 0, 1000, 5)}
+          {slider('m_ed', 'Moment MEd', 'kN·m', -500, 2000, 5)}
+          {slider('v_ed', 'Tranchant VEd', 'kN', 0, 1000, 5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Étriers</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('asw', 'Asw', 'cm²', 0.1, 5, 0.1)}
-          {slider('as_min', 'As,min', 'cm²/m', 0.1, 2, 0.05)}
+          {slider('asw', 'Armature transv. Asw', 'cm²', 0.1, 5, 0.1)}
+          {slider('as_min', 'Armature min. As,min', 'cm²/m', 0.1, 2, 0.05)}
         </div>
         {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>

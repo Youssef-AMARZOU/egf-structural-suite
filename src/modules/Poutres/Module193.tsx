@@ -39,10 +39,10 @@ export default function Module193() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section</div>
-          {slider('b', 'b', 'mm', 100, 1000, 10)}
-          {slider('h', 'h', 'mm', 100, 1000, 10)}
+          {slider('b', 'Largeur b', 'mm', 100, 1000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 100, 1000, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
           {slider('RH', 'RH', '%', 20, 100, 1)}
           {slider('t0', 't0', 'jours', 1, 365, 1)}
           {slider('classe', 'Classe', '', 1, 3, 1)}

@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+fn safe_div(num: f64, den: f64) -> f64 {
+    if den.abs() < 1e-12 { 0.0 } else { num / den }
+}
+
 /// Module 115 — Excentr_pieu (pile cap eccentricity distribution)
 /// D'après EGF N°115 © Henry Thonier
 /// Clean-room reimplementation. No VBA code copied.
@@ -52,8 +56,8 @@ pub fn calculate_excentr_pieu_115(p: ExcentrPieuInputs) -> Result<ExcentrPieuOut
 
     for ih in 1..=2000 {
         let h = ih as f64 * 0.001;
-        let k1 = p.alp1 * p.e1 * 1000.0 * p.b1 * h.powi(3) / (12.0 * p.l1);
-        let k2 = p.alp2 * p.e1 * 1000.0 * p.b2 * h.powi(3) / (12.0 * p.l2);
+        let k1 = safe_div(p.alp1 * p.e1 * 1000.0 * p.b1 * h.powi(3), 12.0 * p.l1);
+        let k2 = safe_div(p.alp2 * p.e1 * 1000.0 * p.b2 * h.powi(3), 12.0 * p.l2);
         let k = k1 + k2 + p.k3 + p.bei;
         if k < 1e-15 { continue; }
         c1 = p.m0 * k1 / k;
@@ -84,5 +88,5 @@ pub fn calculate_excentr_pieu_115(p: ExcentrPieuInputs) -> Result<ExcentrPieuOut
         h_found * 1000.0, c1, c2, c3, c_pieu
     );
 
-    Ok(ExcentrPieuOutput { c1, c2, c3, c_pieu, k1: p.alp1 * p.e1 * 1000.0 * p.b1 * h_found.powi(3) / (12.0 * p.l1), k2: p.alp2 * p.e1 * 1000.0 * p.b2 * h_found.powi(3) / (12.0 * p.l2), k_total: p.alp1 * p.e1 * 1000.0 * p.b1 * h_found.powi(3) / (12.0 * p.l1) + p.alp2 * p.e1 * 1000.0 * p.b2 * h_found.powi(3) / (12.0 * p.l2) + p.k3 + p.bei, h: h_found, ac1, ac2, verdict })
+    Ok(ExcentrPieuOutput { c1, c2, c3, c_pieu, k1: safe_div(p.alp1 * p.e1 * 1000.0 * p.b1 * h_found.powi(3), 12.0 * p.l1), k2: safe_div(p.alp2 * p.e1 * 1000.0 * p.b2 * h_found.powi(3), 12.0 * p.l2), k_total: safe_div(p.alp1 * p.e1 * 1000.0 * p.b1 * h_found.powi(3), 12.0 * p.l1) + safe_div(p.alp2 * p.e1 * 1000.0 * p.b2 * h_found.powi(3), 12.0 * p.l2) + p.k3 + p.bei, h: h_found, ac1, ac2, verdict })
 }

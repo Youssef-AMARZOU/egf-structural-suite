@@ -42,8 +42,8 @@ export default function Module236() {
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Dalle</div>
           {slider('lx', 'Lx (sens charge)', 'm', 1, 12, 0.25)}
           {slider('ly', 'Ly', 'm', 1, 12, 0.25)}
-          {slider('h', 'h', 'mm', 80, 500, 10)}
-          {slider('e_mpa', 'E', 'MPa', 20000, 45000, 100)}
+          {slider('h', 'Hauteur dalle h', 'mm', 80, 500, 10)}
+          {slider('e_mpa', 'Module E', 'MPa', 20000, 45000, 100)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Charge & résistance</div>
           {slider('q0', 'q0 (x=0)', 'kN/m²', 0, 50, 0.5)}
           {slider('q1', 'q1 (x=Lx)', 'kN/m²', 0, 50, 0.5)}

@@ -39,9 +39,9 @@ export default function Module177() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('L', 'L (balcon)', 'm', 0.5, 4, 0.1)}
-          {slider('Lg', 'Lg (semelle)', 'm', 0, 1, 0.05)}
-          {slider('h', 'h', 'mm', 100, 400, 10)}
+          {slider('L', 'Portée balcon L', 'm', 0.5, 4, 0.1)}
+          {slider('Lg', 'Semelle Lg', 'm', 0, 1, 0.05)}
+          {slider('h', 'Hauteur h', 'mm', 100, 400, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Charges (kN/m)</div>
           {slider('g0', 'g0 (poids propre)', 'kN/m', 0, 15, 0.5)}
           {slider('g1', 'g1 (garde-corps)', 'kN/m', 0, 20, 0.5)}
@@ -49,7 +49,7 @@ export default function Module177() {
           {slider('q', 'q (variable)', 'kN/m', 0, 10, 0.5)}
           {slider('psi', 'ψ', '', 0, 1, 0.05)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
-          {slider('Eqp', 'E', 'MPa', 10000, 60000, 1000)}
+          {slider('Eqp', 'Module E', 'MPa', 10000, 60000, 1000)}
           {slider('Infi', 'I infini', 'm⁴', 0, 0.0002, 0.000005)}
           {slider('Ifi', 'I fissuré', 'm⁴', 0, 0.0002, 0.000005)}
           {slider('fctm', 'fctm', 'MPa', 1, 6, 0.1)}

@@ -42,17 +42,17 @@ export default function Module117() {
         <>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-3 gap-2">
-          {slider('p', 'P', 'kN', 10, 5000, 50)}
-          {slider('l', 'L', 'm', 1, 30, 0.5)}
+          {slider('p', 'Charge P', 'kN', 10, 5000, 50)}
+          {slider('l', 'Longueur L', 'm', 1, 30, 0.5)}
           {slider('leff', 'Leff', 'm', 1, 30, 0.1)}
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {slider('a', 'a', 'm', 0.05, 2, 0.05)}
-          {slider('b', 'b', 'm', 0.1, 2, 0.05)}
-          {slider('d', 'd', 'm', 0.1, 2, 0.05)}
+          {slider('a', 'Dimension a', 'm', 0.05, 2, 0.05)}
+          {slider('b', 'Largeur b', 'm', 0.1, 2, 0.05)}
+          {slider('d', 'Hauteur utile d', 'm', 0.1, 2, 0.05)}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('h', 'h', 'm', 0.1, 2, 0.05)}
+          {slider('h', 'Hauteur h', 'm', 0.1, 2, 0.05)}
           {slider('sbl', 'sbl', 'MPa', 1, 30, 0.5)}
         </div>
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>

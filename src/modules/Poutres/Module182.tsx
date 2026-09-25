@@ -43,14 +43,14 @@ export default function Module182() {
           {slider('es', 'εs (déformation acier)', '', 0, 0.01, 0.0001)}
           {slider('Ac', 'Ac (section acier)', 'mm²', 0, 2000, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('b', 'b (largeur)', 'mm', 100, 1000, 10)}
-          {slider('d', 'd (hauteur utile)', 'mm', 100, 1000, 10)}
+          {slider('b', 'Largeur b', 'mm', 100, 1000, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 100, 1000, 10)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Acier</div>
-          {slider('fyd', 'fyd', 'MPa', 300, 600, 5)}
+          {slider('fyd', 'Acier fyd', 'MPa', 300, 600, 5)}
           {slider('ks', 'ks', '', 0.5, 1.5, 0.05)}
           {slider('euk', 'εuk', '', 0.005, 0.05, 0.001)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Béton</div>
-          {slider('fcd', 'fcd', 'MPa', 5, 40, 0.5)}
+          {slider('fcd', 'Résistance fcd', 'MPa', 5, 40, 0.5)}
           {slider('ec2', 'εc2', '', 0.001, 0.003, 0.0001)}
           {slider('ecu2', 'εcu2', '', 0.002, 0.005, 0.0001)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}

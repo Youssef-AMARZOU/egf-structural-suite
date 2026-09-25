@@ -97,7 +97,7 @@ pub fn calculate_fleche_dispense_v5_168(
         return Err("d doit être > 0".to_string());
     }
     let l_over_d = p.L * 1000.0 / p.d;
-    let adjusted_limit = limit_ld * rho_factor;
+    let adjusted_limit = if rho_factor > 1e-12 { limit_ld * rho_factor } else { limit_ld };
 
     let ratio_ld = l_over_d / adjusted_limit;
 

@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import type { ModuleStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { TraveeToutesChargesInputs, TraveeToutesChargesOutput } from '../../types/engineering';
 
 export default function Module216() {
@@ -22,7 +22,7 @@ export default function Module216() {
   };
   const [p_vals, p_pos] = parsePairs(text.ps);
       const [m_vals, m_pos] = parsePairs(text.ms);
-      const full = { ...inputs, p_vals, p_pos, m_vals, m_pos };
+      const full = useMemo(() => ({ ...inputs, p_vals, p_pos, m_vals, m_pos }), [inputs, p_vals, p_pos, m_vals, m_pos]);
   const { data: res, error: err, live } = useModuleCalc<TraveeToutesChargesInputs, TraveeToutesChargesOutput>('calculate_travee_toutes_charges_216', full);
   type NumKey = { [K in keyof TraveeToutesChargesInputs]: TraveeToutesChargesInputs[K] extends number ? K : never }[keyof TraveeToutesChargesInputs];
   const S = (k: NumKey) => (v: number) => setInputs((p) => ({ ...p, [k]: v }));
@@ -76,6 +76,19 @@ export default function Module216() {
                     <line x1={30} y1={40} x2={370} y2={40} stroke="#64748B" />
                     <line x1={30} y1={40} x2={30} y2={170} stroke="#64748B" />
                     <DiagramOverlay type="moment" points={result.xs.map((x, i) => [X(x), Y(result.ms[i])] as [number, number])} fill zeroY={40} closeX={[X(result.xs[0]), X(result.xs[result.xs.length - 1])]} />
+                    <AxisTicks
+                      origin={[30, 170]} end={[370, 170]}
+                      values={[0, inputs.l / 4, inputs.l / 2, inputs.l * 3 / 4, inputs.l]}
+                      map={(v) => [30 + (v / inputs.l) * 340, 170]}
+                      unit="m" side="below" decimals={1}
+                    />
+                    <AxisTicks
+                      origin={[30, 40]} end={[30, 170]}
+                      values={[-mMax, -mMax * 0.5, 0, mMax * 0.5, mMax]}
+                      map={(v) => [30, Y(v)]}
+                      side="left" decimals={0}
+                    />
+                    <InlineLegend items={[{ label: 'M (kN·m)', color: '#6366F1' }]} x={310} y={45} />
                     <text x={X(result.x_mmax)} y={Y(result.m_max) + 16} fontSize={10} fill="#1D4ED8" textAnchor="middle">Mmax={result.m_max.toFixed(1)}</text>
                   </>
                 );

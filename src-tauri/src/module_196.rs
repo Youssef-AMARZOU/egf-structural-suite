@@ -82,8 +82,8 @@ pub fn calculate_pot_circulaire_flambl_ec2_v2_196(
 
     let e2 = e2_for_lo(lo_mm, inv_r);
     let e_i = lo_mm / 400.0;
-    let m1 = p.NEd * (p.e1 + e_i) / 1e6;
-    let m2 = p.NEd * e2 / 1e6;
+    let m1 = p.NEd * (p.e1 + e_i) / 1e3;
+    let m2 = p.NEd * e2 / 1e3;
     let m_tot = m1 + m2;
 
     // Squash resistance + reference moment resistance (steel couple)

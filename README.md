@@ -60,4 +60,7 @@ Root directory contains ~240 original `.xls` workbooks with VBA macros (original
 
 ## Credits
 
-Based on the EGF programs by Henry Thonier. Solvers reimplemented clean-room from EC1/EC2/EC3/EC7 standards.
+D'après les programmes EGF © Henry Thonier
+by ©Youssef AMARZOU
+
+Solvers reimplemented clean-room from EC1/EC2/EC3/EC7 standards.

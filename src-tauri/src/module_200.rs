@@ -77,7 +77,7 @@ pub fn calculate_voile_portique_rdc_200(
     let (y0, y1, y2) = (scores[j - 1], scores[j], scores[j + 1]);
     let denom = y2 + y0 - 2.0 * y1;
     let xm = if denom.abs() < 1e-12 { 0.0 } else { -((4.0 * y1 - 3.0 * y0 - y2) / 2.0) / denom };
-    let xm_c = xm.clamp(-1.0, 1.0);
+    let xm_c = xm.clamp(0.0, 2.0);
     let (z0, z1, z2) = (ieqs[j - 1], ieqs[j], ieqs[j + 1]);
     let az = (z2 + z0 - 2.0 * z1) / 2.0;
     let bz = (4.0 * z1 - 3.0 * z0 - z2) / 2.0;

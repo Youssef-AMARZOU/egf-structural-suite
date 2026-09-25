@@ -80,7 +80,7 @@ fn steel_stress(eps: f64, fyk: f64, gs: f64, euk: f64, k: f64) -> f64 {
 
 fn simpson(t: &[f64], n: usize, a: f64, b: f64) -> f64 {
     if n == 0 { return 0.0; }
-    let mut air = t[0] - t[n];
+    let mut air = t[0] + t[n];
     let mut k = 1;
     while k < n {
         air += 4.0 * t[k];

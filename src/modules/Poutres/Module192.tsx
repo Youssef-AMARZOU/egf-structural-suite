@@ -42,23 +42,23 @@ export default function Module192() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section</div>
-          {slider('b', 'b', 'mm', 100, 1000, 10)}
-          {slider('h', 'h', 'mm', 200, 1000, 10)}
-          {slider('bw', 'bw', 'mm', 100, 1000, 10)}
-          {slider('hf', 'hf', 'mm', 0, 300, 10)}
-          {slider('d', 'd', 'mm', 100, 900, 10)}
-          {slider('dp', 'dp', 'mm', 20, 200, 5)}
+          {slider('b', 'Largeur b', 'mm', 100, 1000, 10)}
+          {slider('h', 'Hauteur h', 'mm', 200, 1000, 10)}
+          {slider('bw', 'Largeur âme bw', 'mm', 100, 1000, 10)}
+          {slider('hf', 'Épaisseur dalle hf', 'mm', 0, 300, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 100, 900, 10)}
+          {slider('dp', 'Enrobage dp', 'mm', 20, 200, 5)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyd', 'fyd', 'MPa', 300, 600, 5)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyd', 'Acier fyd', 'MPa', 300, 600, 5)}
           {slider('rho', 'ρ', '', 0, 0.05, 0.001)}
           {slider('RH', 'RH', '%', 20, 100, 1)}
           {slider('t0', 't0', 'jours', 1, 365, 1)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Sollicitations</div>
-          {slider('L', 'L', 'mm', 1000, 15000, 500)}
-          {slider('Mt', 'Mt', 'kN·m', 0, 500, 5)}
-          {slider('Mq', 'Mq', 'kN·m', 0, 500, 5)}
-          {slider('As', 'As', 'mm²', 0, 5000, 50)}
+          {slider('L', 'Portée L', 'mm', 1000, 15000, 500)}
+          {slider('Mt', 'Moment permanent Mt', 'kN·m', 0, 500, 5)}
+          {slider('Mq', 'Moment variable Mq', 'kN·m', 0, 500, 5)}
+          {slider('As', 'Armature As', 'mm²', 0, 5000, 50)}
           {slider('classe', 'Classe', '', 1, 3, 1)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>

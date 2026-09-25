@@ -114,7 +114,8 @@ pub fn calculate_fleche_nuisible_ec2_v2d_192(
     let ig = p.b * p.h.powi(3) / 12.0;
     let icr_val = icr(p.b, p.d, p.fck, p.fyd, p.rho);
     let k_cr = (icr_val / ig).min(1.0);
-    let fleche_el = 5.0 * m_tot * p.L * p.L / (48.0 * ec_eff * ig * 1000.0) * k_cr;
+    // All units in N and mm: M[N·mm]=m_tot*1e6, L[mm]=L*1e3, E[MPa]=ec_eff*1e3, I[mm⁴]=ig
+    let fleche_el = 5.0 * m_tot * 1e6 * (p.L * 1e3).powi(2) / (48.0 * ec_eff * 1e3 * ig) * k_cr;
 
     // Creep deflection
     let fleche_fp = fleche_el * phi * 0.5;

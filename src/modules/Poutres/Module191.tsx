@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DimensionLine, RebarGroup, rowBars, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DimensionLine, RebarGroup, rowBars, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { VoileVerifFcInputs, VoileVerifFcOutput } from '../../types/engineering';
 
 export default function Module191() {
@@ -52,15 +52,15 @@ export default function Module191() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Voile & ferraillage</div>
-          {slider('Lw', 'Lw', 'm', 1, 10, 0.5)}
-          {slider('t', 't', 'm', 0.1, 0.6, 0.01)}
+          {slider('Lw', 'Longueur voile Lw', 'm', 1, 10, 0.5)}
+          {slider('t', 'Épaisseur t', 'm', 0.1, 0.6, 0.01)}
           {slider('n_bars', 'n_barres réparties', '', 4, 40, 1)}
           {slider('phi_dist', 'φ réparties', 'mm', 6, 32, 1)}
           {slider('A_end', 'A_rive (chaque)', 'cm²', 0, 50, 0.5)}
           {slider('cover', 'Enrobage', 'm', 0.01, 0.1, 0.005)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux & sollicitations</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('N_ed', 'N_Ed (compr.+)', 'kN', 0, 10000, 100)}
           {slider('M_ed', 'M_Ed', 'kN.m', 0, 5000, 50)}
           {slider('n_pts', 'n_points courbe', '', 10, 200, 5)}
@@ -92,6 +92,19 @@ export default function Module191() {
                     <line x1={70} y1={160} x2={530} y2={160} stroke="#999" strokeWidth={1} />
                     <line x1={X(0)} y1={20} x2={X(0)} y2={300} stroke="#999" strokeWidth={1} />
                     <DiagramOverlay type="moment" points={nmPts} />
+                    <AxisTicks
+                      origin={[70, 160]} end={[530, 160]}
+                      values={[nmin, (nmin + nmax) / 2, nmax]}
+                      map={(v) => [X(v), 160]}
+                      unit="kN" side="below" decimals={0}
+                    />
+                    <AxisTicks
+                      origin={[70, 160]} end={[70, 20]}
+                      values={[0, mmax * 0.5, mmax]}
+                      map={(v) => [70, Y(v)]}
+                      side="left" decimals={0}
+                    />
+                    <InlineLegend items={[{ label: 'Courbe N-M', color: '#6366F1' }, { label: 'Point calcul', color: '#EF4444' }]} x={350} y={20} />
                     <circle cx={X(inp.N_ed)} cy={Y(inp.M_ed)} r={6} fill="#EF4444" />
                     <text x={X(inp.N_ed) + 10} y={Y(inp.M_ed)} fontSize={10} fill="#EF4444">
                       ({inp.N_ed}, {inp.M_ed})

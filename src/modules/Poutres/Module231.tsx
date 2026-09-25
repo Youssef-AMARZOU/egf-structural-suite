@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { IntegrationNumInputs, IntegrationNumOutput } from '../../types/engineering';
 
 export default function Module231() {
@@ -15,9 +15,10 @@ export default function Module231() {
   const parseList = (s: string) =>
     s.split(',').map((v) => parseFloat(v.trim())).filter((v) => !isNaN(v));
   const mode = Math.round(inp.mode);
-  const payload: IntegrationNumInputs = mode === 0
+  const payload: IntegrationNumInputs = useMemo(() => mode === 0
     ? { ...inp, mode, ys: parseList(text.list), coeffs: [] }
-    : { ...inp, mode, ys: [], coeffs: parseList(text.poly) };
+    : { ...inp, mode, ys: [], coeffs: parseList(text.poly) },
+    [inp, mode, text]);
 
   const { data: res, error: err, live } = useModuleCalc<IntegrationNumInputs, IntegrationNumOutput>(
     'calculate_integration_num_231', payload,
@@ -47,7 +48,7 @@ export default function Module231() {
     return {
       pts: raw.map(([x, y]) => [X(x), Y(y)] as [number, number]),
       poly: `40,${Y(0)} ${raw.map(([x, y]) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join(' ')} 360,${Y(0)}`,
-      X, Y,
+      X, Y, yMin, yMax,
     };
   })();
 
@@ -106,6 +107,19 @@ export default function Module231() {
           <SectionCanvas title="Aire sous la courbe" vbW={400} vbH={200}>
             <polygon points={area.poly} fill="#3B82F6" opacity={0.25} />
             <DiagramOverlay type="moment" points={area.pts} />
+            <AxisTicks
+              origin={[40, 170]} end={[360, 170]}
+              values={[inp.a, (inp.a + inp.b) / 2, inp.b]}
+              map={(v) => [area.X(v), 170]}
+              unit="" side="below" decimals={1}
+            />
+            <AxisTicks
+              origin={[40, 20]} end={[40, 170]}
+              values={[area.yMin, (area.yMin + area.yMax) / 2, area.yMax]}
+              map={(v) => [40, area.Y(v)]}
+              side="left" decimals={1}
+            />
+            <InlineLegend items={[{ label: 'f(x)', color: '#6366F1' }]} x={45} y={25} />
             {res && (
               <>
                 <line

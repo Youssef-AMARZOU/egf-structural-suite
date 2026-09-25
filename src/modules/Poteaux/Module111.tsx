@@ -62,8 +62,8 @@ export default function Module111() {
         {/* Geometry */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('bx', 'bx', 'mm', 100, 2000, 50)}
-          {slider('by', 'by', 'mm', 100, 2000, 50)}
+          {slider('bx', 'Largeur bx', 'mm', 100, 2000, 50)}
+          {slider('by', 'Hauteur by', 'mm', 100, 2000, 50)}
         </div>
 
         {/* Reinforcement */}
@@ -74,8 +74,8 @@ export default function Module111() {
           {slider('phi', 'φ', 'mm', 6, 40, 2)}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('d1', 'd1', 'mm', 20, 200, 5)}
-          {slider('d2', 'd2', 'mm', 50, 1500, 10)}
+          {slider('d1', 'Enrobage extérieur d1', 'mm', 20, 200, 5)}
+          {slider('d2', 'Enrobage intérieur d2', 'mm', 50, 1500, 10)}
         </div>
 
         {/* Materials */}

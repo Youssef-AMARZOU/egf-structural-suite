@@ -64,11 +64,11 @@ export default function Module189() {
           {slider('gg', 'γg', '', 1, 1.5, 0.05)}
           {slider('gq', 'γq', '', 1, 1.6, 0.05)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Section & matériaux</div>
-          {slider('b', 'b', 'm', 0.2, 3, 0.05)}
-          {slider('h', 'h', 'm', 0.1, 1.5, 0.05)}
-          {slider('d', 'd', 'm', 0.1, 1.4, 0.05)}
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('b', 'Largeur b', 'm', 0.2, 3, 0.05)}
+          {slider('h', 'Hauteur h', 'm', 0.1, 1.5, 0.05)}
+          {slider('d', 'Hauteur utile d', 'm', 0.1, 1.4, 0.05)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('euk', 'euk', '', 0.01, 0.2, 0.005)}
           {slider('k_steel', 'k (écrouissage)', '', 1, 1.3, 0.01)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}

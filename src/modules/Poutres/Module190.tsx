@@ -36,16 +36,16 @@ export default function Module190() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Poutre & chargement</div>
-          {slider('L', 'L', 'm', 2, 15, 0.5)}
-          {slider('b', 'b', 'm', 0.1, 1, 0.05)}
-          {slider('h', 'h', 'm', 0.2, 1.5, 0.05)}
-          {slider('d', 'd', 'm', 0.2, 1.4, 0.05)}
+          {slider('L', 'Portée L', 'm', 2, 15, 0.5)}
+          {slider('b', 'Largeur b', 'm', 0.1, 1, 0.05)}
+          {slider('h', 'Hauteur h', 'm', 0.2, 1.5, 0.05)}
+          {slider('d', 'Hauteur utile d', 'm', 0.2, 1.4, 0.05)}
           {slider('As', 'As (inf)', 'cm²', 0, 50, 0.5)}
           {slider('Asc', 'Asc (sup)', 'cm²', 0, 30, 0.5)}
           {slider('w_ser', 'w_ser', 'kN/m', 0, 100, 1)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+          {slider('fck', 'Résistance fck', 'MPa', 12, 90, 1)}
+          {slider('fyk', 'Acier fyk', 'MPa', 400, 600, 10)}
           {slider('phi', 'φ (fluage)', '', 0, 4, 0.1)}
           {slider('beta', 'β (ζ, 1=CT 0.5=LT)', '', 0, 1, 0.1)}
           {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}

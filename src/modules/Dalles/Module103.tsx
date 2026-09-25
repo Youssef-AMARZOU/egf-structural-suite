@@ -58,22 +58,22 @@ export default function Module103() {
         {/* Column */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Poteau</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('a', 'a', 'mm', 100, 3000, 50)}
-          {slider('b', 'b', 'mm', 100, 3000, 50)}
+          {slider('a', 'Dimension a', 'mm', 100, 3000, 50)}
+          {slider('b', 'Dimension b', 'mm', 100, 3000, 50)}
         </div>
 
         {/* Column head */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Chapiteau</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('r_col', 'r', 'mm', 0, 2000, 50)}
-          {slider('del', 'del', 'mm', 0, 1000, 50)}
+          {slider('r_col', 'Rayon colonne', 'mm', 0, 2000, 50)}
+          {slider('del', 'Décalage chapiteau', 'mm', 0, 1000, 50)}
         </div>
 
         {/* Slab */}
         <div className="text-[11px] font-semibold text-slate-500 uppercase">Dalle</div>
         <div className="grid grid-cols-2 gap-2">
-          {slider('h', 'h', 'mm', 100, 800, 10)}
-          {slider('d', 'd', 'mm', 80, 700, 10)}
+          {slider('h', 'Hauteur dalle h', 'mm', 100, 800, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 80, 700, 10)}
         </div>
 
         {/* Materials */}
@@ -106,8 +106,8 @@ export default function Module103() {
               <option value={2}>Intérieur</option>
             </select>
           </div>
-          {slider('c3', 'c3', 'mm', 0, 5000, 50)}
-          {slider('c4', 'c4', 'mm', 0, 5000, 50)}
+          {slider('c3', 'Distance c3', 'mm', 0, 5000, 50)}
+          {slider('c4', 'Distance c4', 'mm', 0, 5000, 50)}
         </div>
 
         {err && (

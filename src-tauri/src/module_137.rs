@@ -65,6 +65,7 @@ fn f_nm_r(
     phi: f64, n_bars: usize, d_bar: f64, enr: f64,
     eb: f64, eh: f64, fcd: f64, ec2: f64, ecu2: f64,
     n_sec: usize, fyk: f64, gs: f64, euk: f64, ka: f64, nac: f64,
+    nc: f64,
 ) -> (f64, f64) {
     let ac = d_bar * d_bar * std::f64::consts::PI / 4.0 * nac;
     let n0 = 0.5 * phi;
@@ -80,7 +81,7 @@ fn f_nm_r(
             let arg = half * half - (half - y) * (half - y);
             let b = if arg <= 0.0 { 0.0 } else { 2.0 * arg.sqrt() };
             let e = eh + (eb - eh) * y / phi;
-            let s = fsc(e, fcd, ec2, ecu2, n_sec as f64);
+            let s = fsc(e, fcd, ec2, ecu2, nc);
             let k = if i % 2 == 0 && i > 0 && i < n_sec { 2.0 } else if i == 0 || i == n_sec { 1.0 } else { 4.0 };
             let dn = b * s * k;
             nr += dn;
@@ -154,7 +155,7 @@ pub fn calculate_interac_circ_137(
         let eh = 0.003 - ratio * 0.006;
         let (nr, mr) = f_nm_r(
             phi, n_bars, p.d_bar, enr, eb, eh,
-            fcd, ec2, ecu2, n_sec, p.fyk, p.gs, p.euk, ka, 1.0,
+            fcd, ec2, ecu2, n_sec, p.fyk, p.gs, p.euk, ka, 1.0, n,
         );
         n_resist.push(nr);
         m_resist.push(mr);

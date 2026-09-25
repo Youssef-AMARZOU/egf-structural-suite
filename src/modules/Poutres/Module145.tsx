@@ -4,9 +4,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import {
-  SectionCanvas,
-} from '../../components/drafting';
+import { SectionCanvas, InlineLegend } from '../../components/drafting';
 
 const DEFAULT: ReservoirCirculaireInputs = {
   fck: 30, fyk: 500, gc: 1.5, gs: 1.15,
@@ -19,14 +17,12 @@ const DEFAULT: ReservoirCirculaireInputs = {
   ecap: 0.8, qf: 0.3, qv: 0.3,
 };
 
-
 export default function Module145() {
   const [inp, setInp] = useState<ReservoirCirculaireInputs>(DEFAULT);
   const { data: res, error: err, live } = useModuleCalc<ReservoirCirculaireInputs, ReservoirCirculaireOutput>(
     'calculate_reservoir_circulaire_145', inp,
   );
   const S = (k: keyof ReservoirCirculaireInputs) => (v: number | string) => setInp((p) => ({ ...p, [k]: v }));
-
 
   const status = err ? 'fail' : !res ? 'computing' : verdictStatus(res.verdict);
 
@@ -40,128 +36,197 @@ export default function Module145() {
   return (
     <Workstation
       title="145 Réservoir Circulaire"
-      subtitle="Réservoirs circulaires béton armé — EC2"
+      subtitle="Réservoir circulaire béton armé — EC2"
       eurocode="EC2"
+      category="Poutres"
       status={status}
       live={live}
       params={
         <>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
+          <div className="grid grid-cols-2 gap-2">
+            {slider('fck', 'fck', 'MPa', 12, 90, 1)}
+            {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
+            {slider('gc', 'γc', '-', 1, 2, 0.05)}
+            {slider('gs', 'γs', '-', 1, 2, 0.05)}
+          </div>
 
-        <div className="text-[11px] font-semibold text-slate-500 uppercase">Matériaux</div>
-        <div className="grid grid-cols-2 gap-2">
-          {slider('fck', 'fck', 'MPa', 12, 90, 1)}
-          {slider('fyk', 'fyk', 'MPa', 400, 600, 10)}
-          {slider('gc', 'γc', '-', 1, 2, 0.05)}
-          {slider('gs', 'γs', '-', 1, 2, 0.05)}
-        </div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
+          <div className="grid grid-cols-2 gap-2">
+            {slider('phi', 'φ int.', 'mm', 1000, 50000, 500)}
+            {slider('h', 'h', 'mm', 100, 1000, 10)}
+            {slider('e', 'e', 'mm', 50, 500, 10)}
+            {slider('l', 'L panneau', 'mm', 500, 20000, 100)}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {slider('h_eau', 'h eau', 'mm', 0, 20000, 100)}
+            {slider('hw', 'hw', 'mm', 0, 20000, 100)}
+          </div>
 
-        <div className="text-[11px] font-semibold text-slate-500 uppercase">Géométrie</div>
-        <div className="grid grid-cols-2 gap-2">
-          {slider('phi', 'φ', 'mm', 1000, 50000, 500)}
-          {slider('h', 'h', 'mm', 100, 1000, 10)}
-          {slider('e', 'e', 'mm', 50, 500, 10)}
-          {slider('l', 'L', 'mm', 500, 20000, 100)}
-          {slider('h_eau', 'h_eau', 'mm', 0, 20000, 100)}
-          {slider('hw', 'hw', 'mm', 0, 20000, 100)}
-        </div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Armatures</div>
+          <div className="grid grid-cols-2 gap-2">
+            {slider('nli', 'Nb liserés', '-', 1, 20, 1)}
+            {slider('phi_s', 'φ arm.', 'mm', 6, 40, 1)}
+            {slider('s', 's', 'mm', 50, 500, 10)}
+            {slider('c', 'c', 'mm', 10, 100, 5)}
+            {slider('a0', 'a0', 'mm', 10, 100, 5)}
+          </div>
 
-        <div className="text-[11px] font-semibold text-slate-500 uppercase">Armatures</div>
-        <div className="grid grid-cols-2 gap-2">
-          {slider('nli', 'Nb liserés', '-', 1, 20, 1)}
-          {slider('phi_s', 'φ armature', 'mm', 6, 40, 1)}
-          {slider('s', 's', 'mm', 50, 500, 10)}
-          {slider('c', 'c', 'mm', 10, 100, 5)}
-          {slider('a0', 'a0', 'mm', 10, 100, 5)}
-        </div>
-
-        {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
+          {err && <p className="text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">{err}</p>}
         </>
       }
       sketch={
-        <>
         <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-<SectionCanvas title="Coupe réservoir" vbW={500} vbH={200}>
+          <SectionCanvas title="Coupe — Réservoir circulaire" vbW={500} vbH={340}>
             {res && (() => {
-              const ox = 40, oy = 20, w = 420, h = 160;
-              const scale = Math.min(w / (inp.phi / 1000), h / (inp.h / 1000)) * 0.8;
-              const cx = ox + w / 2;
-              const cy = oy + h / 2;
-              const rPx = (inp.phi / 2000) * scale;
-              const hPx = (inp.h / 1000) * scale;
-              const ePx = (inp.e / 1000) * scale;
+              const cx = 250, cy = 160;
+              const maxR = 180;
+              const scale = maxR / (inp.phi / 2000);
+              const rOuter = (inp.phi / 2000) * scale;
+              const rInner = rOuter - (inp.e / 1000) * scale;
+              const hWall = (inp.h / 1000) * scale * 2;
+              const waterLevel = (inp.h_eau / inp.l) * hWall;
 
               return (
                 <g>
-                  <circle cx={cx} cy={cy} r={rPx} fill="#e2e8f0" stroke="#2563eb" strokeWidth={1.5} />
-                  <circle cx={cx} cy={cy} r={rPx - ePx} fill="white" stroke="#94a3b8" strokeWidth={0.5} />
+                  {/* Outer wall */}
+                  <circle cx={cx} cy={cy} r={rOuter} fill="none" stroke="#3b82f6" strokeWidth={2} />
+                  {/* Inner wall */}
+                  <circle cx={cx} cy={cy} r={rInner} fill="#dbeafe" stroke="#93c5fd" strokeWidth={1} />
 
-                  <text x={cx + rPx + 5} y={cy} fontSize={7} fill="#64748b">
-                    φ={(inp.phi / 1000).toFixed(1)}m
-                  </text>
-                  <text x={cx - rPx / 2} y={oy + h - 5} textAnchor="middle" fontSize={7} fill="#64748b">
-                    h={(inp.h / 1000).toFixed(1)}m | e={(inp.e / 1000).toFixed(2)}m
+                  {/* Water level fill */}
+                  {waterLevel > 0 && (
+                    <clipPath id="tankClip">
+                      <circle cx={cx} cy={cy} r={rInner - 1} />
+                    </clipPath>
+                  )}
+                  {waterLevel > 0 && (
+                    <rect x={cx - rInner} y={cy + rInner - waterLevel} width={rInner * 2} height={waterLevel}
+                      fill="#3b82f6" opacity={0.15} clipPath="url(#tankClip)" />
+                  )}
+
+                  {/* Center line */}
+                  <line x1={cx} y1={cy - rOuter - 10} x2={cx} y2={cy + rOuter + 10}
+                    stroke="#64748b" strokeWidth={0.3} strokeDasharray="4,4" />
+                  <line x1={cx - rOuter - 10} y1={cy} x2={cx + rOuter + 10} y2={cy}
+                    stroke="#64748b" strokeWidth={0.3} strokeDasharray="4,4" />
+
+                  {/* Dimension — diameter */}
+                  <line x1={cx - rOuter} y1={cy - rOuter - 12} x2={cx + rOuter} y2={cy - rOuter - 12}
+                    stroke="#64748b" strokeWidth={0.6} />
+                  <line x1={cx - rOuter} y1={cy - rOuter - 16} x2={cx - rOuter} y2={cy - rOuter - 8}
+                    stroke="#64748b" strokeWidth={0.6} />
+                  <line x1={cx + rOuter} y1={cy - rOuter - 16} x2={cx + rOuter} y2={cy - rOuter - 8}
+                    stroke="#64748b" strokeWidth={0.6} />
+                  <text x={cx} y={cy - rOuter - 16} textAnchor="middle" fontSize={9} fill="#94a3b8" fontWeight="600">
+                    φ = {(inp.phi / 1000).toFixed(1)} m
                   </text>
 
-                  <text x={cx} y={oy + h - 5} textAnchor="middle" fontSize={8} fill="#64748b">
-                    μ={res.mu.toFixed(3)} | As={res.as_prov.toFixed(1)}cm²/m | wk={res.wk.toFixed(3)}mm
+                  {/* Dimension — wall thickness */}
+                  <line x1={cx + rInner} y1={cy - 20} x2={cx + rOuter} y2={cy - 20}
+                    stroke="#f59e0b" strokeWidth={0.6} />
+                  <line x1={cx + rInner} y1={cy - 24} x2={cx + rInner} y2={cy - 16}
+                    stroke="#f59e0b" strokeWidth={0.6} />
+                  <line x1={cx + rOuter} y1={cy - 24} x2={cx + rOuter} y2={cy - 16}
+                    stroke="#f59e0b" strokeWidth={0.6} />
+                  <text x={cx + (rInner + rOuter) / 2} y={cy - 26} textAnchor="middle" fontSize={8} fill="#f59e0b" fontWeight="600">
+                    e = {(inp.e)} mm
+                  </text>
+
+                  {/* Water level */}
+                  {waterLevel > 0 && (
+                    <g>
+                      <line x1={cx - rInner - 20} y1={cy + rInner - waterLevel}
+                        x2={cx - rInner - 5} y2={cy + rInner - waterLevel}
+                        stroke="#3b82f6" strokeWidth={1} />
+                      <text x={cx - rInner - 24} y={cy + rInner - waterLevel + 3} textAnchor="end" fontSize={8} fill="#3b82f6" fontWeight="600">
+                        h_eau
+                      </text>
+                    </g>
+                  )}
+
+                  {/* Labels */}
+                  <text x={cx} y={cy + 3} textAnchor="middle" fontSize={9} fill="#1e293b" fontWeight="600">
+                    {(inp.phi / 1000).toFixed(1)}m
+                  </text>
+
+                  {/* Legend */}
+                  <InlineLegend
+                    items={[
+                      { label: 'Paroi béton', color: '#3b82f6' },
+                      { label: `e = ${inp.e} mm`, color: '#f59e0b' },
+                    ]}
+                    x={cx - rOuter}
+                    y={cy + rOuter + 20}
+                  />
+
+                  {/* Bottom info */}
+                  <text x={cx} y={cy + rOuter + 38} textAnchor="middle" fontSize={8} fill="#64748b">
+                    μ = {res.mu.toFixed(3)} · As = {res.as_prov.toFixed(1)} cm²/m · wk = {res.wk.toFixed(3)} mm
                   </text>
                 </g>
               );
             })()}
           </SectionCanvas>
         </div>
-        </>
       }
       results={
         <>
           {res ? (
             <>
-        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-4">
-          <h2 className="text-sm font-bold mb-2">Résultats</h2>
-          {res && (
-            <div className="font-mono text-xs space-y-1">
-              <div>μ = <b>{res.mu.toFixed(3)}</b> | μ_max = {res.omega_max.toFixed(3)}</div>
-              <div>ω = <b>{res.omega.toFixed(3)}</b> | ξ = {res.ns.toFixed(3)}</div>
-              <div>As = <b>{(res.as_prov / 100).toFixed(1)}</b> cm²/m | z = {res.z_arm.toFixed(3)} m</div>
-              <div>wk = <b>{res.wk.toFixed(3)}</b> mm | wk_lim = {res.wk_lim.toFixed(1)} mm</div>
-              <div>fctd = {res.fctd.toFixed(2)} MPa | fyd = {res.fyd.toFixed(0)} MPa</div>
-              <div className="font-bold">{res.verdict}</div>
-            </div>
-          )}
-        </div>
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                {[
+                  ['μ', res.mu.toFixed(3)],
+                  ['μ_max', res.omega_max.toFixed(3)],
+                  ['ω', res.omega.toFixed(3)],
+                  ['ξ', res.ns.toFixed(3)],
+                  ['As', `${res.as_prov.toFixed(1)} cm²/m`],
+                  ['wk', `${res.wk.toFixed(3)} mm`],
+                  ['wk_lim', `${res.wk_lim.toFixed(1)} mm`],
+                  ['fctd', `${res.fctd.toFixed(2)} MPa`],
+                ].map(([l, v]) => (
+                  <div key={l} className="bg-slate-50 dark:bg-white/5 rounded p-2">
+                    <div className="text-slate-500">{l}</div>
+                    <div className="font-bold">{v}</div>
+                  </div>
+                ))}
+              </div>
 
               <FormulaCard
-                title="Réservoir circulaire"
-                latex={String.raw`w_k = s_{r,max}(\varepsilon_{sm} - \varepsilon_{cm})`}
-                description="Ouverture des fissures + retrait"
+                title="Réservoir circulaire — Fissuration EC2"
+                latex={String.raw`w_k = s_{r,max} (\varepsilon_{sm} - \varepsilon_{cm})`}
+                description="Ouverture caractéristique des fissures sous charges quasi-permanentes"
                 status={status === 'computing' ? 'neutral' : status}
                 variables={[
-                    { symbol: String.raw`w_k`, meaning: 'Ouverture caractéristique', value: res.wk.toFixed(3) },
-                    { symbol: String.raw`\varepsilon_{sm}`, meaning: 'Déformation acier', value: res.ns.toFixed(3) },
+                  { symbol: String.raw`w_k`, meaning: 'Ouverture fissure', value: res.wk.toFixed(3), unit: 'mm' },
+                  { symbol: String.raw`w_{k,lim}`, meaning: 'Limite', value: res.wk_lim.toFixed(1), unit: 'mm' },
+                  { symbol: String.raw`\mu`, meaning: 'Ratio armature', value: res.mu.toFixed(3), unit: '-' },
+                  { symbol: String.raw`\mu_{max}`, meaning: 'Ratio max', value: res.omega_max.toFixed(3), unit: '-' },
+                  { symbol: String.raw`A_s`, meaning: 'Armature fournie', value: res.as_prov.toFixed(1), unit: 'cm²/m' },
                 ]}
               />
-        <h2 className="text-sm font-bold mb-2">IA — Diagnostics</h2>
-        {res ? (
-          <div className="space-y-2">
-            {res.diag.map((d, i) => (
-              <div key={i} className={`text-xs px-2 py-1 rounded ${d.startsWith('KO') ? 'bg-red-50 dark:bg-red-900/20 text-red-600' : d.startsWith('ATTENTION') ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600' : 'bg-green-50 dark:bg-green-900/20 text-green-600'}`}>
-                {d}
+
+              <div className={`p-2 rounded text-xs font-semibold ${res.wk <= res.wk_lim ? 'bg-green-50 dark:bg-emerald-900/20 text-green-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'}`}>
+                {res.verdict}
               </div>
-            ))}
-            <hr className="border-slate-200 dark:border-white/10 my-2" />
-            <ul className="text-xs space-y-2">
-              <li className={res.mu <= res.omega_max ? 'text-green-600' : 'text-red-600'}>
-                {res.mu <= res.omega_max ? '✓' : '✗'} μ = {res.mu.toFixed(3)} / μ_max = {res.omega_max.toFixed(3)}
-              </li>
-              <li className="text-slate-500">• As_prov = {res.as_prov.toFixed(1)} cm²/m</li>
-              <li className="text-slate-500">• As_min = {res.as_min.toFixed(1)} cm²/m</li>
-              <li className="text-slate-500">• z_arm = {res.z_arm.toFixed(3)} m</li>
-              <li className="text-slate-500">• wk = {res.wk.toFixed(3)} mm</li>
-              <li className="text-slate-500">• wk_lim = {res.wk_lim.toFixed(1)} mm</li>
-              <li className="text-slate-500">• fctd = {res.fctd.toFixed(2)} MPa</li>
-            </ul>
-          </div>
-        ) : <p className="text-xs text-slate-500">computing…</p>}
+
+              <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-xs space-y-1">
+                <div className="font-semibold text-blue-700 dark:text-blue-400">Géométrie</div>
+                <div className="font-mono space-y-0.5">
+                  <div>φ = {(inp.phi / 1000).toFixed(1)} m · h = {inp.h} mm · e = {inp.e} mm</div>
+                  <div>L panneau = {inp.l} mm · h eau = {inp.h_eau} mm</div>
+                </div>
+                <div className="font-semibold text-blue-700 dark:text-blue-400 pt-1">Fissuration</div>
+                <div className="font-mono space-y-0.5">
+                  <div>wk = {res.wk.toFixed(3)} mm {'\u2264'} wk,lim = {res.wk_lim.toFixed(1)} mm → {res.wk <= res.wk_lim ? 'Vérifié' : 'Non vérifié'}</div>
+                  <div>μ = {res.mu.toFixed(3)} {'\u2264'} μ_max = {res.omega_max.toFixed(3)} → {res.mu <= res.omega_max ? 'OK' : 'Dépassé'}</div>
+                </div>
+                <div className="font-semibold text-blue-700 dark:text-blue-400 pt-1">Matériaux</div>
+                <div className="font-mono space-y-0.5">
+                  <div>fctd = {res.fctd.toFixed(2)} MPa · fyd = {res.fyd.toFixed(0)} MPa</div>
+                  <div>As = {res.as_prov.toFixed(1)} cm²/m {'\u2265'} As,min = {res.as_min.toFixed(1)} cm²/m</div>
+                </div>
+              </div>
             </>
           ) : (
             <p className="text-xs text-slate-500">{err ?? 'computing…'}</p>

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { VoilesInertieVarIeqInputs, VoilesInertieVarIeqOutput } from '../../types/engineering';
 
 export default function Module197() {
@@ -14,11 +14,11 @@ export default function Module197() {
 
   const parseList = (s: string) => s.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
   const pick = (parsed: number[], fb: number[]) => parsed.length > 0 ? parsed : fb;
-  const payload: VoilesInertieVarIeqInputs = {
+  const payload: VoilesInertieVarIeqInputs = useMemo(() => ({
     ...inp,
     heights: pick(parseList(txt.heights), inp.heights),
     inertias: pick(parseList(txt.inertias), inp.inertias),
-  };
+  }), [inp, txt]);
   const { data: res, error: err, live } = useModuleCalc<VoilesInertieVarIeqInputs, VoilesInertieVarIeqOutput>(
     'calculate_voiles_inertie_var_ieq_197', payload,
   );
@@ -51,10 +51,10 @@ export default function Module197() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Vent & matériau</div>
-          {slider('b', 'b (largeur réf.)', 'm', 1, 30, 0.5)}
-          {slider('qb', 'qb (pression base)', 'kN/m', 0, 10, 0.1)}
-          {slider('qh', 'qh (pression sommet)', 'kN/m', 0, 10, 0.1)}
-          {slider('E', 'E', 'MPa', 10000, 60000, 500)}
+          {slider('b', 'Largeur réf. b', 'm', 1, 30, 0.5)}
+          {slider('qb', 'Pression base qb', 'kN/m', 0, 10, 0.1)}
+          {slider('qh', 'Pression sommet qh', 'kN/m', 0, 10, 0.1)}
+          {slider('E', 'Module E', 'MPa', 10000, 60000, 500)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Étages (séparés par virgule)</div>
           {field('heights', 'Hauteurs d\'étage (m)')}
           {field('inertias', 'Inerties (m⁴)')}
@@ -83,6 +83,19 @@ export default function Module197() {
                   <line x1={360} y1={10} x2={360} y2={220} stroke="#999" strokeWidth={0.5} />
                   <DiagramOverlay type="moment" points={mPts} color="#F59E0B" />
                   <text x={460} y={15} fontSize={9} fill="#F59E0B" textAnchor="middle">|M|</text>
+                  <AxisTicks
+                    origin={[80, 220]} end={[260, 220]}
+                    values={[0, maxF / 2, maxF]}
+                    map={(v) => [80 + (v / maxF) * 180, 220]}
+                    unit="mm" side="below" decimals={1}
+                  />
+                  <AxisTicks
+                    origin={[360, 220]} end={[560, 220]}
+                    values={[0, maxM * 0.5, maxM]}
+                    map={(v) => [360 + (v / maxM) * 200, 220]}
+                    unit="kN·m" side="below" decimals={0}
+                  />
+                  <InlineLegend items={[{ label: 'Flèche', color: '#6366F1' }, { label: '|M|', color: '#F59E0B' }]} x={80} y={225} />
                   {res.z.map((zz, i) => (
                     i % Math.max(1, Math.floor(n / 5)) === 0 || i === n ? (
                       <text key={i} x={55} y={yOf(i) + 3} fontSize={7} fill="#94A3B8" textAnchor="end">{zz.toFixed(1)}m</text>

@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, AxisTicks, InlineLegend } from '../../components/drafting';
 import { BaelBaBpFlecheDalleContinueInputs, BaelBaBpFlecheDalleContinueOutput } from '../../types/engineering';
 
 export default function Module167() {
@@ -50,11 +50,11 @@ export default function Module167() {
       params={
         <>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Géométrie</div>
-          {slider('L', 'L', 'm', 1, 15, 0.5)}
-          {slider('b', 'b', 'mm', 200, 2000, 10)}
-          {slider('h', 'h', 'mm', 50, 600, 10)}
-          {slider('d', 'd', 'mm', 50, 550, 10)}
-          {slider('dp', 'dp', 'mm', 10, 100, 5)}
+          {slider('L', 'Portée L', 'm', 1, 15, 0.5)}
+          {slider('b', 'Largeur b', 'mm', 200, 2000, 10)}
+          {slider('h', 'Hauteur dalle h', 'mm', 50, 600, 10)}
+          {slider('d', 'Hauteur utile d', 'mm', 50, 550, 10)}
+          {slider('dp', 'Enrobage dp', 'mm', 10, 100, 5)}
           <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">Matériaux</div>
           {slider('E', 'E', 'MPa', 10000, 60000, 1000)}
           {slider('n_mod', 'n', '', 5, 30, 1)}
@@ -86,7 +86,22 @@ export default function Module167() {
             <line x1={50} y1={50} x2={450} y2={50} stroke="#94A3B8" strokeWidth={2} />
             <line x1={50} y1={130} x2={450} y2={130} stroke="#ddd" strokeWidth={0.5} />
             {res && res.deflections.length > 1 && (
+              <>
               <DiagramOverlay type="deflection" points={deflPts} />
+              <AxisTicks
+                origin={[50, 130]} end={[450, 130]}
+                values={[0, inp.L / 2, inp.L]}
+                map={(v) => [50 + (v / inp.L) * 400, 130]}
+                unit="m" side="below" decimals={1}
+              />
+              <AxisTicks
+                origin={[50, 50]} end={[50, 130]}
+                values={[0, (res.max_deflection || 1) / 2, res.max_deflection || 1]}
+                map={(v) => [50, 50 + v * (80 / (res.max_deflection || 1))]}
+                side="left" decimals={1}
+              />
+              <InlineLegend items={[{ label: 'δ(x)', color: '#6366F1' }]} x={380} y={55} />
+              </>
             )}
             {res && (
               <>

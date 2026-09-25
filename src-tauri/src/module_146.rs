@@ -59,7 +59,7 @@ pub fn calculate_poinconnement_tremie_146(
     let u0 = 2.0 * (p.c1 + p.c2) / 1000.0;
     let c1_m = p.c1 / 1000.0;
     let c2_m = p.c2 / 1000.0;
-    let u1 = 2.0 * (c1_m + c2_m) + 4.0 * 2.0 * d_eff;
+    let u1 = 2.0 * (c1_m + c2_m) + 4.0 * std::f64::consts::PI * d_eff;
     let vr_ed = v_ed / (u1 * d_eff);
     let rho_l = (p.d_pile * p.d_pile * std::f64::consts::PI / 4.0) / (p.d_tremie * p.d_tremie * std::f64::consts::PI / 4.0);
     let alpha_ed = if p.fck <= 50.0 { 0.18 } else { 0.12 };

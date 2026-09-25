@@ -3,7 +3,7 @@ import { ParamSlider } from '../../components/common/ParamSlider';
 import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
-import { SectionCanvas, DiagramOverlay } from '../../components/drafting';
+import { SectionCanvas, DiagramOverlay, InlineLegend } from '../../components/drafting';
 import { DalleContinueFeuInputs, DalleContinueFeuOutput } from '../../types/engineering';
 
 export default function Module157() {
@@ -82,6 +82,7 @@ export default function Module157() {
             {res && (
               <>
                 <DiagramOverlay type="moment" points={tempPts} color="#EF4444" />
+                <InlineLegend items={[{ label: 'θ(x) ISO 834', color: '#EF4444' }]} x={350} y={15} />
                 <line x1={steelX} y1={10} x2={steelX} y2={190} stroke="#3B82F6" strokeWidth={1} strokeDasharray="4,4" />
                 <text x={steelX + 5} y={25} fontSize={10} fill="#3B82F6">d = {(inp.d * 1000).toFixed(0)}mm</text>
                 <text x={steelX + 5} y={38} fontSize={10} fill="#EF4444">θ_s = {res.theta_s.toFixed(0)}°C</text>

@@ -70,7 +70,7 @@ pub fn calculate_corbeau_113(p: CorbeauInputs) -> Result<CorbeauOutput, String> 
     let lb_d = (alpha_comb * lb_d0).max(10.0 * p.phi).max(100.0);
 
     let bar_length = if p.bar_type == 1 {
-        p.ga - 2.0 * p.c_nom + p.phi / 1000.0 * (8.0 + 45.0) + p.phi * 0.5
+        p.ga - 2.0 * p.c_nom + p.phi * (8.0 + 45.0) + p.phi * 0.5
     } else {
         p.ga - 2.0 * p.c_nom
     };

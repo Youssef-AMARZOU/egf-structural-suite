@@ -5,7 +5,7 @@ import { useModuleCalc } from '../../components/common/useModuleCalc';
 import { Workstation, verdictStatus } from '../../components/common/Workstation';
 import { FormulaCard } from '../../components/common/FormulaCard';
 import {
-  SectionCanvas,
+  SectionCanvas, AxisTicks, InlineLegend,
 } from '../../components/drafting';
 
 const DEFAULT: InteracCircInputs = {
@@ -82,10 +82,49 @@ export default function Module137() {
               const scM = w / maxM / 2;
               const cx = ox + w / 2;
 
+              const niceStep = (range: number) => {
+                const raw = range / 4;
+                const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+                const norm = raw / mag;
+                if (norm <= 1) return mag;
+                if (norm <= 2) return 2 * mag;
+                if (norm <= 5) return 5 * mag;
+                return 10 * mag;
+              };
+
+              const stepN = niceStep(maxN * 2);
+              const stepM = niceStep(maxM * 2);
+              const nTicks: number[] = [];
+              const mTicks: number[] = [];
+              for (let v = -Math.floor(maxN / stepN) * stepN; v <= maxN; v += stepN) nTicks.push(Math.round(v * 100) / 100);
+              for (let v = -Math.floor(maxM / stepM) * stepM; v <= maxM; v += stepM) mTicks.push(Math.round(v * 100) / 100);
+
               return (
                 <g>
                   <line x1={ox} y1={oy} x2={ox + w} y2={oy} stroke="#94a3b8" strokeWidth={0.5} />
                   <line x1={cx} y1={10} x2={cx} y2={240} stroke="#94a3b8" strokeWidth={0.5} />
+
+                  {nTicks.map((v) => {
+                    const y = oy - v * scN;
+                    if (y < 5 || y > 245) return null;
+                    return (
+                      <g key={`n${v}`}>
+                        <line x1={cx - 3} y1={y} x2={cx + 3} y2={y} stroke="#94a3b8" strokeWidth={0.6} />
+                        <text x={cx - 6} y={y + 2} textAnchor="end" fontSize={5} fill="#94a3b8">{v}</text>
+                      </g>
+                    );
+                  })}
+
+                  {mTicks.map((v) => {
+                    const x = cx + v * scM;
+                    if (x < ox - 5 || x > ox + w + 5) return null;
+                    return (
+                      <g key={`m${v}`}>
+                        <line x1={x} y1={oy - 3} x2={x} y2={oy + 3} stroke="#94a3b8" strokeWidth={0.6} />
+                        <text x={x} y={oy + 10} textAnchor="middle" fontSize={5} fill="#94a3b8">{v}</text>
+                      </g>
+                    );
+                  })}
 
                   {res.n_resist.map((n, i) => {
                     if (i === 0) return null;
@@ -113,9 +152,16 @@ export default function Module137() {
                   <circle cx={cx + res.m_demand[res.m_demand.length - 1] * scM} cy={oy - res.n_demand[res.n_demand.length - 1] * scN} r={3} fill="#ef4444" />
 
                   <text x={cx} y={248} textAnchor="middle" fontSize={6} fill="#64748b">M (kN·m)</text>
-                  <text x={15} y={oy + 3} textAnchor="middle" fontSize={6} fill="#64748b">N (kN)</text>
-                  <text x={cx + w / 2} y={248} textAnchor="middle" fontSize={5} fill="#2563eb">Courbe N-M</text>
-                  <text x={cx + w / 2} y={240} textAnchor="middle" fontSize={5} fill="#ef4444">Point de calcul</text>
+                  <text x={12} y={oy + 3} textAnchor="middle" fontSize={6} fill="#64748b" transform={`rotate(-90,12,${oy})`}>N (kN)</text>
+
+                  <InlineLegend
+                    items={[
+                      { label: 'Courbe N-M', color: '#2563eb' },
+                      { label: 'Point de calcul', color: '#ef4444', dashed: true },
+                    ]}
+                    x={ox + w - 80}
+                    y={oy - h / 2 + 10}
+                  />
                 </g>
               );
             })()}
